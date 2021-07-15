@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.6.11;
 
-import "./Frax.sol";
+import "./DEI.sol";
 import '../Uniswap/TransferHelper.sol';
 import "../Staking/Owned.sol";
 import "../Governance/AccessControl.sol";

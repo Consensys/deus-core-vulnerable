@@ -1,22 +1,23 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.6.11;
 
+// =================================================================================================================
+//  _|_|_|    _|_|_|_|  _|    _|    _|_|_|      _|_|_|_|  _|                                                       |
+//  _|    _|  _|        _|    _|  _|            _|            _|_|_|      _|_|_|  _|_|_|      _|_|_|    _|_|       |
+//  _|    _|  _|_|_|    _|    _|    _|_|        _|_|_|    _|  _|    _|  _|    _|  _|    _|  _|        _|_|_|_|     |
+//  _|    _|  _|        _|    _|        _|      _|        _|  _|    _|  _|    _|  _|    _|  _|        _|           |
+//  _|_|_|    _|_|_|_|    _|_|    _|_|_|        _|        _|  _|    _|    _|_|_|  _|    _|    _|_|_|    _|_|_|     | 
+// =================================================================================================================
+// ========================= DEUS (DEUS) =========================
 // ====================================================================
-// |     ______                   _______                             |
-// |    / _____________ __  __   / ____(_____  ____ _____  ________   |
-// |   / /_  / ___/ __ `| |/_/  / /_  / / __ \/ __ `/ __ \/ ___/ _ \  |
-// |  / __/ / /  / /_/ _>  <   / __/ / / / / / /_/ / / / / /__/  __/  |
-// | /_/   /_/   \__,_/_/|_|  /_/   /_/_/ /_/\__,_/_/ /_/\___/\___/   |
-// |                                                                  |
-// ====================================================================
-// ========================= FRAXShares (FXS) =========================
-// ====================================================================
-// Frax Finance: https://github.com/FraxFinance
+// DEUS Finance: https://github.com/DeusFinance
 
 // Primary Author(s)
 // Travis Moore: https://github.com/FortisFortuna
 // Jason Huan: https://github.com/jasonhuan
 // Sam Kazemian: https://github.com/samkazemian
+// Vahid Gh: https://github.com/vahid-dev
+// SAYaghoubnejad: https://github.com/SAYaghoubnejad
 
 // Reviewer(s) / Contributor(s)
 // Sam Sun: https://github.com/samczsun
@@ -24,12 +25,12 @@ pragma solidity >=0.6.11;
 import "../Common/Context.sol";
 import "../ERC20/ERC20Custom.sol";
 import "../ERC20/IERC20.sol";
-import "../Frax/Frax.sol";
+import "../DEI/DEI.sol";
 import "../Staking/Owned.sol";
 import "../Math/SafeMath.sol";
 import "../Governance/AccessControl.sol";
 
-contract FRAXShares is ERC20Custom, AccessControl, Owned {
+contract DEUSToken is ERC20Custom, AccessControl, Owned {
     using SafeMath for uint256;
 
     /* ========== STATE VARIABLES ========== */
@@ -37,13 +38,13 @@ contract FRAXShares is ERC20Custom, AccessControl, Owned {
     string public symbol;
     string public name;
     uint8 public constant decimals = 18;
-    address public FRAXStablecoinAdd;
+    address public DEIStablecoinAdd;
     
     uint256 public constant genesis_supply = 100000000e18; // 100M is printed upon genesis
 
     address public oracle_address;
     address public timelock_address; // Governance timelock address
-    FRAXStablecoin private FRAX;
+    DEIStablecoin private DEI;
 
     bool public trackingVotes = true; // Tracking votes (only change if need to disable votes)
 
@@ -62,7 +63,7 @@ contract FRAXShares is ERC20Custom, AccessControl, Owned {
     /* ========== MODIFIERS ========== */
 
     modifier onlyPools() {
-       require(FRAX.frax_pools(msg.sender) == true, "Only frax pools can mint new FRAX");
+       require(DEI.frax_pools(msg.sender) == true, "Only frax pools can mint new DEI");
         _;
     } 
     
@@ -105,19 +106,19 @@ contract FRAXShares is ERC20Custom, AccessControl, Owned {
         timelock_address = new_timelock;
     }
     
-    function setFRAXAddress(address frax_contract_address) external onlyByOwnerOrGovernance {
+    function setDEIAddress(address frax_contract_address) external onlyByOwnerOrGovernance {
         require(frax_contract_address != address(0), "Zero address detected");
 
-        FRAX = FRAXStablecoin(frax_contract_address);
+        DEI = DEIStablecoin(frax_contract_address);
 
-        emit FRAXAddressSet(frax_contract_address);
+        emit DEIAddressSet(frax_contract_address);
     }
     
     function mint(address to, uint256 amount) public onlyPools {
         _mint(to, amount);
     }
     
-    // This function is what other frax pools will call to mint new FXS (similar to the FRAX mint) 
+    // This function is what other frax pools will call to mint new DEUS (similar to the DEI mint) 
     function pool_mint(address m_address, uint256 m_amount) external onlyPools {        
         if(trackingVotes){
             uint32 srcRepNum = numCheckpoints[address(this)];
@@ -128,10 +129,10 @@ contract FRAXShares is ERC20Custom, AccessControl, Owned {
         }
 
         super._mint(m_address, m_amount);
-        emit FXSMinted(address(this), m_address, m_amount);
+        emit DEUSMinted(address(this), m_address, m_amount);
     }
 
-    // This function is what other frax pools will call to burn FXS 
+    // This function is what other frax pools will call to burn DEUS 
     function pool_burn_from(address b_address, uint256 b_amount) external onlyPools {
         if(trackingVotes){
             trackVotes(b_address, address(this), uint96(b_amount));
@@ -142,7 +143,7 @@ contract FRAXShares is ERC20Custom, AccessControl, Owned {
         }
 
         super._burnFrom(b_address, b_amount);
-        emit FXSBurned(b_address, address(this), b_amount);
+        emit DEUSBurned(b_address, address(this), b_amount);
     }
 
     function toggleVotes() external onlyByOwnerOrGovernance {
@@ -193,7 +194,7 @@ contract FRAXShares is ERC20Custom, AccessControl, Owned {
      * @return The number of votes the account had as of the given block
      */
     function getPriorVotes(address account, uint blockNumber) public view returns (uint96) {
-        require(blockNumber < block.number, "FXS::getPriorVotes: not yet determined");
+        require(blockNumber < block.number, "DEUS::getPriorVotes: not yet determined");
 
         uint32 nCheckpoints = numCheckpoints[account];
         if (nCheckpoints == 0) {
@@ -235,21 +236,21 @@ contract FRAXShares is ERC20Custom, AccessControl, Owned {
             if (srcRep != address(0)) {
                 uint32 srcRepNum = numCheckpoints[srcRep];
                 uint96 srcRepOld = srcRepNum > 0 ? checkpoints[srcRep][srcRepNum - 1].votes : 0;
-                uint96 srcRepNew = sub96(srcRepOld, amount, "FXS::_moveVotes: vote amount underflows");
+                uint96 srcRepNew = sub96(srcRepOld, amount, "DEUS::_moveVotes: vote amount underflows");
                 _writeCheckpoint(srcRep, srcRepNum, srcRepOld, srcRepNew);
             }
 
             if (dstRep != address(0)) {
                 uint32 dstRepNum = numCheckpoints[dstRep];
                 uint96 dstRepOld = dstRepNum > 0 ? checkpoints[dstRep][dstRepNum - 1].votes : 0;
-                uint96 dstRepNew = add96(dstRepOld, amount, "FXS::_moveVotes: vote amount overflows");
+                uint96 dstRepNew = add96(dstRepOld, amount, "DEUS::_moveVotes: vote amount overflows");
                 _writeCheckpoint(dstRep, dstRepNum, dstRepOld, dstRepNew);
             }
         }
     }
 
     function _writeCheckpoint(address voter, uint32 nCheckpoints, uint96 oldVotes, uint96 newVotes) internal {
-      uint32 blockNumber = safe32(block.number, "FXS::_writeCheckpoint: block number exceeds 32 bits");
+      uint32 blockNumber = safe32(block.number, "DEUS::_writeCheckpoint: block number exceeds 32 bits");
 
       if (nCheckpoints > 0 && checkpoints[voter][nCheckpoints - 1].fromBlock == blockNumber) {
           checkpoints[voter][nCheckpoints - 1].votes = newVotes;
@@ -287,11 +288,11 @@ contract FRAXShares is ERC20Custom, AccessControl, Owned {
     /// @notice An event thats emitted when a voters account's vote balance changes
     event VoterVotesChanged(address indexed voter, uint previousBalance, uint newBalance);
 
-    // Track FXS burned
-    event FXSBurned(address indexed from, address indexed to, uint256 amount);
+    // Track DEUS burned
+    event DEUSBurned(address indexed from, address indexed to, uint256 amount);
 
-    // Track FXS minted
-    event FXSMinted(address indexed from, address indexed to, uint256 amount);
+    // Track DEUS minted
+    event DEUSMinted(address indexed from, address indexed to, uint256 amount);
 
-    event FRAXAddressSet(address addr);
+    event DEIAddressSet(address addr);
 }

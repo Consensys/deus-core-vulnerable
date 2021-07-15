@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.6.11;
 
-interface IFraxPool {
+interface IDEIPool {
     function minting_fee() external returns (uint256);
     function redemption_fee() external returns (uint256);
     function buyback_fee() external returns (uint256);
@@ -10,15 +10,15 @@ interface IFraxPool {
     function availableExcessCollatDV() external returns (uint256);
     function getCollateralPrice() external returns (uint256);
     function setCollatETHOracle(address _collateral_weth_oracle_address, address _weth_address) external;
-    function mint1t1FRAX(uint256 collateral_amount, uint256 FRAX_out_min) external;
-    function mintAlgorithmicFRAX(uint256 fxs_amount_d18, uint256 FRAX_out_min) external;
-    function mintFractionalFRAX(uint256 collateral_amount, uint256 fxs_amount, uint256 FRAX_out_min) external;
-    function redeem1t1FRAX(uint256 FRAX_amount, uint256 COLLATERAL_out_min) external;
-    function redeemFractionalFRAX(uint256 FRAX_amount, uint256 FXS_out_min, uint256 COLLATERAL_out_min) external;
-    function redeemAlgorithmicFRAX(uint256 FRAX_amount, uint256 FXS_out_min) external;
+    function mint1t1DEI(uint256 collateral_amount, uint256 DEI_out_min) external;
+    function mintAlgorithmicDEI(uint256 deus_amount_d18, uint256 DEI_out_min) external;
+    function mintFractionalDEI(uint256 collateral_amount, uint256 deus_amount, uint256 DEI_out_min) external;
+    function redeem1t1DEI(uint256 DEI_amount, uint256 COLLATERAL_out_min) external;
+    function redeemFractionalDEI(uint256 DEI_amount, uint256 DEUS_out_min, uint256 COLLATERAL_out_min) external;
+    function redeemAlgorithmicDEI(uint256 DEI_amount, uint256 DEUS_out_min) external;
     function collectRedemption() external;
-    function recollateralizeFRAX(uint256 collateral_amount, uint256 FXS_out_min) external;
-    function buyBackFXS(uint256 FXS_amount, uint256 COLLATERAL_out_min) external;
+    function recollateralizeDEI(uint256 collateral_amount, uint256 DEUS_out_min) external;
+    function buyBackDEUS(uint256 DEUS_amount, uint256 COLLATERAL_out_min) external;
     function toggleMinting() external;
     function toggleRedeeming() external;
     function toggleRecollateralize() external;
