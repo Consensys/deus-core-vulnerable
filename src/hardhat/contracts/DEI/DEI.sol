@@ -30,8 +30,8 @@ import "../Math/SafeMath.sol";
 import "../Staking/Owned.sol";
 import "../DEUS/DEUS.sol";
 import "./Pools/DEIPool.sol";
-import "../Oracle/UniswapPairOracle.sol";
-import "../Oracle/ChainlinkETHUSDPriceConsumer.sol";
+// import "../Oracle/UniswapPairOracle.sol";
+// import "../Oracle/ChainlinkETHUSDPriceConsumer.sol";
 import "../Governance/AccessControl.sol";
 
 contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
@@ -39,10 +39,10 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 
     /* ========== STATE VARIABLES ========== */
     enum PriceChoice { DEI, DEUS }
-    ChainlinkETHUSDPriceConsumer private eth_usd_pricer;
+    // ChainlinkETHUSDPriceConsumer private eth_usd_pricer;
     uint8 private eth_usd_pricer_decimals;
-    UniswapPairOracle private deiEthOracle;
-    UniswapPairOracle private deusEthOracle;
+    // UniswapPairOracle private deiEthOracle;
+    // UniswapPairOracle private deusEthOracle;
     string public symbol;
     string public name;
     uint8 public constant decimals = 18;
@@ -132,20 +132,21 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 
     // Choice = 'DEI' or 'DEUS' for now
     function oracle_price(PriceChoice choice) internal view returns (uint256) {
-        // Get the ETH / USD price first, and cut it down to 1e6 precision
-        uint256 __eth_usd_price = uint256(eth_usd_pricer.getLatestPrice()).mul(PRICE_PRECISION).div(uint256(10) ** eth_usd_pricer_decimals);
-        uint256 price_vs_eth = 0;
+        // // Get the ETH / USD price first, and cut it down to 1e6 precision
+        // uint256 __eth_usd_price = uint256(eth_usd_pricer.getLatestPrice()).mul(PRICE_PRECISION).div(uint256(10) ** eth_usd_pricer_decimals);
+        // uint256 price_vs_eth = 0;
 
-        if (choice == PriceChoice.DEI) {
-            price_vs_eth = uint256(deiEthOracle.consult(weth_address, PRICE_PRECISION)); // How much DEI if you put in PRICE_PRECISION WETH
-        }
-        else if (choice == PriceChoice.DEUS) {
-            price_vs_eth = uint256(deusEthOracle.consult(weth_address, PRICE_PRECISION)); // How much DEUS if you put in PRICE_PRECISION WETH
-        }
-        else revert("INVALID PRICE CHOICE. Needs to be either 0 (DEI) or 1 (DEUS)");
+        // if (choice == PriceChoice.DEI) {
+        //     price_vs_eth = uint256(deiEthOracle.consult(weth_address, PRICE_PRECISION)); // How much DEI if you put in PRICE_PRECISION WETH
+        // }
+        // else if (choice == PriceChoice.DEUS) {
+        //     price_vs_eth = uint256(deusEthOracle.consult(weth_address, PRICE_PRECISION)); // How much DEUS if you put in PRICE_PRECISION WETH
+        // }
+        // else revert("INVALID PRICE CHOICE. Needs to be either 0 (DEI) or 1 (DEUS)");
 
-        // Will be in 1e6 format
-        return __eth_usd_price.mul(PRICE_PRECISION).div(price_vs_eth);
+        // // Will be in 1e6 format
+        // return __eth_usd_price.mul(PRICE_PRECISION).div(price_vs_eth);
+        return 0;
     }
 
     // Returns X DEI = 1 USD
@@ -304,15 +305,15 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
         emit DEUSAddressSet(_deus_address);
     }
 
-    function setETHUSDOracle(address _eth_usd_consumer_address) public onlyByOwnerGovernanceOrController {
-        require(_eth_usd_consumer_address != address(0), "Zero address detected");
+    // function setETHUSDOracle(address _eth_usd_consumer_address) public onlyByOwnerGovernanceOrController {
+    //     require(_eth_usd_consumer_address != address(0), "Zero address detected");
 
-        eth_usd_consumer_address = _eth_usd_consumer_address;
-        eth_usd_pricer = ChainlinkETHUSDPriceConsumer(eth_usd_consumer_address);
-        eth_usd_pricer_decimals = eth_usd_pricer.getDecimals();
+    //     eth_usd_consumer_address = _eth_usd_consumer_address;
+    //     eth_usd_pricer = ChainlinkETHUSDPriceConsumer(eth_usd_consumer_address);
+    //     eth_usd_pricer_decimals = eth_usd_pricer.getDecimals();
 
-        emit ETHUSDOracleSet(_eth_usd_consumer_address);
-    }
+    //     emit ETHUSDOracleSet(_eth_usd_consumer_address);
+    // }
 
     function setTimelock(address new_timelock) external onlyByOwnerGovernanceOrController {
         require(new_timelock != address(0), "Zero address detected");
@@ -336,15 +337,15 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
         emit PriceBandSet(_price_band);
     }
 
-    // Sets the DEI_ETH Uniswap oracle address 
-    function setDEIEthOracle(address _dei_oracle_addr, address _weth_address) public onlyByOwnerGovernanceOrController {
-        require((_dei_oracle_addr != address(0)) && (_weth_address != address(0)), "Zero address detected");
-        dei_eth_oracle_address = _dei_oracle_addr;
-        deiEthOracle = UniswapPairOracle(_dei_oracle_addr); 
-        weth_address = _weth_address;
+    // // Sets the DEI_ETH Uniswap oracle address 
+    // function setDEIEthOracle(address _dei_oracle_addr, address _weth_address) public onlyByOwnerGovernanceOrController {
+    //     require((_dei_oracle_addr != address(0)) && (_weth_address != address(0)), "Zero address detected");
+    //     dei_eth_oracle_address = _dei_oracle_addr;
+    //     deiEthOracle = UniswapPairOracle(_dei_oracle_addr); 
+    //     weth_address = _weth_address;
 
-        emit DEIETHOracleSet(_dei_oracle_addr, _weth_address);
-    }
+    //     emit DEIETHOracleSet(_dei_oracle_addr, _weth_address);
+    // }
 
     // Sets the DEUS_ETH Uniswap oracle address 
     function setDEUSEthOracle(address _deus_oracle_addr, address _weth_address) public onlyByOwnerGovernanceOrController {
@@ -384,7 +385,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
     event TimelockSet(address new_timelock);
     event ControllerSet(address controller_address);
     event PriceBandSet(uint256 price_band);
-    event DEIETHOracleSet(address dei_oracle_addr, address weth_address);
-    event DEUSEthOracleSet(address deus_oracle_addr, address weth_address);
+    // event DEIETHOracleSet(address dei_oracle_addr, address weth_address);
+    // event DEUSEthOracleSet(address deus_oracle_addr, address weth_address);
     event CollateralRatioToggled(bool collateral_ratio_paused);
 }
