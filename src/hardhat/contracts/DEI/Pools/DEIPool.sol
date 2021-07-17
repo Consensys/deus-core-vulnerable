@@ -43,7 +43,7 @@ contract DEIPool is AccessControl, Owned {
     address private dei_contract_address;
     address private deus_contract_address;
     address private timelock_address;
-    DEUS private deus;
+    DEUSToken private deus;
     DEIStablecoin private DEI;
 
     UniswapPairOracle private collatEthOracle;
@@ -130,7 +130,7 @@ contract DEIPool is AccessControl, Owned {
             && (_timelock_address != address(0))
         , "Zero address detected"); 
         DEI = DEIStablecoin(_dei_contract_address);
-        deus = DEUS(_deus_contract_address);
+        deus = DEUSToken(_deus_contract_address);
         dei_contract_address = _dei_contract_address;
         deus_contract_address = _deus_contract_address;
         collateral_address = _collateral_address;

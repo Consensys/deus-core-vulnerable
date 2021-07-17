@@ -63,7 +63,7 @@ contract DEUSToken is ERC20Custom, AccessControl, Owned {
     /* ========== MODIFIERS ========== */
 
     modifier onlyPools() {
-       require(DEI.frax_pools(msg.sender) == true, "Only frax pools can mint new DEI");
+       require(DEI.dei_pools(msg.sender) == true, "Only dei pools can mint new DEI");
         _;
     } 
     
@@ -106,19 +106,19 @@ contract DEUSToken is ERC20Custom, AccessControl, Owned {
         timelock_address = new_timelock;
     }
     
-    function setDEIAddress(address frax_contract_address) external onlyByOwnerOrGovernance {
-        require(frax_contract_address != address(0), "Zero address detected");
+    function setDEIAddress(address dei_contract_address) external onlyByOwnerOrGovernance {
+        require(dei_contract_address != address(0), "Zero address detected");
 
-        DEI = DEIStablecoin(frax_contract_address);
+        DEI = DEIStablecoin(dei_contract_address);
 
-        emit DEIAddressSet(frax_contract_address);
+        emit DEIAddressSet(dei_contract_address);
     }
     
     function mint(address to, uint256 amount) public onlyPools {
         _mint(to, amount);
     }
     
-    // This function is what other frax pools will call to mint new DEUS (similar to the DEI mint) 
+    // This function is what other dei pools will call to mint new DEUS (similar to the DEI mint) 
     function pool_mint(address m_address, uint256 m_amount) external onlyPools {        
         if(trackingVotes){
             uint32 srcRepNum = numCheckpoints[address(this)];
@@ -132,7 +132,7 @@ contract DEUSToken is ERC20Custom, AccessControl, Owned {
         emit DEUSMinted(address(this), m_address, m_amount);
     }
 
-    // This function is what other frax pools will call to burn DEUS 
+    // This function is what other dei pools will call to burn DEUS 
     function pool_burn_from(address b_address, uint256 b_amount) external onlyPools {
         if(trackingVotes){
             trackVotes(b_address, address(this), uint96(b_amount));

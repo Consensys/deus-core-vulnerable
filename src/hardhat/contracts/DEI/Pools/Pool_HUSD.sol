@@ -4,7 +4,7 @@ pragma solidity >=0.6.11;
 import "./DEIPool.sol";
 
 contract Pool_HUSD is DEIPool {
-    address public USDC_address;
+    address public HUSD_address;
     constructor(
         address _dei_contract_address,
         address _deus_contract_address,
@@ -18,6 +18,6 @@ contract Pool_HUSD is DEIPool {
         require(_collateral_address != address(0), "Zero address detected");
 
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        HUSD_Address = _collateral_address;
+        HUSD_address = _collateral_address;
     }
 }

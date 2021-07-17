@@ -41,7 +41,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
     enum PriceChoice { DEI, DEUS }
     ChainlinkETHUSDPriceConsumer private eth_usd_pricer;
     uint8 private eth_usd_pricer_decimals;
-    UniswapPairOracle private DEIEthOracle;
+    UniswapPairOracle private deiEthOracle;
     UniswapPairOracle private deusEthOracle;
     string public symbol;
     string public name;
@@ -50,7 +50,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
     address public timelock_address; // Governance timelock address
     address public controller_address; // Controller contract to dynamically adjust system parameters automatically
     address public deus_address;
-    address public DEI_eth_oracle_address;
+    address public dei_eth_oracle_address;
     address public deus_eth_oracle_address;
     address public weth_address;
     address public eth_usd_consumer_address;
