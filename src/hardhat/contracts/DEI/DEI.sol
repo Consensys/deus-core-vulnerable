@@ -160,7 +160,8 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
     }
 
     function eth_usd_price() public view returns (uint256) {
-        return uint256(eth_usd_pricer.getLatestPrice()).mul(PRICE_PRECISION).div(uint256(10) ** eth_usd_pricer_decimals);
+        // return uint256(eth_usd_pricer.getLatestPrice()).mul(PRICE_PRECISION).div(uint256(10) ** eth_usd_pricer_decimals);
+        return 0;
     }
 
     // This is needed to avoid costly repeat calls to different getter functions
@@ -174,7 +175,8 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
             globalCollateralValue(), // globalCollateralValue
             minting_fee, // minting_fee()
             redemption_fee, // redemption_fee()
-            uint256(eth_usd_pricer.getLatestPrice()).mul(PRICE_PRECISION).div(uint256(10) ** eth_usd_pricer_decimals) //eth_usd_price
+            // uint256(eth_usd_pricer.getLatestPrice()).mul(PRICE_PRECISION).div(uint256(10) ** eth_usd_pricer_decimals) //eth_usd_price
+            0
         );
     }
 
@@ -348,15 +350,15 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
     // }
 
     // Sets the DEUS_ETH Uniswap oracle address 
-    function setDEUSEthOracle(address _deus_oracle_addr, address _weth_address) public onlyByOwnerGovernanceOrController {
-        require((_deus_oracle_addr != address(0)) && (_weth_address != address(0)), "Zero address detected");
+    // function setDEUSEthOracle(address _deus_oracle_addr, address _weth_address) public onlyByOwnerGovernanceOrController {
+    //     require((_deus_oracle_addr != address(0)) && (_weth_address != address(0)), "Zero address detected");
 
-        deus_eth_oracle_address = _deus_oracle_addr;
-        deusEthOracle = UniswapPairOracle(_deus_oracle_addr);
-        weth_address = _weth_address;
+    //     deus_eth_oracle_address = _deus_oracle_addr;
+    //     deusEthOracle = UniswapPairOracle(_deus_oracle_addr);
+    //     weth_address = _weth_address;
 
-        emit DEUSEthOracleSet(_deus_oracle_addr, _weth_address);
-    }
+    //     emit DEUSEthOracleSet(_deus_oracle_addr, _weth_address);
+    // }
 
     function toggleCollateralRatio() public onlyCollateralRatioPauser {
         collateral_ratio_paused = !collateral_ratio_paused;
