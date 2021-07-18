@@ -42,7 +42,7 @@ contract DEUSToken is ERC20Custom, AccessControl, Owned {
     
     uint256 public constant genesis_supply = 100000000e18; // 100M is printed upon genesis
 
-    address public oracle_address;
+    // address public oracle_address;
     address public timelock_address; // Governance timelock address
     DEIStablecoin private DEI;
 
@@ -77,14 +77,15 @@ contract DEUSToken is ERC20Custom, AccessControl, Owned {
     constructor(
         string memory _name,
         string memory _symbol, 
-        address _oracle_address,
+        // address _oracle_address,
         address _creator_address,
         address _timelock_address
     ) public Owned(_creator_address){
-        require((_oracle_address != address(0)) && (_timelock_address != address(0)), "Zero address detected"); 
+        // require((_oracle_address != address(0)) && (_timelock_address != address(0)), "Zero address detected"); 
+        require((_timelock_address != address(0), "Zero address detected"); 
         name = _name;
         symbol = _symbol;
-        oracle_address = _oracle_address;
+        // oracle_address = _oracle_address;
         timelock_address = _timelock_address;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _mint(_creator_address, genesis_supply);
@@ -95,11 +96,11 @@ contract DEUSToken is ERC20Custom, AccessControl, Owned {
 
     /* ========== RESTRICTED FUNCTIONS ========== */
 
-    function setOracle(address new_oracle) external onlyByOwnerOrGovernance {
-        require(new_oracle != address(0), "Zero address detected");
+    // function setOracle(address new_oracle) external onlyByOwnerOrGovernance {
+    //     require(new_oracle != address(0), "Zero address detected");
 
-        oracle_address = new_oracle;
-    }
+    //     oracle_address = new_oracle;
+    // }
 
     function setTimelock(address new_timelock) external onlyByOwnerOrGovernance {
         require(new_timelock != address(0), "Timelock address cannot be 0");
