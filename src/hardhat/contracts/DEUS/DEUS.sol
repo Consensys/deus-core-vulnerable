@@ -43,7 +43,7 @@ contract DEUSToken is ERC20Custom, AccessControl, Owned {
     uint256 public constant genesis_supply = 100000000e18; // 100M is printed upon genesis
 
     // address public oracle_address;
-    address public timelock_address; // Governance timelock address
+    // address public timelock_address; // Governance timelock address
     DEIStablecoin private DEI;
 
     bool public trackingVotes = true; // Tracking votes (only change if need to disable votes)
@@ -71,10 +71,8 @@ contract DEUSToken is ERC20Custom, AccessControl, Owned {
     }
 
     modifier onlyByOwnerOrGovernance() {
-        require(
-            msg.sender == owner || msg.sender == timelock_address,
-            "You are not an owner or the governance timelock"
-        );
+        // require(msg.sender == owner || msg.sender == timelock_address, "You are not an owner or the governance timelock");
+        require(msg.sender == owner, "You are not an owner");
         _;
     }
 
@@ -84,15 +82,15 @@ contract DEUSToken is ERC20Custom, AccessControl, Owned {
         string memory _name,
         string memory _symbol,
         // address _oracle_address,
-        address _creator_address,
-        address _timelock_address
-    ) public Owned(_creator_address) {
-        // require((_oracle_address != address(0)) && (_timelock_address != address(0)), "Zero address detected");
-        require(_timelock_address != address(0), "Zero address detected");
+        // address _timelock_address,
+        address _creator_address
+    ) public Owned(_creator_address){
+        // require((_oracle_address != address(0)) && (_timelock_address != address(0)), "Zero address detected"); 
+        // require((_timelock_address != address(0), "Zero address detected"); 
         name = _name;
         symbol = _symbol;
         // oracle_address = _oracle_address;
-        timelock_address = _timelock_address;
+        // timelock_address = _timelock_address;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _mint(_creator_address, genesis_supply);
 
