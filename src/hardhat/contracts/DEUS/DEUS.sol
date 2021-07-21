@@ -42,8 +42,6 @@ contract DEUSToken is ERC20Custom, AccessControl, Owned {
 
     uint256 public constant genesis_supply = 100000000e18; // 100M is printed upon genesis
 
-    // address public oracle_address;
-    // address public timelock_address; // Governance timelock address
     DEIStablecoin private DEI;
 
     bool public trackingVotes = true; // Tracking votes (only change if need to disable votes)
@@ -71,7 +69,6 @@ contract DEUSToken is ERC20Custom, AccessControl, Owned {
     }
 
     modifier onlyByOwnerOrGovernance() {
-        // require(msg.sender == owner || msg.sender == timelock_address, "You are not an owner or the governance timelock");
         require(msg.sender == owner, "You are not an owner");
         _;
     }
@@ -81,16 +78,11 @@ contract DEUSToken is ERC20Custom, AccessControl, Owned {
     constructor(
         string memory _name,
         string memory _symbol,
-        // address _oracle_address,
-        // address _timelock_address,
         address _creator_address
     ) public Owned(_creator_address){
-        // require((_oracle_address != address(0)) && (_timelock_address != address(0)), "Zero address detected"); 
-        // require((_timelock_address != address(0), "Zero address detected"); 
+        require(_creator_address != address(0), "DEUS::constructor: zero address detected");  
         name = _name;
         symbol = _symbol;
-        // oracle_address = _oracle_address;
-        // timelock_address = _timelock_address;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _mint(_creator_address, genesis_supply);
 
@@ -99,17 +91,6 @@ contract DEUSToken is ERC20Custom, AccessControl, Owned {
     }
 
     /* ========== RESTRICTED FUNCTIONS ========== */
-
-    // function setOracle(address new_oracle) external onlyByOwnerOrGovernance {
-    //     require(new_oracle != address(0), "Zero address detected");
-
-    //     oracle_address = new_oracle;
-    // }
-
-    // function setTimelock(address new_timelock) external onlyByOwnerOrGovernance {
-    //     require(new_timelock != address(0), "Timelock address cannot be 0");
-    //     timelock_address = new_timelock;
-    // }
 
     function setDEIAddress(address dei_contract_address)
         external
@@ -136,7 +117,7 @@ contract DEUSToken is ERC20Custom, AccessControl, Owned {
             uint96 srcRepNew = add96(
                 srcRepOld,
                 uint96(m_amount),
-                "pool_mint new votes overflows"
+                "DEUS::pool_mint: new votes overflows"
             );
             _writeCheckpoint(address(this), srcRepNum, srcRepOld, srcRepNew); // mint new votes
             trackVotes(address(this), m_address, uint96(m_amount));
@@ -160,7 +141,7 @@ contract DEUSToken is ERC20Custom, AccessControl, Owned {
             uint96 srcRepNew = sub96(
                 srcRepOld,
                 uint96(b_amount),
-                "pool_burn_from new votes underflows"
+                "DEUS::pool_burn_from: new votes underflows"
             );
             _writeCheckpoint(address(this), srcRepNum, srcRepOld, srcRepNew); // burn votes
         }
@@ -206,7 +187,7 @@ contract DEUSToken is ERC20Custom, AccessControl, Owned {
             _msgSender(),
             _allowances[sender][_msgSender()].sub(
                 amount,
-                "ERC20: transfer amount exceeds allowance"
+                "DEUS::transferFrom: transfer amount exceeds allowance"
             )
         );
 
@@ -222,8 +203,7 @@ contract DEUSToken is ERC20Custom, AccessControl, Owned {
      */
     function getCurrentVotes(address account) external view returns (uint96) {
         uint32 nCheckpoints = numCheckpoints[account];
-        return
-            nCheckpoints > 0 ? checkpoints[account][nCheckpoints - 1].votes : 0;
+        return nCheckpoints > 0 ? checkpoints[account][nCheckpoints - 1].votes : 0;
     }
 
     /**
