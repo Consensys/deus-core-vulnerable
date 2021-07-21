@@ -150,27 +150,6 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 
 	/* ========== VIEWS ========== */
 
-	// // Choice = 'DEI' or 'DEUS' for now
-	// function oracle_price(bytes32 sighash, bytes[] calldata sigs) internal {
-	// 	// // Get the ETH / USD price first, and cut it down to 1e6 precision
-	// 	// uint256 __eth_usd_price = uint256(eth_usd_pricer.getLatestPrice()).mul(PRICE_PRECISION).div(uint256(10) ** eth_usd_pricer_decimals);
-	// 	// uint256 price_vs_eth = 0;
-
-	// 	// if (choice == PriceChoice.DEI) {
-	// 	//     price_vs_eth = uint256(deiEthOracle.consult(weth_address, PRICE_PRECISION)); // How much DEI if you put in PRICE_PRECISION WETH
-	// 	// }
-	// 	// else if (choice == PriceChoice.DEUS) {
-	// 	//     price_vs_eth = uint256(deusEthOracle.consult(weth_address, PRICE_PRECISION)); // How much DEUS if you put in PRICE_PRECISION WETH
-	// 	// }
-	// 	// else revert("INVALID PRICE CHOICE. Needs to be either 0 (DEI) or 1 (DEUS)");
-
-	// 	// // Will be in 1e6 format
-	// 	// return __eth_usd_price.mul(PRICE_PRECISION).div(price_vs_eth);
-
-	// 	bool verified = oracle.verify(sighash, sigs);
-	// 	require(verified, "DEI: expired signature");
-	// }
-
 	// Returns X DEI = 1 USD
 	function dei_price(uint256 price, bytes[] calldata sigs) public returns (uint256) {
 		bytes32 sighash = keccak256(abi.encodePacked(price));
@@ -189,13 +168,14 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 		return price;
 	}
 
+	// Verify X DEUS or X DEI = 1 USD
 	function verify_price(uint256 price, uint256 expireBlock, bytes[] calldata sigs)
 		public
 	{
-		require(expireBlock <= block.number, "DEI: signature is expired.");
+		require(expireBlock <= block.number, "DEI::verify_price: signature is expired.");
 		bytes32 sighash = keccak256(abi.encodePacked(price, expireBlock));
 		bool verified = Oracle(oracle).verify(sighash, sigs);
-		require(verified, "DEI: expired signature");
+		require(verified, "DEI::verify_price: invalid signatures");
 	}
 
 	// This is needed to avoid costly repeat calls to different getter functions
@@ -297,9 +277,9 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 		public
 		onlyByOwnerGovernanceOrController
 	{
-		require(pool_address != address(0), "DEI: Zero address detected");
+		require(pool_address != address(0), "DEI::addPool: Zero address detected");
 
-		require(dei_pools[pool_address] == false, "DEI: Address already exists");
+		require(dei_pools[pool_address] == false, "DEI::addPool: Address already exists");
 		dei_pools[pool_address] = true;
 		dei_pools_array.push(pool_address);
 
@@ -311,9 +291,9 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 		public
 		onlyByOwnerGovernanceOrController
 	{
-		require(pool_address != address(0), "DEI: Zero address detected");
+		require(pool_address != address(0), "DEI::removePool: Zero address detected");
 
-		require(dei_pools[pool_address] == true, "DEI: Address nonexistant");
+		require(dei_pools[pool_address] == true, "DEI::removePool: Address nonexistant");
 
 		// Delete from the mapping
 		delete dei_pools[pool_address];
@@ -388,44 +368,12 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 		public
 		onlyByOwnerGovernanceOrController
 	{
-		require(_deus_address != address(0), "DEI: Zero address detected");
+		require(_deus_address != address(0), "DEI::setDEUSAddress: Zero address detected");
 
 		deus_address = _deus_address;
 
 		emit DEUSAddressSet(_deus_address);
 	}
-
-	// function setETHUSDOracle(address _eth_usd_consumer_address) public onlyByOwnerGovernanceOrController {
-	//     require(_eth_usd_consumer_address != address(0), "Zero address detected");
-
-	//     eth_usd_consumer_address = _eth_usd_consumer_address;
-	//     eth_usd_pricer = ChainlinkETHUSDPriceConsumer(eth_usd_consumer_address);
-	//     eth_usd_pricer_decimals = eth_usd_pricer.getDecimals();
-
-	//     emit ETHUSDOracleSet(_eth_usd_consumer_address);
-	// }
-
-	// function setTimelock(address new_timelock)
-	//     external
-	//     onlyByOwnerGovernanceOrController
-	// {
-	//     require(new_timelock != address(0), "Zero address detected");
-
-	//     timelock_address = new_timelock;
-
-	//     emit TimelockSet(new_timelock);
-	// }
-
-	// function setController(address _controller_address)
-	//     external
-	//     onlyByOwnerGovernanceOrController
-	// {
-	//     require(_controller_address != address(0), "Zero address detected");
-
-	//     controller_address = _controller_address;
-
-	//     emit ControllerSet(_controller_address);
-	// }
 
 	function setPriceBand(uint256 _price_band)
 		external
@@ -436,28 +384,10 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 		emit PriceBandSet(_price_band);
 	}
 
-	// // Sets the DEI_ETH Uniswap oracle address
-	// function setDEIEthOracle(address _dei_oracle_addr, address _weth_address) public onlyByOwnerGovernanceOrController {
-	//     require((_dei_oracle_addr != address(0)) && (_weth_address != address(0)), "Zero address detected");
-	//     dei_eth_oracle_address = _dei_oracle_addr;
-	//     deiEthOracle = UniswapPairOracle(_dei_oracle_addr);
-	//     weth_address = _weth_address;
-
-	//     emit DEIETHOracleSet(_dei_oracle_addr, _weth_address);
-	// }
-
-	// Sets the DEUS_ETH Uniswap oracle address
-	// function setDEUSEthOracle(address _deus_oracle_addr, address _weth_address) public onlyByOwnerGovernanceOrController {
-	//     require((_deus_oracle_addr != address(0)) && (_weth_address != address(0)), "Zero address detected");
-
-	//     deus_eth_oracle_address = _deus_oracle_addr;
-	//     deusEthOracle = UniswapPairOracle(_deus_oracle_addr);
-	//     weth_address = _weth_address;
-
-	//     emit DEUSEthOracleSet(_deus_oracle_addr, _weth_address);
-	// }
-
-	function toggleCollateralRatio() public onlyCollateralRatioPauser {
+	function toggleCollateralRatio()
+		public
+		onlyCollateralRatioPauser 
+	{
 		collateral_ratio_paused = !collateral_ratio_paused;
 
 		emit CollateralRatioToggled(collateral_ratio_paused);
@@ -480,12 +410,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 	event PriceTargetSet(uint256 new_price_target);
 	event RefreshCooldownSet(uint256 new_cooldown);
 	event DEUSAddressSet(address _deus_address);
-	// event ETHUSDOracleSet(address eth_usd_consumer_address);
-	// event TimelockSet(address new_timelock);
-	// event ControllerSet(address controller_address);
 	event PriceBandSet(uint256 price_band);
-	// event DEIETHOracleSet(address dei_oracle_addr, address weth_address);
-	// event DEUSEthOracleSet(address deus_oracle_addr, address weth_address);
 	event CollateralRatioToggled(bool collateral_ratio_paused);
 	event OracleSet(address oracle);
 }

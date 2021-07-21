@@ -16,7 +16,7 @@ contract Oracle is AccessControl {
     event MinimumRequiredSignatureSet(uint256 minimumRequiredSignature);
 
     constructor(address _admin, uint256 _minimumRequiredSignature) {
-        require(_admin != address(0), "ORACLE: zero address detected.");
+        require(_admin != address(0), "ORACLE::constructor: zero address detected.");
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
         minimumRequiredSignature = _minimumRequiredSignature;
     }
@@ -32,7 +32,7 @@ contract Oracle is AccessControl {
             if (!hasRole(ORACLE_ROLE, oracle)) {
                 return false;
             }
-            require(oracle > lastOracle, "ORACLE: signers are same.");
+            require(oracle > lastOracle, "ORACLE::verify: signers are same.");
             lastOracle = oracle;
         }
         return true;
@@ -43,7 +43,7 @@ contract Oracle is AccessControl {
     {
         require(
             hasRole(TRUSTY_ROLE, msg.sender),
-            "ORACLE: you are not a setter."
+            "ORACLE::setMinimumRequiredSignature: you are not a setter."
         );
         minimumRequiredSignature = _minimumRequiredSignature;
 
