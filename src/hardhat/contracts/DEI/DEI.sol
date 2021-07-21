@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity >=0.6.11;
+pragma solidity >=0.6.12;
 
 // =================================================================================================================
 //  _|_|_|    _|_|_|_|  _|    _|    _|_|_|      _|_|_|_|  _|                                                       |
@@ -32,7 +32,6 @@ import "../DEUS/DEUS.sol";
 import "./Pools/DEIPool.sol";
 // import "../Oracle/UniswapPairOracle.sol";
 // import "../Oracle/ChainlinkETHUSDPriceConsumer.sol";
-import "../Governance/AccessControl.sol";
 import "../Oracle/Oracle.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
@@ -41,7 +40,6 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 	using ECDSA for bytes32;
 
 	/* ========== DEUS VARIABLES =========== */
-	uint256 public signatureExpirationTime = 10 minutes;
 	address public oracle;
 
 	/* ========== STATE VARIABLES ========== */
@@ -84,21 +82,20 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 	uint256 public price_band; // The bound above and below the price target at which the refreshCollateralRatio() will not change the collateral ratio
 
 	address public DEFAULT_ADMIN_ADDRESS;
-	bytes32 public constant COLLATERAL_RATIO_PAUSER =
-		keccak256("COLLATERAL_RATIO_PAUSER");
+	bytes32 public constant COLLATERAL_RATIO_PAUSER = keccak256("COLLATERAL_RATIO_PAUSER");
 	bool public collateral_ratio_paused = false;
 
 	/* ========== MODIFIERS ========== */
 
 	modifier onlyCollateralRatioPauser() {
-		require(hasRole(COLLATERAL_RATIO_PAUSER, msg.sender), "DEI: You are not the collateral ratio pauser");
+		require(hasRole(COLLATERAL_RATIO_PAUSER, msg.sender), "DEI: you are not the collateral ratio pauser");
 		_;
 	}
 
 	modifier onlyPools() {
 		require(
 			dei_pools[msg.sender] == true,
-			"DEI: Only dei pools can call this function"
+			"DEI: only dei pools can call this function"
 		);
 		_;
 	}
@@ -108,7 +105,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 			msg.sender == owner,
 				// msg.sender == timelock_address,
 				// msg.sender == controller_address,
-			"DEI: You are not the owner"
+			"DEI: you are not the owner"
 		);
 		_;
 	}
@@ -118,7 +115,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 			msg.sender == owner ||
 				// msg.sender == timelock_address ||
 				dei_pools[msg.sender] == true,
-			"DEI: You are not the owner"
+			"DEI: you are not the owner"
 		);
 		_;
 	}
@@ -130,10 +127,10 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 		string memory _symbol,
 		address _creator_address
 		// address _timelock_address
-	) public Owned(_creator_address) {
+	) Owned(_creator_address) {
 		require(
 			_creator_address != address(0),
-			"Zero address detected"
+			"DEI: zero address detected."
 		);
 		name = _name;
 		symbol = _symbol;
@@ -153,49 +150,52 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 
 	/* ========== VIEWS ========== */
 
-	// Choice = 'DEI' or 'DEUS' for now
-	function oracle_price(bytes32 sighash, bytes[] calldata sigs) internal {
-		// // Get the ETH / USD price first, and cut it down to 1e6 precision
-		// uint256 __eth_usd_price = uint256(eth_usd_pricer.getLatestPrice()).mul(PRICE_PRECISION).div(uint256(10) ** eth_usd_pricer_decimals);
-		// uint256 price_vs_eth = 0;
+	// // Choice = 'DEI' or 'DEUS' for now
+	// function oracle_price(bytes32 sighash, bytes[] calldata sigs) internal {
+	// 	// // Get the ETH / USD price first, and cut it down to 1e6 precision
+	// 	// uint256 __eth_usd_price = uint256(eth_usd_pricer.getLatestPrice()).mul(PRICE_PRECISION).div(uint256(10) ** eth_usd_pricer_decimals);
+	// 	// uint256 price_vs_eth = 0;
 
-		// if (choice == PriceChoice.DEI) {
-		//     price_vs_eth = uint256(deiEthOracle.consult(weth_address, PRICE_PRECISION)); // How much DEI if you put in PRICE_PRECISION WETH
-		// }
-		// else if (choice == PriceChoice.DEUS) {
-		//     price_vs_eth = uint256(deusEthOracle.consult(weth_address, PRICE_PRECISION)); // How much DEUS if you put in PRICE_PRECISION WETH
-		// }
-		// else revert("INVALID PRICE CHOICE. Needs to be either 0 (DEI) or 1 (DEUS)");
+	// 	// if (choice == PriceChoice.DEI) {
+	// 	//     price_vs_eth = uint256(deiEthOracle.consult(weth_address, PRICE_PRECISION)); // How much DEI if you put in PRICE_PRECISION WETH
+	// 	// }
+	// 	// else if (choice == PriceChoice.DEUS) {
+	// 	//     price_vs_eth = uint256(deusEthOracle.consult(weth_address, PRICE_PRECISION)); // How much DEUS if you put in PRICE_PRECISION WETH
+	// 	// }
+	// 	// else revert("INVALID PRICE CHOICE. Needs to be either 0 (DEI) or 1 (DEUS)");
 
-		// // Will be in 1e6 format
-		// return __eth_usd_price.mul(PRICE_PRECISION).div(price_vs_eth);
+	// 	// // Will be in 1e6 format
+	// 	// return __eth_usd_price.mul(PRICE_PRECISION).div(price_vs_eth);
 
-		bool verified = oracle.verify(sighash, sigs);
-		require(verified, "DEI: expired signature");
-	}
+	// 	bool verified = oracle.verify(sighash, sigs);
+	// 	require(verified, "DEI: expired signature");
+	// }
 
 	// Returns X DEI = 1 USD
-	function dei_price(uint256 price, bytes[] calldata sigs) public view returns (uint256) {
+	function dei_price(uint256 price, bytes[] calldata sigs) public returns (uint256) {
 		bytes32 sighash = keccak256(abi.encodePacked(price));
-		oracle_price(sighash, sigs);
+		// oracle_price(sighash, sigs);
+		bool verified = Oracle(oracle).verify(sighash, sigs);
+		require(verified, "DEI: expired signature");
 		return price;
 	}
 
 	// Returns X DEUS = 1 USD
-	function deus_price(uint256 price, bytes[] calldata sigs) public view returns (uint256) {
+	function deus_price(uint256 price, bytes[] calldata sigs) public returns (uint256) {
 		bytes32 sighash = keccak256(abi.encodePacked(price));
-		oracle_price(sighash, sigs);
+		// oracle_price(sighash, sigs);
+		bool verified = Oracle(oracle).verify(sighash, sigs);
+		require(verified, "DEI: expired signature");
 		return price;
 	}
 
-	function verify_price(uint256 price, bytes[] calldata sigs) public {
-		bytes32 sighash = keccak256(abi.encodePacked(price));
-		oracle_price(sighash, sigs);
-	}
-
-	function eth_usd_price() public view returns (uint256) {
-		// return uint256(eth_usd_pricer.getLatestPrice()).mul(PRICE_PRECISION).div(uint256(10) ** eth_usd_pricer_decimals);
-		return 0;
+	function verify_price(uint256 price, uint256 expireBlock, bytes[] calldata sigs)
+		public
+	{
+		require(expireBlock <= block.number, "DEI: signature is expired.");
+		bytes32 sighash = keccak256(abi.encodePacked(price, expireBlock));
+		bool verified = Oracle(oracle).verify(sighash, sigs);
+		require(verified, "DEI: expired signature");
 	}
 
 	// This is needed to avoid costly repeat calls to different getter functions
@@ -212,8 +212,6 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 		)
 	{
 		return (
-			// oracle_price(PriceChoice.DEI), // dei_price()
-			// oracle_price(PriceChoice.DEUS), // deus_price()
 			totalSupply(), // totalSupply()
 			global_collateral_ratio, // global_collateral_ratio()
 			globalCollateralValue(), // globalCollateralValue
@@ -242,12 +240,12 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 	// There needs to be a time interval that this can be called. Otherwise it can be called multiple times per expansion.
 	uint256 public last_call_time; // Last time the refreshCollateralRatio function was called
 
-	function refreshCollateralRatio(uint256 dei_price) public {
+	function refreshCollateralRatio(uint256 dei_price_cur, uint256 expireBlock, bytes[] calldata sigs) public {
 		require(
 			collateral_ratio_paused == false,
 			"DEI: Collateral Ratio has been paused"
 		);
-		uint256 dei_price_cur = dei_price();
+		verify_price(dei_price_cur, expireBlock, sigs);
 		require(
 			block.timestamp - last_call_time >= refresh_cooldown,
 			"DEI: Must wait for the refresh cooldown since last refresh"
@@ -330,6 +328,16 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 
 		emit PoolRemoved(pool_address);
 	}
+	
+	function setOracle(address _oracle)
+		public
+		onlyByOwnerGovernanceOrController
+	{
+		oracle = _oracle;
+
+		emit OracleSet(_oracle);
+	}
+
 
 	function setRedemptionFee(uint256 red_fee)
 		public
@@ -479,4 +487,5 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 	// event DEIETHOracleSet(address dei_oracle_addr, address weth_address);
 	// event DEUSEthOracleSet(address deus_oracle_addr, address weth_address);
 	event CollateralRatioToggled(bool collateral_ratio_paused);
+	event OracleSet(address oracle);
 }
