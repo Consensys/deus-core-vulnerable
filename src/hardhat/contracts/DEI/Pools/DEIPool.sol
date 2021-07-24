@@ -250,8 +250,11 @@ contract DEIPool is AccessControl, Owned {
 			"[Pool's Closed]: Ceiling reached"
 		);
 
+        bytes32 sighash = keccak256(abi.encodePacked(collateral_address, collateral_price, expireBlock));
+		require(DEI.verify_price(sighash, sigs), "POOL::mint1t1DEI: invalid signatures");
+
 		uint256 dei_amount_d18 = DEIPoolLibrary.calcMint1t1DEI(
-			getCollateralPrice(collateral_price, expireBlock, sigs),
+			getCollateralPrice(collateral_price),
 			collateral_amount_d18
 		); //1 DEI for each $1 worth of collateral
 
@@ -367,6 +370,9 @@ contract DEIPool is AccessControl, Owned {
 			DEI.global_collateral_ratio() == COLLATERAL_RATIO_MAX,
 			"Collateral ratio must be == 1"
 		);
+
+        bytes32 sighash = keccak256(abi.encodePacked(collateral_address, collateral_price, expireBlock));
+		require(DEI.verify_price(sighash, sigs), "POOL::redeem1t1DEI: invalid signatures");
 
 		// Need to adjust for decimals of collateral
 		uint256 DEI_amount_precision = DEI_amount.div(10**missing_decimals);

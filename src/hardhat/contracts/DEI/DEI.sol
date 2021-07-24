@@ -146,6 +146,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 	function verify_price(bytes32 sighash, bytes[] calldata sigs)
 		public
 		view
+		returns (bool)
 	{
 		return Oracle(oracle).verify(sighash, sigs);
 	}
