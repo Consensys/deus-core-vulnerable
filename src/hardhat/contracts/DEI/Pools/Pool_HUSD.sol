@@ -10,10 +10,11 @@ contract Pool_HUSD is DEIPool {
         address _deus_contract_address,
         address _collateral_address,
         address _creator_address,
-        address _timelock_address,
+        address _trusty_address,
+        address _admin_address,
         uint256 _pool_ceiling
     ) 
-    DEIPool(_dei_contract_address, _deus_contract_address, _collateral_address, _creator_address, _timelock_address, _pool_ceiling)
+    DEIPool(_dei_contract_address, _deus_contract_address, _collateral_address, _creator_address, _trusty_address, _admin_address, _pool_ceiling)
     public {
         require(_collateral_address != address(0), "Zero address detected");
 
