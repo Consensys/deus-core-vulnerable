@@ -80,9 +80,7 @@ library DEIPoolLibrary {
         uint256 collateral_equivalent_d18 = deus_dollar_value_d18.mul(1e6).div(params.col_price_usd);
         //collateral_equivalent_d18 = collateral_equivalent_d18.sub((collateral_equivalent_d18.mul(params.buyback_fee)).div(1e6));
 
-        return (
-            collateral_equivalent_d18
-        );
+        return collateral_equivalent_d18;
 
     }
 

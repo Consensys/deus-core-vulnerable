@@ -30,8 +30,6 @@ import "../Math/SafeMath.sol";
 import "../Staking/Owned.sol";
 import "../DEUS/DEUS.sol";
 import "./Pools/DEIPool.sol";
-// import "../Oracle/UniswapPairOracle.sol";
-// import "../Oracle/ChainlinkETHUSDPriceConsumer.sol";
 import "../Oracle/Oracle.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
@@ -39,24 +37,18 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 	using SafeMath for uint256;
 	using ECDSA for bytes32;
 
-	/* ========== DEUS VARIABLES =========== */
-	address public oracle;
 
 	/* ========== STATE VARIABLES ========== */
 	enum PriceChoice {
 		DEI,
 		DEUS
 	}
-	// ChainlinkETHUSDPriceConsumer private eth_usd_pricer;
 	uint8 private eth_usd_pricer_decimals;
-	// UniswapPairOracle private deiEthOracle;
-	// UniswapPairOracle private deusEthOracle;
+	address public oracle;
 	string public symbol;
 	string public name;
 	uint8 public constant decimals = 18;
 	address public creator_address;
-	// address public timelock_address; // Governance timelock address
-	// address public controller_address; // Controller contract to dynamically adjust system parameters automatically
 	address public deus_address;
 	address public dei_eth_oracle_address;
 	address public deus_eth_oracle_address;
@@ -150,37 +142,17 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 
 	/* ========== VIEWS ========== */
 
-	// Returns X DEI = 1 USD
-	function dei_price(uint256 price, bytes[] calldata sigs) public returns (uint256) {
-		bytes32 sighash = keccak256(abi.encodePacked(price));
-		// oracle_price(sighash, sigs);
-		bool verified = Oracle(oracle).verify(sighash, sigs);
-		require(verified, "DEI: expired signature");
-		return price;
-	}
-
-	// Returns X DEUS = 1 USD
-	function deus_price(uint256 price, bytes[] calldata sigs) public returns (uint256) {
-		bytes32 sighash = keccak256(abi.encodePacked(price));
-		// oracle_price(sighash, sigs);
-		bool verified = Oracle(oracle).verify(sighash, sigs);
-		require(verified, "DEI: expired signature");
-		return price;
-	}
-
-	// Verify X DEUS or X DEI = 1 USD
-	function verify_price(uint256 price, uint256 expireBlock, bytes[] calldata sigs)
+	// Verify X DEUS or X DEI = 1 USD or ...
+	function verify_price(bytes32 sighash, bytes[] calldata sigs)
 		public
+		view
 	{
-		require(expireBlock <= block.number, "DEI::verify_price: signature is expired.");
-		bytes32 sighash = keccak256(abi.encodePacked(price, expireBlock));
-		bool verified = Oracle(oracle).verify(sighash, sigs);
-		require(verified, "DEI::verify_price: invalid signatures");
+		return Oracle(oracle).verify(sighash, sigs);
 	}
 
 	// This is needed to avoid costly repeat calls to different getter functions
 	// It is cheaper gas-wise to just dump everything and only use some of the info
-	function dei_info()
+	function dei_info(uint256 eth_usd_price, uint256 eth_collat_price)
 		public
 		view
 		returns (
@@ -194,21 +166,21 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 		return (
 			totalSupply(), // totalSupply()
 			global_collateral_ratio, // global_collateral_ratio()
-			globalCollateralValue(), // globalCollateralValue
+			globalCollateralValue(eth_usd_price, eth_collat_price), // globalCollateralValue
 			minting_fee, // minting_fee()
 			redemption_fee // redemption_fee()
 		);
 	}
 
 	// Iterate through all dei pools and calculate all value of collateral in all pools globally
-	function globalCollateralValue() public view returns (uint256) {
+	function globalCollateralValue(uint256 eth_usd_price, uint256 eth_collat_price) public view returns (uint256) {
 		uint256 total_collateral_value_d18 = 0;
 
 		for (uint256 i = 0; i < dei_pools_array.length; i++) {
 			// Exclude null addresses
 			if (dei_pools_array[i] != address(0)) {
 				total_collateral_value_d18 = total_collateral_value_d18.add(
-					DEIPool(dei_pools_array[i]).collatDollarBalance()
+					DEIPool(dei_pools_array[i]).collatDollarBalance(eth_usd_price, eth_collat_price)
 				);
 			}
 		}
@@ -223,9 +195,13 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 	function refreshCollateralRatio(uint256 dei_price_cur, uint256 expireBlock, bytes[] calldata sigs) public {
 		require(
 			collateral_ratio_paused == false,
-			"DEI: Collateral Ratio has been paused"
+			"DEI::refreshCollateralRatio: Collateral Ratio has been paused"
 		);
-		verify_price(dei_price_cur, expireBlock, sigs);
+
+		require(expireBlock >= block.number, "DEI::refreshCollateralRatio: signature is expired.");
+		bytes32 sighash = keccak256(abi.encodePacked(address(this), dei_price_cur, expireBlock));
+		require(verify_price(sighash, sigs), "DEI::refreshCollateralRatio: invalid signatures");
+
 		require(
 			block.timestamp - last_call_time >= refresh_cooldown,
 			"DEI: Must wait for the refresh cooldown since last refresh"
