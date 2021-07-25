@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity >=0.6.12;
-
+pragma solidity >=0.8.0;
+pragma abicoder v2;
 // =================================================================================================================
 //  _|_|_|    _|_|_|_|  _|    _|    _|_|_|      _|_|_|_|  _|                                                       |
 //  _|    _|  _|        _|    _|  _|            _|            _|_|_|      _|_|_|  _|_|_|      _|_|_|    _|_|       |
@@ -22,17 +22,27 @@ pragma solidity >=0.6.12;
 // Reviewer(s) / Contributor(s)
 // Sam Sun: https://github.com/samczsun
 
-import "../../Math/SafeMath.sol";
+// import "../../Math/SafeMath.sol";
 import "../../Uniswap/TransferHelper.sol";
-import "../../Staking/Owned.sol";
-import "../../DEUS/DEUS.sol";
-import "../../DEI/DEI.sol";
+// import "../../Staking/Owned.sol";
+import "../../DEUS/IDEUS.sol";
+import "../../DEI/IDEI.sol";
 import "../../ERC20/ERC20.sol";
 import "../../Governance/AccessControl.sol";
 import "./DEIPoolLibrary.sol";
 
-contract DEIPool is AccessControl, Owned {
-	using SafeMath for uint256;
+contract DEIPool is AccessControl {
+
+    struct RecollateralizeDEI {
+        uint256 eth_usd_price;
+		uint256 eth_collat_price;
+		uint256 collateral_price;
+		uint256 deus_current_price;
+		uint256 expireBlock;
+		bytes[] sigs;
+		uint256 collateral_amount;
+		uint256 DEUS_out_min;
+    }
 
 	/* ========== STATE VARIABLES ========== */
 
@@ -42,11 +52,9 @@ contract DEIPool is AccessControl, Owned {
 	address private dei_contract_address;
 	address private deus_contract_address;
 
-	DEUSToken private deus;
-	DEIStablecoin private DEI;
+	IDEUSToken private deus;
+	IDEIStablecoin private DEI;
 
-	// UniswapPairOracle private collatEthOracle;
-	// address public collat_eth_oracle_address;
 	address private weth_address;
 
 	uint256 public minting_fee;
@@ -80,12 +88,15 @@ contract DEIPool is AccessControl, Owned {
 	// Number of blocks to wait before being able to collectRedemption()
 	uint256 public redemption_delay = 1;
 
+	DEIPoolLibrary poolLibrary;
+
 	// AccessControl Roles
 	bytes32 private constant MINT_PAUSER = keccak256("MINT_PAUSER");
 	bytes32 private constant REDEEM_PAUSER = keccak256("REDEEM_PAUSER");
 	bytes32 private constant BUYBACK_PAUSER = keccak256("BUYBACK_PAUSER");
 	bytes32 private constant RECOLLATERALIZE_PAUSER = keccak256("RECOLLATERALIZE_PAUSER");
 	bytes32 private constant COLLATERAL_PRICE_PAUSER = keccak256("COLLATERAL_PRICE_PAUSER");
+    bytes32 public constant TRUSTY_ROLE = keccak256("TRUSTY_ROLE");
 
 	// AccessControl state variables
 	bool public mintPaused = false;
@@ -96,10 +107,10 @@ contract DEIPool is AccessControl, Owned {
 
 	/* ========== MODIFIERS ========== */
 
-	modifier onlyByOwnerOrGovernance() {
+	modifier onlyByTrusty() {
 		require(
-			msg.sender == owner,
-			"POOL::you are not owner"
+			hasRole(TRUSTY_ROLE, msg.sender),
+			"POOL::you are not trusty"
 		);
 		_;
 	}
@@ -120,28 +131,29 @@ contract DEIPool is AccessControl, Owned {
 		address _dei_contract_address,
 		address _deus_contract_address,
 		address _collateral_address,
-		address _creator_address,
 		address _trusty_address,
 		address _admin_address,
-		uint256 _pool_ceiling
-	) public Owned(_creator_address) {
+		uint256 _pool_ceiling,
+		address _library
+	) public {
 		require(
 			(_dei_contract_address != address(0)) &&
 				(_deus_contract_address != address(0)) &&
 				(_collateral_address != address(0)) &&
-				(_creator_address != address(0)) &&
 				(_trusty_address != address(0)) &&
-				(_admin_address != address(0)),
+				(_admin_address != address(0)) &&
+				(_library != address(0)),
 			"POOL::Zero address detected"
 		);
-		DEI = DEIStablecoin(_dei_contract_address);
-		deus = DEUSToken(_deus_contract_address);
+		poolLibrary = DEIPoolLibrary(_library);
+		DEI = IDEIStablecoin(_dei_contract_address);
+		deus = IDEUSToken(_deus_contract_address);
 		dei_contract_address = _dei_contract_address;
 		deus_contract_address = _deus_contract_address;
 		collateral_address = _collateral_address;
 		collateral_token = ERC20(_collateral_address);
 		pool_ceiling = _pool_ceiling;
-		missing_decimals = uint256(18).sub(collateral_token.decimals());
+		missing_decimals = uint256(18) - collateral_token.decimals();
 
 		_setupRole(DEFAULT_ADMIN_ROLE, _admin_address);
 		grantRole(MINT_PAUSER, _trusty_address);
@@ -149,6 +161,7 @@ contract DEIPool is AccessControl, Owned {
 		grantRole(RECOLLATERALIZE_PAUSER, _trusty_address);
 		grantRole(BUYBACK_PAUSER, _trusty_address);
 		grantRole(COLLATERAL_PRICE_PAUSER, _trusty_address);
+        grantRole(TRUSTY_ROLE, _trusty_address);
 	}
 
 	/* ========== VIEWS ========== */
@@ -156,34 +169,11 @@ contract DEIPool is AccessControl, Owned {
 	// Returns dollar value of collateral held in this DEI pool
 	function collatDollarBalance(uint256 eth_usd_price, uint256 eth_collat_price) public view returns (uint256) {
 		if (collateralPricePaused == true) {
-			return
-				(
-					collateral_token.balanceOf(address(this)).sub(
-						unclaimedPoolCollateral
-					)
-				)
-					.mul(10**missing_decimals)
-					.mul(pausedPrice)
-					.div(PRICE_PRECISION);
+			return ((collateral_token.balanceOf(address(this)) - unclaimedPoolCollateral) * (10**missing_decimals) * (pausedPrice)) / (PRICE_PRECISION);
 		} else {
-			// uint256 eth_usd_price = DEI.eth_usd_price();
-			// uint256 eth_collat_price = collatEthOracle.consult(
-			//     weth_address,
-			//     (PRICE_PRECISION * (10**missing_decimals))
-			// );
 
-			uint256 collat_usd_price = eth_usd_price.mul(PRICE_PRECISION).div(
-				eth_collat_price
-			);
-			return
-				(
-					collateral_token.balanceOf(address(this)).sub(
-						unclaimedPoolCollateral
-					)
-				)
-					.mul(10**missing_decimals)
-					.mul(collat_usd_price)
-					.div(PRICE_PRECISION); //.mul(getCollateralPrice()).div(1e6);
+			uint256 collat_usd_price = (eth_usd_price * PRICE_PRECISION) / eth_collat_price;
+			return ((collateral_token.balanceOf(address(this)) - (unclaimedPoolCollateral)) * (10**missing_decimals) * collat_usd_price) / (PRICE_PRECISION);
 		}
 	}
 
@@ -195,12 +185,9 @@ contract DEIPool is AccessControl, Owned {
 
 		if (global_collateral_ratio > COLLATERAL_RATIO_PRECISION)
 			global_collateral_ratio = COLLATERAL_RATIO_PRECISION; // Handles an overcollateralized contract with CR > 1
-		uint256 required_collat_dollar_value_d18 = (
-			total_supply.mul(global_collateral_ratio)
-		)
-		.div(COLLATERAL_RATIO_PRECISION); // Calculates collateral needed to back each 1 DEI with $1 of collateral at current collat ratio
+		uint256 required_collat_dollar_value_d18 = (total_supply * global_collateral_ratio) / (COLLATERAL_RATIO_PRECISION); // Calculates collateral needed to back each 1 DEI with $1 of collateral at current collat ratio
 		if (global_collat_value > required_collat_dollar_value_d18)
-			return global_collat_value.sub(required_collat_dollar_value_d18);
+			return global_collat_value - required_collat_dollar_value_d18;
 		else return 0;
 	}
 
@@ -211,25 +198,10 @@ contract DEIPool is AccessControl, Owned {
 		if (collateralPricePaused == true) {
 			return pausedPrice;
 		} else {
-			// uint256 eth_usd_price = DEI.eth_usd_price();
 			return collateral_price;
-				// eth_usd_price.mul(PRICE_PRECISION).div(
-				//     collatEthOracle.consult(
-				//         weth_address,
-				//         PRICE_PRECISION * (10**missing_decimals)
-				//     )
-				// );
 		}
 	}
 
-	// function setCollatETHOracle(
-	//     address _collateral_weth_oracle_address,
-	//     address _weth_address
-	// ) external onlyByOwnerOrGovernance {
-	//     collat_eth_oracle_address = _collateral_weth_oracle_address;
-	//     collatEthOracle = UniswapPairOracle(_collateral_weth_oracle_address);
-	//     weth_address = _weth_address;
-	// }
 
 	// We separate out the 1t1, fractional and algorithmic minting functions for gas efficiency
 	function mint1t1DEI(uint256 collateral_amount, uint256 DEI_out_min, uint256 collateral_price, uint256 expireBlock, bytes[] calldata sigs)
@@ -244,22 +216,19 @@ contract DEIPool is AccessControl, Owned {
 			"Collateral ratio must be >= 1"
 		);
 		require(
-			(collateral_token.balanceOf(address(this)))
-			.sub(unclaimedPoolCollateral)
-			.add(collateral_amount) <= pool_ceiling,
+			collateral_token.balanceOf(address(this)) - unclaimedPoolCollateral +  collateral_amount <= pool_ceiling,
 			"[Pool's Closed]: Ceiling reached"
 		);
 
         bytes32 sighash = keccak256(abi.encodePacked(collateral_address, collateral_price, expireBlock));
 		require(DEI.verify_price(sighash, sigs), "POOL::mint1t1DEI: invalid signatures");
 
-		uint256 dei_amount_d18 = DEIPoolLibrary.calcMint1t1DEI(
+		uint256 dei_amount_d18 = poolLibrary.calcMint1t1DEI(
 			getCollateralPrice(collateral_price),
 			collateral_amount_d18
 		); //1 DEI for each $1 worth of collateral
 
-		dei_amount_d18 = (dei_amount_d18.mul(uint256(1e6).sub(minting_fee)))
-		.div(1e6); //remove precision at the end
+		dei_amount_d18 = (dei_amount_d18 * (uint256(1e6) - minting_fee)) / (1e6); //remove precision at the end
 		require(DEI_out_min <= dei_amount_d18, "Slippage limit reached");
 
 		TransferHelper.safeTransferFrom(
@@ -289,13 +258,12 @@ contract DEIPool is AccessControl, Owned {
 			"Collateral ratio must be 0"
 		);
 
-		uint256 dei_amount_d18 = DEIPoolLibrary.calcMintAlgorithmicDEI(
+		uint256 dei_amount_d18 = poolLibrary.calcMintAlgorithmicDEI(
 			deus_current_price, // X DEUS / 1 USD
 			deus_amount_d18
 		);
 
-		dei_amount_d18 = (dei_amount_d18.mul(uint256(1e6).sub(minting_fee)))
-		.div(1e6);
+		dei_amount_d18 = (dei_amount_d18 * (uint256(1e6) - (minting_fee))) / (1e6);
 		require(DEI_out_min <= dei_amount_d18, "Slippage limit reached");
 
 		deus.pool_burn_from(msg.sender, deus_amount_d18);
@@ -326,28 +294,23 @@ contract DEIPool is AccessControl, Owned {
 			"Collateral ratio needs to be between .000001 and .999999"
 		);
 		require(
-			collateral_token
-			.balanceOf(address(this))
-			.sub(unclaimedPoolCollateral)
-			.add(collateral_amount) <= pool_ceiling,
+			collateral_token.balanceOf(address(this)) - unclaimedPoolCollateral + collateral_amount <= pool_ceiling,
 			"Pool ceiling reached, no more DEI can be minted with this collateral"
 		);
 
 		uint256 collateral_amount_d18 = collateral_amount *
 			(10**missing_decimals);
-		DEIPoolLibrary.MintFF_Params memory input_params = DEIPoolLibrary
-		.MintFF_Params(
-			deus_current_price,
-			getCollateralPrice(collateral_price),
-			deus_amount,
-			collateral_amount_d18,
-			global_collateral_ratio
-		);
+		DEIPoolLibrary.MintFF_Params memory input_params = DEIPoolLibrary.MintFF_Params(
+												deus_current_price,
+												getCollateralPrice(collateral_price),
+												deus_amount,
+												collateral_amount_d18,
+												global_collateral_ratio
+											);
 
-		(uint256 mint_amount, uint256 deus_needed) = DEIPoolLibrary
-		.calcMintFractionalDEI(input_params);
+		(uint256 mint_amount, uint256 deus_needed) = poolLibrary.calcMintFractionalDEI(input_params);
 
-		mint_amount = (mint_amount.mul(uint256(1e6).sub(minting_fee))).div(1e6);
+		mint_amount = (mint_amount * (uint256(1e6) - minting_fee)) / (1e6);
 		require(DEI_out_min <= mint_amount, "Slippage limit reached");
 		require(deus_needed <= deus_amount, "Not enough DEUS inputted");
 
@@ -375,21 +338,15 @@ contract DEIPool is AccessControl, Owned {
 		require(DEI.verify_price(sighash, sigs), "POOL::redeem1t1DEI: invalid signatures");
 
 		// Need to adjust for decimals of collateral
-		uint256 DEI_amount_precision = DEI_amount.div(10**missing_decimals);
-		uint256 collateral_needed = DEIPoolLibrary.calcRedeem1t1DEI(
+		uint256 DEI_amount_precision = DEI_amount / (10**missing_decimals);
+		uint256 collateral_needed = poolLibrary.calcRedeem1t1DEI(
 			getCollateralPrice(collateral_price),
 			DEI_amount_precision
 		);
 
-		collateral_needed = (
-			collateral_needed.mul(uint256(1e6).sub(redemption_fee))
-		)
-		.div(1e6);
+		collateral_needed = (collateral_needed * (uint256(1e6) - redemption_fee)) / (1e6);
 		require(
-			collateral_needed <=
-				collateral_token.balanceOf(address(this)).sub(
-					unclaimedPoolCollateral
-				),
+			collateral_needed <= collateral_token.balanceOf(address(this)) - unclaimedPoolCollateral,
 			"Not enough collateral in pool"
 		);
 		require(
@@ -397,13 +354,8 @@ contract DEIPool is AccessControl, Owned {
 			"Slippage limit reached"
 		);
 
-		redeemCollateralBalances[msg.sender] = redeemCollateralBalances[
-			msg.sender
-		]
-		.add(collateral_needed);
-		unclaimedPoolCollateral = unclaimedPoolCollateral.add(
-			collateral_needed
-		);
+		redeemCollateralBalances[msg.sender] = redeemCollateralBalances[msg.sender] + collateral_needed;
+		unclaimedPoolCollateral = unclaimedPoolCollateral + collateral_needed;
 		lastRedeemed[msg.sender] = block.number;
 
 		// Move all external functions to the end
@@ -434,36 +386,18 @@ contract DEIPool is AccessControl, Owned {
 		);
 		uint256 col_price_usd = getCollateralPrice(collateral_price);
 
-		uint256 DEI_amount_post_fee = (
-			DEI_amount.mul(uint256(1e6).sub(redemption_fee))
-		)
-		.div(PRICE_PRECISION);
+		uint256 DEI_amount_post_fee = (DEI_amount * (uint256(1e6) - redemption_fee)) / (PRICE_PRECISION);
 
-		uint256 deus_dollar_value_d18 = DEI_amount_post_fee.sub(
-			DEI_amount_post_fee.mul(global_collateral_ratio).div(
-				PRICE_PRECISION
-			)
-		);
-		uint256 deus_amount = deus_dollar_value_d18.mul(PRICE_PRECISION).div(
-			deus_current_price
-		);
+		uint256 deus_dollar_value_d18 = DEI_amount_post_fee - ((DEI_amount_post_fee * global_collateral_ratio) / (PRICE_PRECISION));
+		uint256 deus_amount = deus_dollar_value_d18 * (PRICE_PRECISION) / (deus_current_price);
 
 		// Need to adjust for decimals of collateral
-		uint256 DEI_amount_precision = DEI_amount_post_fee.div(
-			10**missing_decimals
-		);
-		uint256 collateral_dollar_value = DEI_amount_precision
-		.mul(global_collateral_ratio)
-		.div(PRICE_PRECISION);
-		uint256 collateral_amount = collateral_dollar_value
-		.mul(PRICE_PRECISION)
-		.div(col_price_usd);
+		uint256 DEI_amount_precision = DEI_amount_post_fee / (10**missing_decimals);
+		uint256 collateral_dollar_value = (DEI_amount_precision * global_collateral_ratio) / PRICE_PRECISION;
+		uint256 collateral_amount = (collateral_dollar_value * PRICE_PRECISION) / (col_price_usd);
 
 		require(
-			collateral_amount <=
-				collateral_token.balanceOf(address(this)).sub(
-					unclaimedPoolCollateral
-				),
+			collateral_amount <= collateral_token.balanceOf(address(this)) - unclaimedPoolCollateral,
 			"Not enough collateral in pool"
 		);
 		require(
@@ -472,18 +406,11 @@ contract DEIPool is AccessControl, Owned {
 		);
 		require(DEUS_out_min <= deus_amount, "Slippage limit reached [DEUS]");
 
-		redeemCollateralBalances[msg.sender] = redeemCollateralBalances[
-			msg.sender
-		]
-		.add(collateral_amount);
-		unclaimedPoolCollateral = unclaimedPoolCollateral.add(
-			collateral_amount
-		);
+		redeemCollateralBalances[msg.sender] = redeemCollateralBalances[msg.sender] + collateral_amount;
+		unclaimedPoolCollateral = unclaimedPoolCollateral + collateral_amount;
 
-		redeemDEUSBalances[msg.sender] = redeemDEUSBalances[msg.sender].add(
-			deus_amount
-		);
-		unclaimedPoolDEUS = unclaimedPoolDEUS.add(deus_amount);
+		redeemDEUSBalances[msg.sender] = redeemDEUSBalances[msg.sender] + deus_amount;
+		unclaimedPoolDEUS = unclaimedPoolDEUS + deus_amount;
 
 		lastRedeemed[msg.sender] = block.number;
 
@@ -509,14 +436,12 @@ contract DEIPool is AccessControl, Owned {
 		require(global_collateral_ratio == 0, "POOL::redeemAlgorithmicDEI: Collateral ratio must be 0");
 		uint256 deus_dollar_value_d18 = DEI_amount;
 
-		deus_dollar_value_d18 = (
-			deus_dollar_value_d18.mul(uint256(1e6).sub(redemption_fee))
-		).div(PRICE_PRECISION); //apply fees
+		deus_dollar_value_d18 = (deus_dollar_value_d18 * (uint256(1e6) - redemption_fee)) / (PRICE_PRECISION); //apply fees
 
-		uint256 deus_amount = deus_dollar_value_d18.mul(PRICE_PRECISION).div(deus_current_price);
+		uint256 deus_amount = (deus_dollar_value_d18 * (PRICE_PRECISION)) / deus_current_price;
 
-		redeemDEUSBalances[msg.sender] = redeemDEUSBalances[msg.sender].add(deus_amount);
-		unclaimedPoolDEUS = unclaimedPoolDEUS.add(deus_amount);
+		redeemDEUSBalances[msg.sender] = redeemDEUSBalances[msg.sender] + deus_amount;
+		unclaimedPoolDEUS = unclaimedPoolDEUS + deus_amount;
 
 		lastRedeemed[msg.sender] = block.number;
 
@@ -531,7 +456,7 @@ contract DEIPool is AccessControl, Owned {
 	// to take out DEI/collateral from the system, use an AMM to trade the new price, and then mint back into the system.
 	function collectRedemption() external {
 		require(
-			(lastRedeemed[msg.sender].add(redemption_delay)) <= block.number,
+			(lastRedeemed[msg.sender] + redemption_delay) <= block.number,
 			"POOL::collectRedemption: Must wait for redemption_delay blocks before collecting redemption"
 		);
 		bool sendDEUS = false;
@@ -543,7 +468,7 @@ contract DEIPool is AccessControl, Owned {
 		if (redeemDEUSBalances[msg.sender] > 0) {
 			DEUSAmount = redeemDEUSBalances[msg.sender];
 			redeemDEUSBalances[msg.sender] = 0;
-			unclaimedPoolDEUS = unclaimedPoolDEUS.sub(DEUSAmount);
+			unclaimedPoolDEUS = unclaimedPoolDEUS - DEUSAmount;
 
 			sendDEUS = true;
 		}
@@ -551,10 +476,7 @@ contract DEIPool is AccessControl, Owned {
 		if (redeemCollateralBalances[msg.sender] > 0) {
 			CollateralAmount = redeemCollateralBalances[msg.sender];
 			redeemCollateralBalances[msg.sender] = 0;
-			unclaimedPoolCollateral = unclaimedPoolCollateral.sub(
-				CollateralAmount
-			);
-
+			unclaimedPoolCollateral = unclaimedPoolCollateral - CollateralAmount;
 			sendCollateral = true;
 		}
 
@@ -574,46 +496,41 @@ contract DEIPool is AccessControl, Owned {
 	// Thus, if the target collateral ratio is higher than the actual value of collateral, minters get DEUS for adding collateral
 	// This function simply rewards anyone that sends collateral to a pool with the same amount of DEUS + the bonus rate
 	// Anyone can call this function to recollateralize the protocol and take the extra DEUS value from the bonus rate as an arb opportunity
-	function recollateralizeDEI(
-		uint256 eth_usd_price,
-		uint256 eth_collat_price,
-		uint256 collateral_price,
-		uint256 deus_current_price,
-		uint256 expireBlock,
-		bytes[] calldata sigs,
-		uint256 collateral_amount,
-		uint256 DEUS_out_min
-	) external {
+	function recollateralizeDEI(RecollateralizeDEI memory inputs) external {
 		require(recollateralizePaused == false, "POOL::recollateralizeDEI: Recollateralize is paused");
 
-		require(expireBlock >= block.number, "DEI::recollateralizeDEI: signature is expired.");
-		bytes32 sighash = keccak256(abi.encodePacked(eth_usd_price, eth_collat_price, collateral_address, collateral_price, deus_contract_address, deus_current_price, expireBlock));
-		require(DEI.verify_price(sighash, sigs), "POOL::recollateralizeDEI: invalid signatures");
+		require(inputs.expireBlock >= block.number, "DEI::recollateralizeDEI: signature is expired.");
+		bytes32 sighash = keccak256(abi.encodePacked(
+                                        inputs.eth_usd_price, 
+                                        inputs.eth_collat_price, 
+                                        collateral_address, 
+                                        inputs.collateral_price, 
+                                        deus_contract_address, 
+                                        inputs.deus_current_price, 
+                                        inputs.expireBlock
+                                    ));
+		require(DEI.verify_price(sighash, inputs.sigs), "POOL::recollateralizeDEI: invalid signatures");
 
-		uint256 collateral_amount_d18 = collateral_amount * (10**missing_decimals);
+		uint256 collateral_amount_d18 = inputs.collateral_amount * (10**missing_decimals);
 
 		uint256 dei_total_supply = DEI.totalSupply();
 		uint256 global_collateral_ratio = DEI.global_collateral_ratio();
-		uint256 global_collat_value = DEI.globalCollateralValue(eth_usd_price, eth_collat_price);
+		uint256 global_collat_value = DEI.globalCollateralValue(inputs.eth_usd_price, inputs.eth_collat_price);
 
-		(uint256 collateral_units, uint256 amount_to_recollat) = DEIPoolLibrary
+		(uint256 collateral_units, uint256 amount_to_recollat) = poolLibrary
 		.calcRecollateralizeDEIInner(
 			collateral_amount_d18,
-			getCollateralPrice(collateral_price),
+			getCollateralPrice(inputs.collateral_price),
 			global_collat_value,
 			dei_total_supply,
 			global_collateral_ratio
 		);
 
-		uint256 collateral_units_precision = collateral_units.div(
-			10**missing_decimals
-		);
+		uint256 collateral_units_precision = collateral_units / (10**missing_decimals);
 
-		uint256 deus_paid_back = amount_to_recollat
-								.mul(uint256(1e6).add(bonus_rate).sub(recollat_fee))
-								.div(deus_current_price);
+		uint256 deus_paid_back = (amount_to_recollat * (uint256(1e6) + bonus_rate - recollat_fee)) / inputs.deus_current_price;
 
-		require(DEUS_out_min <= deus_paid_back, "POOL::recollateralizeDEI: Slippage limit reached");
+		require(inputs.DEUS_out_min <= deus_paid_back, "POOL::recollateralizeDEI: Slippage limit reached");
 		TransferHelper.safeTransferFrom(
 			address(collateral_token),
 			msg.sender,
@@ -641,17 +558,14 @@ contract DEIPool is AccessControl, Owned {
 		require(DEI.verify_price(sighash, sigs), "POOL::buyBackDEUS: invalid signatures");
 
 		DEIPoolLibrary.BuybackDEUS_Params memory input_params = DEIPoolLibrary.BuybackDEUS_Params(
-																				availableExcessCollatDV(eth_usd_price, eth_collat_price),
-																				deus_current_price,
-																				getCollateralPrice(collateral_price),
-																				DEUS_amount
-																			);
+													availableExcessCollatDV(eth_usd_price, eth_collat_price),
+													deus_current_price,
+													getCollateralPrice(collateral_price),
+													DEUS_amount
+												);
 
-		uint256 collateral_equivalent_d18 = (
-			DEIPoolLibrary.calcBuyBackDEUS(input_params)
-		).mul(uint256(1e6).sub(buyback_fee))
-		.div(1e6);
-		uint256 collateral_precision = collateral_equivalent_d18.div(10**missing_decimals);
+		uint256 collateral_equivalent_d18 = (poolLibrary.calcBuyBackDEUS(input_params) * (uint256(1e6) - buyback_fee)) / (1e6);
+		uint256 collateral_precision = collateral_equivalent_d18 / (10**missing_decimals);
 
 		require(
 			COLLATERAL_out_min <= collateral_precision,
@@ -718,7 +632,7 @@ contract DEIPool is AccessControl, Owned {
 		uint256 new_redeem_fee,
 		uint256 new_buyback_fee,
 		uint256 new_recollat_fee
-	) external onlyByOwnerOrGovernance {
+	) external onlyByTrusty {
 		pool_ceiling = new_ceiling;
 		bonus_rate = new_bonus_rate;
 		redemption_delay = new_redemption_delay;
