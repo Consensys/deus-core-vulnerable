@@ -31,6 +31,12 @@ async function main() {
 
 	console.log("ORACLE deployed to:", oracle.address);
 
+	await hre.run("verify:verify", {
+		address: oracle.address,
+		constructorArguments: [creatorAddress, minimumRequiredSignature, trustyAddress],
+	  });
+	  
+
 	// DEI
 	const deiContract = await hre.ethers.getContractFactory("DEIStablecoin");
 	// string memory _name, string memory _symbol, address _creator_address, address _trusty_address
@@ -39,6 +45,11 @@ async function main() {
 	await dei.deployed();
 
 	console.log("DEI deployed to:", dei.address);
+
+	await hre.run("verify:verify", {
+		address: dei.address,
+		constructorArguments: ["Dei", "DEI", creatorAddress, trustyAddress],
+	  });
 
 	// DEUS
 	const deusContract = await hre.ethers.getContractFactory("DEUSToken")
@@ -49,6 +60,11 @@ async function main() {
 
 	console.log("DEUS deployed to:", deus.address);
 
+	await hre.run("verify:verify", {
+		address: deus.address,
+		constructorArguments: ["Deus", "DEUS", creatorAddress, trustyAddress],
+	  });
+
 	// DEI POOL Librariy
 	const deiPoolLibraryContract = await hre.ethers.getContractFactory("DEIPoolLibrary")
 	// empty
@@ -58,6 +74,11 @@ async function main() {
 
 	console.log("DEI Pool Library deployed to:", deiPoolLibrary.address);
 
+	await hre.run("verify:verify", {
+		address: deiPoolLibrary.address,
+		constructorArguments: [],
+	  });
+
 	// POOl HUSD
 	const poolHUSDContract = await hre.ethers.getContractFactory("Pool_HUSD")
 	// address _dei_contract_address, address _deus_contract_address, address _collateral_address, address _trusty_address, address _admin_address, uint256 _pool_ceiling, address _library
@@ -66,6 +87,11 @@ async function main() {
 	await poolHUSD.deployed();
 
 	console.log("Pool HUSD deployed to:", poolHUSD.address);
+
+	await hre.run("verify:verify", {
+		address: poolHUSD.address,
+		constructorArguments: [dei.address, deus.address, collateralAddress, trustyAddress, creatorAddress, HUSDPoolCeiling, deiPoolLibrary.address],
+	  });
 
 	// Parameters
 	await dei.addPool(poolHUSD.address)
