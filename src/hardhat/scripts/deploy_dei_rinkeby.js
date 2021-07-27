@@ -32,7 +32,7 @@ async function main() {
 	console.log("ORACLE deployed to:", oracle.address);
 
 	// DEI
-	const deiContract = await hre.ethers.getContractFactory("DEIStableCoin");
+	const deiContract = await hre.ethers.getContractFactory("DEIStablecoin");
 	// string memory _name, string memory _symbol, address _creator_address, address _trusty_address
 	const dei = await deiContract.deploy("Dei", "DEI", creatorAddress, trustyAddress);
 
