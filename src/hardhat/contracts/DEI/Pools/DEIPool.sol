@@ -22,9 +22,7 @@ pragma abicoder v2;
 // Reviewer(s) / Contributor(s)
 // Sam Sun: https://github.com/samczsun
 
-// import "../../Math/SafeMath.sol";
 import "../../Uniswap/TransferHelper.sol";
-// import "../../Staking/Owned.sol";
 import "../../DEUS/IDEUS.sol";
 import "../../DEI/IDEI.sol";
 import "../../ERC20/ERC20.sol";

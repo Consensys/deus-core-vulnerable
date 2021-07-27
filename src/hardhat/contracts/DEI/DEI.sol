@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity >=0.6.12;
+pragma solidity ^0.8.0;
 
 // =================================================================================================================
 //  _|_|_|    _|_|_|_|  _|    _|    _|_|_|      _|_|_|_|  _|                                                       |
@@ -26,34 +26,26 @@ import "../Common/Context.sol";
 import "../ERC20/IERC20.sol";
 import "../ERC20/ERC20Custom.sol";
 import "../ERC20/ERC20.sol";
-import "../Math/SafeMath.sol";
 import "../Staking/Owned.sol";
 import "../DEUS/DEUS.sol";
 import "./Pools/DEIPool.sol";
 import "../Oracle/Oracle.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
-	using SafeMath for uint256;
+contract DEIStablecoin is ERC20Custom, AccessControl {
 	using ECDSA for bytes32;
-
 
 	/* ========== STATE VARIABLES ========== */
 	enum PriceChoice {
 		DEI,
 		DEUS
 	}
-	uint8 private eth_usd_pricer_decimals;
 	address public oracle;
 	string public symbol;
 	string public name;
 	uint8 public constant decimals = 18;
 	address public creator_address;
 	address public deus_address;
-	address public dei_eth_oracle_address;
-	address public deus_eth_oracle_address;
-	address public weth_address;
-	address public eth_usd_consumer_address;
 	uint256 public constant genesis_supply = 2000000e18; // 2M DEI (only for testing, genesis supply will be 5k on Mainnet). This is to help with establishing the Uniswap pools, as they need liquidity
 
 	// The addresses in this array are added by the oracle and these contracts are able to mint DEI
@@ -66,8 +58,6 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 	uint256 private constant PRICE_PRECISION = 1e6;
 
 	uint256 public global_collateral_ratio; // 6 decimals of precision, e.g. 924102 = 0.924102
-	uint256 public redemption_fee; // 6 decimals of precision, divide by 1000000 in calculations for fee
-	uint256 public minting_fee; // 6 decimals of precision, divide by 1000000 in calculations for fee
 	uint256 public dei_step; // Amount to change the collateralization ratio by upon refreshCollateralRatio()
 	uint256 public refresh_cooldown; // Seconds to wait before being able to run refreshCollateralRatio() again
 	uint256 public price_target; // The price of DEI at which the collateral ratio will respond to; this value is only used for the collateral ratio mechanism and not for minting and redeeming which are hardcoded at $1
@@ -75,6 +65,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 
 	address public DEFAULT_ADMIN_ADDRESS;
 	bytes32 public constant COLLATERAL_RATIO_PAUSER = keccak256("COLLATERAL_RATIO_PAUSER");
+	bytes32 public constant TRUSTY_ROLE = keccak256("TRUSTY_ROLE");
 	bool public collateral_ratio_paused = false;
 
 	/* ========== MODIFIERS ========== */
@@ -92,21 +83,9 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 		_;
 	}
 
-	modifier onlyByOwnerGovernanceOrController() {
+	modifier onlyByTrusty() {
 		require(
-			msg.sender == owner,
-				// msg.sender == timelock_address,
-				// msg.sender == controller_address,
-			"DEI: you are not the owner"
-		);
-		_;
-	}
-
-	modifier onlyByOwnerGovernanceOrPool() {
-		require(
-			msg.sender == owner ||
-				// msg.sender == timelock_address ||
-				dei_pools[msg.sender] == true,
+			hasRole(TRUSTY_ROLE, msg.sender),
 			"DEI: you are not the owner"
 		);
 		_;
@@ -117,9 +96,10 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 	constructor(
 		string memory _name,
 		string memory _symbol,
-		address _creator_address
+		address _creator_address,
+		address _trusty_address
 		// address _timelock_address
-	) Owned(_creator_address) {
+	){
 		require(
 			_creator_address != address(0),
 			"DEI: zero address detected."
@@ -127,17 +107,16 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 		name = _name;
 		symbol = _symbol;
 		creator_address = _creator_address;
-		// timelock_address = _timelock_address;
 		_setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
 		DEFAULT_ADMIN_ADDRESS = _msgSender();
 		_mint(creator_address, genesis_supply);
 		grantRole(COLLATERAL_RATIO_PAUSER, creator_address);
-		// grantRole(COLLATERAL_RATIO_PAUSER, timelock_address);
 		dei_step = 2500; // 6 decimals of precision, equal to 0.25%
 		global_collateral_ratio = 1000000; // Dei system starts off fully collateralized (6 decimals of precision)
 		refresh_cooldown = 3600; // Refresh cooldown period is set to 1 hour (3600 seconds) at genesis
 		price_target = 1000000; // Collateral ratio will adjust according to the $1 price target at genesis
 		price_band = 5000; // Collateral ratio will not adjust if between $0.995 and $1.005 at genesis
+		grantRole(TRUSTY_ROLE, _trusty_address);
 	}
 
 	/* ========== VIEWS ========== */
@@ -159,17 +138,13 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 		returns (
 			uint256,
 			uint256,
-			uint256,
-			uint256,
 			uint256
 		)
 	{
 		return (
 			totalSupply(), // totalSupply()
 			global_collateral_ratio, // global_collateral_ratio()
-			globalCollateralValue(eth_usd_price, eth_collat_price), // globalCollateralValue
-			minting_fee, // minting_fee()
-			redemption_fee // redemption_fee()
+			globalCollateralValue(eth_usd_price, eth_collat_price) // globalCollateralValue
 		);
 	}
 
@@ -180,9 +155,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 		for (uint256 i = 0; i < dei_pools_array.length; i++) {
 			// Exclude null addresses
 			if (dei_pools_array[i] != address(0)) {
-				total_collateral_value_d18 = total_collateral_value_d18.add(
-					DEIPool(dei_pools_array[i]).collatDollarBalance(eth_usd_price, eth_collat_price)
-				);
+				total_collateral_value_d18 = total_collateral_value_d18 + DEIPool(dei_pools_array[i]).collatDollarBalance(eth_usd_price, eth_collat_price);
 			}
 		}
 		return total_collateral_value_d18;
@@ -210,20 +183,20 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 
 		// Step increments are 0.25% (upon genesis, changable by setDEIStep())
 
-		if (dei_price_cur > price_target.add(price_band)) {
+		if (dei_price_cur > price_target + price_band) {
 			//decrease collateral ratio
 			if (global_collateral_ratio <= dei_step) {
 				//if within a step of 0, go to 0
 				global_collateral_ratio = 0;
 			} else {
-				global_collateral_ratio = global_collateral_ratio.sub(dei_step);
+				global_collateral_ratio = global_collateral_ratio - dei_step;
 			}
-		} else if (dei_price_cur < price_target.sub(price_band)) {
+		} else if (dei_price_cur < price_target - price_band) {
 			//increase collateral ratio
-			if (global_collateral_ratio.add(dei_step) >= 1000000) {
+			if (global_collateral_ratio + dei_step >= 1000000) {
 				global_collateral_ratio = 1000000; // cap collateral ratio at 1.000000
 			} else {
-				global_collateral_ratio = global_collateral_ratio.add(dei_step);
+				global_collateral_ratio = global_collateral_ratio + dei_step;
 			}
 		}
 
@@ -252,7 +225,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 	// Adds collateral addresses supported, such as tether and busd, must be ERC20
 	function addPool(address pool_address)
 		public
-		onlyByOwnerGovernanceOrController
+		onlyByTrusty
 	{
 		require(pool_address != address(0), "DEI::addPool: Zero address detected");
 
@@ -266,7 +239,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 	// Remove a pool
 	function removePool(address pool_address)
 		public
-		onlyByOwnerGovernanceOrController
+		onlyByTrusty
 	{
 		require(pool_address != address(0), "DEI::removePool: Zero address detected");
 
@@ -288,35 +261,16 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 	
 	function setOracle(address _oracle)
 		public
-		onlyByOwnerGovernanceOrController
+		onlyByTrusty
 	{
 		oracle = _oracle;
 
 		emit OracleSet(_oracle);
 	}
 
-
-	function setRedemptionFee(uint256 red_fee)
-		public
-		onlyByOwnerGovernanceOrController
-	{
-		redemption_fee = red_fee;
-
-		emit RedemptionFeeSet(red_fee);
-	}
-
-	function setMintingFee(uint256 min_fee)
-		public
-		onlyByOwnerGovernanceOrController
-	{
-		minting_fee = min_fee;
-
-		emit MintingFeeSet(min_fee);
-	}
-
 	function setDEIStep(uint256 _new_step)
 		public
-		onlyByOwnerGovernanceOrController
+		onlyByTrusty
 	{
 		dei_step = _new_step;
 
@@ -325,7 +279,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 
 	function setPriceTarget(uint256 _new_price_target)
 		public
-		onlyByOwnerGovernanceOrController
+		onlyByTrusty
 	{
 		price_target = _new_price_target;
 
@@ -334,7 +288,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 
 	function setRefreshCooldown(uint256 _new_cooldown)
 		public
-		onlyByOwnerGovernanceOrController
+		onlyByTrusty
 	{
 		refresh_cooldown = _new_cooldown;
 
@@ -343,7 +297,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 
 	function setDEUSAddress(address _deus_address)
 		public
-		onlyByOwnerGovernanceOrController
+		onlyByTrusty
 	{
 		require(_deus_address != address(0), "DEI::setDEUSAddress: Zero address detected");
 
@@ -354,7 +308,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 
 	function setPriceBand(uint256 _price_band)
 		external
-		onlyByOwnerGovernanceOrController
+		onlyByTrusty
 	{
 		price_band = _price_band;
 
@@ -381,8 +335,6 @@ contract DEIStablecoin is ERC20Custom, AccessControl, Owned {
 	event CollateralRatioRefreshed(uint256 global_collateral_ratio);
 	event PoolAdded(address pool_address);
 	event PoolRemoved(address pool_address);
-	event RedemptionFeeSet(uint256 red_fee);
-	event MintingFeeSet(uint256 min_fee);
 	event DEIStepSet(uint256 new_step);
 	event PriceTargetSet(uint256 new_price_target);
 	event RefreshCooldownSet(uint256 new_cooldown);
