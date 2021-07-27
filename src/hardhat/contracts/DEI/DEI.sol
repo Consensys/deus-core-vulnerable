@@ -40,17 +40,12 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 		DEI,
 		DEUS
 	}
-	uint8 private eth_usd_pricer_decimals;
 	address public oracle;
 	string public symbol;
 	string public name;
 	uint8 public constant decimals = 18;
 	address public creator_address;
 	address public deus_address;
-	address public dei_eth_oracle_address;
-	address public deus_eth_oracle_address;
-	address public weth_address;
-	address public eth_usd_consumer_address;
 	uint256 public constant genesis_supply = 2000000e18; // 2M DEI (only for testing, genesis supply will be 5k on Mainnet). This is to help with establishing the Uniswap pools, as they need liquidity
 
 	// The addresses in this array are added by the oracle and these contracts are able to mint DEI
@@ -63,8 +58,6 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 	uint256 private constant PRICE_PRECISION = 1e6;
 
 	uint256 public global_collateral_ratio; // 6 decimals of precision, e.g. 924102 = 0.924102
-	uint256 public redemption_fee; // 6 decimals of precision, divide by 1000000 in calculations for fee
-	uint256 public minting_fee; // 6 decimals of precision, divide by 1000000 in calculations for fee
 	uint256 public dei_step; // Amount to change the collateralization ratio by upon refreshCollateralRatio()
 	uint256 public refresh_cooldown; // Seconds to wait before being able to run refreshCollateralRatio() again
 	uint256 public price_target; // The price of DEI at which the collateral ratio will respond to; this value is only used for the collateral ratio mechanism and not for minting and redeeming which are hardcoded at $1
@@ -145,17 +138,13 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 		returns (
 			uint256,
 			uint256,
-			uint256,
-			uint256,
 			uint256
 		)
 	{
 		return (
 			totalSupply(), // totalSupply()
 			global_collateral_ratio, // global_collateral_ratio()
-			globalCollateralValue(eth_usd_price, eth_collat_price), // globalCollateralValue
-			minting_fee, // minting_fee()
-			redemption_fee // redemption_fee()
+			globalCollateralValue(eth_usd_price, eth_collat_price) // globalCollateralValue
 		);
 	}
 
@@ -279,25 +268,6 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 		emit OracleSet(_oracle);
 	}
 
-
-	function setRedemptionFee(uint256 red_fee)
-		public
-		onlyByTrusty
-	{
-		redemption_fee = red_fee;
-
-		emit RedemptionFeeSet(red_fee);
-	}
-
-	function setMintingFee(uint256 min_fee)
-		public
-		onlyByTrusty
-	{
-		minting_fee = min_fee;
-
-		emit MintingFeeSet(min_fee);
-	}
-
 	function setDEIStep(uint256 _new_step)
 		public
 		onlyByTrusty
@@ -365,8 +335,6 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 	event CollateralRatioRefreshed(uint256 global_collateral_ratio);
 	event PoolAdded(address pool_address);
 	event PoolRemoved(address pool_address);
-	event RedemptionFeeSet(uint256 red_fee);
-	event MintingFeeSet(uint256 min_fee);
 	event DEIStepSet(uint256 new_step);
 	event PriceTargetSet(uint256 new_price_target);
 	event RefreshCooldownSet(uint256 new_cooldown);
