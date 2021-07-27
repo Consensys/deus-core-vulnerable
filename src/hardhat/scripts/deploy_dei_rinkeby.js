@@ -68,18 +68,18 @@ async function main() {
 	console.log("Pool HUSD deployed to:", poolHUSD.address);
 
 	// Parameters
-	dei.addPool(poolHUSD.address)
-	dei.setOracle(oracle.address)
-	dei.setDEIStep(10000)
-	dei.setPriceTarget(1000000)
-	dei.setRefreshCooldown(30)
-	dei.setDEUSAddress(deus.address)
-	dei.setPriceBand(5000)
+	await dei.addPool(poolHUSD.address)
+	await dei.setOracle(oracle.address)
+	await dei.setDEIStep(10000)
+	await dei.setPriceTarget(1000000)
+	await dei.setRefreshCooldown(30)
+	await dei.setDEUSAddress(deus.address)
+	await dei.setPriceBand(5000)
 
-	deus.setDEIAddress(dei.address)
+	await deus.setDEIAddress(dei.address)
 	
 	// uint256 new_ceiling, uint256 new_bonus_rate, uint256 new_redemption_delay, uint256 new_mint_fee, uint256 new_redeem_fee, uint256 new_buyback_fee, uint256 new_recollat_fee
-	poolHUSD.setPoolParameters(HUSDPoolCeiling, 0, 1, 1000, 1000, 1000, 1000)
+	await poolHUSD.setPoolParameters(HUSDPoolCeiling, 0, 1, 1000, 1000, 1000, 1000)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
