@@ -127,7 +127,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 		view
 		returns (bool)
 	{
-		return Oracle(oracle).verify(sighash, sigs);
+		return Oracle(oracle).verify(sighash.toEthSignedMessageHash(), sigs);
 	}
 
 	// This is needed to avoid costly repeat calls to different getter functions
