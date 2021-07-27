@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity >=0.6.11;
+pragma solidity ^0.8.0;
 
 // =================================================================================================================
 //  _|_|_|    _|_|_|_|  _|    _|    _|_|_|      _|_|_|_|  _|                                                       |
@@ -26,12 +26,9 @@ import "../Common/Context.sol";
 import "../ERC20/ERC20Custom.sol";
 import "../ERC20/IERC20.sol";
 import "../DEI/DEI.sol";
-import "../Staking/Owned.sol";
-import "../Math/SafeMath.sol";
 import "../Governance/AccessControl.sol";
 
-contract DEUSToken is ERC20Custom, AccessControl, Owned {
-    using SafeMath for uint256;
+contract DEUSToken is ERC20Custom, AccessControl {
 
     /* ========== STATE VARIABLES ========== */
 
@@ -58,18 +55,20 @@ contract DEUSToken is ERC20Custom, AccessControl, Owned {
     // The number of checkpoints for each account
     mapping(address => uint32) public numCheckpoints;
 
+    bytes32 public constant TRUSTY_ROLE = keccak256("TRUSTY_ROLE");
+
     /* ========== MODIFIERS ========== */
 
     modifier onlyPools() {
         require(
             DEI.dei_pools(msg.sender) == true,
-            "Only dei pools can mint new DEI"
+            "DEUS: Only dei pools can mint new DEI"
         );
         _;
     }
 
-    modifier onlyByOwnerOrGovernance() {
-        require(msg.sender == owner, "You are not an owner");
+    modifier onlyByTrusty() {
+        require(hasRole(TRUSTY_ROLE, msg.sender), "DEUS: You are not trusty");
         _;
     }
 
@@ -78,12 +77,14 @@ contract DEUSToken is ERC20Custom, AccessControl, Owned {
     constructor(
         string memory _name,
         string memory _symbol,
-        address _creator_address
-    ) public Owned(_creator_address){
+        address _creator_address,
+        address _trusty_address
+    ) public {
         require(_creator_address != address(0), "DEUS::constructor: zero address detected");  
         name = _name;
         symbol = _symbol;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        grantRole(TRUSTY_ROLE, _trusty_address);
         _mint(_creator_address, genesis_supply);
 
         // Do a checkpoint for the owner
@@ -94,9 +95,9 @@ contract DEUSToken is ERC20Custom, AccessControl, Owned {
 
     function setDEIAddress(address dei_contract_address)
         external
-        onlyByOwnerOrGovernance
+        onlyByTrusty
     {
-        require(dei_contract_address != address(0), "Zero address detected");
+        require(dei_contract_address != address(0), "DEUS::setDEIAddress: Zero address detected");
 
         DEI = DEIStablecoin(dei_contract_address);
 
@@ -150,7 +151,7 @@ contract DEUSToken is ERC20Custom, AccessControl, Owned {
         emit DEUSBurned(b_address, address(this), b_amount);
     }
 
-    function toggleVotes() external onlyByOwnerOrGovernance {
+    function toggleVotes() external onlyByTrusty {
         trackingVotes = !trackingVotes;
     }
 
@@ -185,10 +186,7 @@ contract DEUSToken is ERC20Custom, AccessControl, Owned {
         _approve(
             sender,
             _msgSender(),
-            _allowances[sender][_msgSender()].sub(
-                amount,
-                "DEUS::transferFrom: transfer amount exceeds allowance"
-            )
+            _allowances[sender][_msgSender()] - amount
         );
 
         return true;

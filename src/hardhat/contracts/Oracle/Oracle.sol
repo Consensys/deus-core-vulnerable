@@ -15,9 +15,10 @@ contract Oracle is AccessControl {
 
     event MinimumRequiredSignatureSet(uint256 minimumRequiredSignature);
 
-    constructor(address _admin, uint256 _minimumRequiredSignature) {
+    constructor(address _admin, uint256 _minimumRequiredSignature, address _trusty_address) {
         require(_admin != address(0), "ORACLE::constructor: zero address detected.");
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
+        grantRole(TRUSTY_ROLE, _trusty_address);
         minimumRequiredSignature = _minimumRequiredSignature;
     }
 
