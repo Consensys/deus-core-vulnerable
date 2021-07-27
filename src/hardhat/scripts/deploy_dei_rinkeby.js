@@ -30,13 +30,7 @@ async function main() {
 	await oracle.deployed();
 
 	console.log("ORACLE deployed to:", oracle.address);
-
-	await hre.run("verify:verify", {
-		address: oracle.address,
-		constructorArguments: [creatorAddress, minimumRequiredSignature, trustyAddress],
-	  });
-	  
-
+	
 	// DEI
 	const deiContract = await hre.ethers.getContractFactory("DEIStablecoin");
 	// string memory _name, string memory _symbol, address _creator_address, address _trusty_address
@@ -45,54 +39,33 @@ async function main() {
 	await dei.deployed();
 
 	console.log("DEI deployed to:", dei.address);
-
-	await hre.run("verify:verify", {
-		address: dei.address,
-		constructorArguments: ["Dei", "DEI", creatorAddress, trustyAddress],
-	  });
-
 	// DEUS
 	const deusContract = await hre.ethers.getContractFactory("DEUSToken")
 	// string memory _name, string memory _symbol, address _creator_address, address _trusty_address
 	const deus = await deusContract.deploy("Deus", "DEUS", creatorAddress, trustyAddress); 
-
+	
 	await deus.deployed();
-
+	
 	console.log("DEUS deployed to:", deus.address);
-
-	await hre.run("verify:verify", {
-		address: deus.address,
-		constructorArguments: ["Deus", "DEUS", creatorAddress, trustyAddress],
-	  });
-
+	
 	// DEI POOL Librariy
 	const deiPoolLibraryContract = await hre.ethers.getContractFactory("DEIPoolLibrary")
 	// empty
 	const deiPoolLibrary = await deiPoolLibraryContract.deploy();               
-
+	
 	await deiPoolLibrary.deployed();
-
+	
 	console.log("DEI Pool Library deployed to:", deiPoolLibrary.address);
-
-	await hre.run("verify:verify", {
-		address: deiPoolLibrary.address,
-		constructorArguments: [],
-	  });
-
+	
 	// POOl HUSD
 	const poolHUSDContract = await hre.ethers.getContractFactory("Pool_HUSD")
 	// address _dei_contract_address, address _deus_contract_address, address _collateral_address, address _trusty_address, address _admin_address, uint256 _pool_ceiling, address _library
 	const poolHUSD = await poolHUSDContract.deploy(dei.address, deus.address, collateralAddress, trustyAddress, creatorAddress, HUSDPoolCeiling, deiPoolLibrary.address);
-
+	
 	await poolHUSD.deployed();
-
+	
 	console.log("Pool HUSD deployed to:", poolHUSD.address);
-
-	await hre.run("verify:verify", {
-		address: poolHUSD.address,
-		constructorArguments: [dei.address, deus.address, collateralAddress, trustyAddress, creatorAddress, HUSDPoolCeiling, deiPoolLibrary.address],
-	  });
-
+	
 	// Parameters
 	await dei.addPool(poolHUSD.address)
 	await dei.setOracle(oracle.address)
@@ -101,18 +74,44 @@ async function main() {
 	await dei.setRefreshCooldown(30)
 	await dei.setDEUSAddress(deus.address)
 	await dei.setPriceBand(5000)
-
+	
 	await deus.setDEIAddress(dei.address)
 	
 	// uint256 new_ceiling, uint256 new_bonus_rate, uint256 new_redemption_delay, uint256 new_mint_fee, uint256 new_redeem_fee, uint256 new_buyback_fee, uint256 new_recollat_fee
 	await poolHUSD.setPoolParameters(HUSDPoolCeiling, 0, 1, 1000, 1000, 1000, 1000)
+	
+	await hre.run("verify:verify", {
+		address: oracle.address,
+		constructorArguments: [creatorAddress, minimumRequiredSignature, trustyAddress],
+	});
+	
+	await hre.run("verify:verify", {
+		address: dei.address,
+		constructorArguments: ["Dei", "DEI", creatorAddress, trustyAddress],
+	});
+	
+	await hre.run("verify:verify", {
+		address: deus.address,
+		constructorArguments: ["Deus", "DEUS", creatorAddress, trustyAddress],
+	});
+	
+	await hre.run("verify:verify", {
+		address: deiPoolLibrary.address,
+		constructorArguments: [],
+	});
+	
+	await hre.run("verify:verify", {
+		address: poolHUSD.address,
+		constructorArguments: [dei.address, deus.address, collateralAddress, trustyAddress, creatorAddress, HUSDPoolCeiling, deiPoolLibrary.address],
+	});
 }
+
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 main()
-	.then(() => process.exit(0))
-	.catch(error => {
-		console.error(error);
+.then(() => process.exit(0))
+.catch(error => {
+	console.error(error);
 		process.exit(1);
 	});

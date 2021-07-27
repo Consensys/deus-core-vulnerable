@@ -161,6 +161,14 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 		return total_collateral_value_d18;
 	}
 
+	function getChainID() public view returns (uint256) {
+        uint256 id;
+        assembly {
+            id := chainid()
+        }
+        return id;
+    }
+
 	/* ========== PUBLIC FUNCTIONS ========== */
 
 	// There needs to be a time interval that this can be called. Otherwise it can be called multiple times per expansion.
@@ -173,7 +181,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 		);
 
 		require(expireBlock >= block.number, "DEI::refreshCollateralRatio: signature is expired.");
-		bytes32 sighash = keccak256(abi.encodePacked(address(this), dei_price_cur, expireBlock));
+		bytes32 sighash = keccak256(abi.encodePacked(address(this), dei_price_cur, expireBlock, getChainID()));
 		require(verify_price(sighash, sigs), "DEI::refreshCollateralRatio: invalid signatures");
 
 		require(
