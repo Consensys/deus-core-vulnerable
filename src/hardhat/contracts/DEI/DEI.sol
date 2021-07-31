@@ -132,7 +132,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 
 	// This is needed to avoid costly repeat calls to different getter functions
 	// It is cheaper gas-wise to just dump everything and only use some of the info
-	function dei_info(uint256 eth_usd_price, uint256 eth_collat_price)
+	function dei_info(uint256 collat_usd_price)
 		public
 		view
 		returns (
@@ -144,18 +144,18 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 		return (
 			totalSupply(), // totalSupply()
 			global_collateral_ratio, // global_collateral_ratio()
-			globalCollateralValue(eth_usd_price, eth_collat_price) // globalCollateralValue
+			globalCollateralValue(collat_usd_price) // globalCollateralValue
 		);
 	}
 
 	// Iterate through all dei pools and calculate all value of collateral in all pools globally
-	function globalCollateralValue(uint256 eth_usd_price, uint256 eth_collat_price) public view returns (uint256) {
+	function globalCollateralValue(uint256 collat_usd_price) public view returns (uint256) {
 		uint256 total_collateral_value_d18 = 0;
 
 		for (uint256 i = 0; i < dei_pools_array.length; i++) {
 			// Exclude null addresses
 			if (dei_pools_array[i] != address(0)) {
-				total_collateral_value_d18 = total_collateral_value_d18 + DEIPool(dei_pools_array[i]).collatDollarBalance(eth_usd_price, eth_collat_price);
+				total_collateral_value_d18 = total_collateral_value_d18 + DEIPool(dei_pools_array[i]).collatDollarBalance(collat_usd_price);
 			}
 		}
 		return total_collateral_value_d18;

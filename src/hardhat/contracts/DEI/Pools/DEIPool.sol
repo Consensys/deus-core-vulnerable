@@ -32,8 +32,6 @@ import "./DEIPoolLibrary.sol";
 contract DEIPool is AccessControl {
 
     struct RecollateralizeDEI {
-        uint256 eth_usd_price;
-		uint256 eth_collat_price;
 		uint256 collateral_price;
 		uint256 deus_current_price;
 		uint256 expireBlock;
@@ -49,11 +47,6 @@ contract DEIPool is AccessControl {
 
 	address private dei_contract_address;
 	address private deus_contract_address;
-
-	// IDEUSToken private deus;
-	// IDEIStablecoin private DEI;
-
-	address private weth_address;
 
 	uint256 public minting_fee;
 	uint256 public redemption_fee;
@@ -133,7 +126,7 @@ contract DEIPool is AccessControl {
 		address _admin_address,
 		uint256 _pool_ceiling,
 		address _library
-	) public {
+	) {
 		require(
 			(_dei_contract_address != address(0)) &&
 				(_deus_contract_address != address(0)) &&
@@ -144,8 +137,6 @@ contract DEIPool is AccessControl {
 			"POOL::Zero address detected"
 		);
 		poolLibrary = DEIPoolLibrary(_library);
-		// DEI = IDEIStablecoin(_dei_contract_address);
-		// deus = IDEUSToken(_deus_contract_address);
 		dei_contract_address = _dei_contract_address;
 		deus_contract_address = _deus_contract_address;
 		collateral_address = _collateral_address;
@@ -165,21 +156,19 @@ contract DEIPool is AccessControl {
 	/* ========== VIEWS ========== */
 
 	// Returns dollar value of collateral held in this DEI pool
-	function collatDollarBalance(uint256 eth_usd_price, uint256 eth_collat_price) public view returns (uint256) {
+	function collatDollarBalance(uint256 collat_usd_price) public view returns (uint256) {
 		if (collateralPricePaused == true) {
 			return ((collateral_token.balanceOf(address(this)) - unclaimedPoolCollateral) * (10**missing_decimals) * (pausedPrice)) / (PRICE_PRECISION);
 		} else {
-
-			uint256 collat_usd_price = (eth_usd_price * PRICE_PRECISION) / eth_collat_price;
 			return ((collateral_token.balanceOf(address(this)) - (unclaimedPoolCollateral)) * (10**missing_decimals) * collat_usd_price) / (PRICE_PRECISION);
 		}
 	}
 
 	// Returns the value of excess collateral held in this DEI pool, compared to what is needed to maintain the global collateral ratio
-	function availableExcessCollatDV(uint256 eth_usd_price, uint256 eth_collat_price) public view returns (uint256) {
+	function availableExcessCollatDV(uint256 collat_usd_price) public view returns (uint256) {
 		uint256 total_supply = IDEIStablecoin(dei_contract_address).totalSupply();
 		uint256 global_collateral_ratio = IDEIStablecoin(dei_contract_address).global_collateral_ratio();
-		uint256 global_collat_value = IDEIStablecoin(dei_contract_address).globalCollateralValue(eth_usd_price, eth_collat_price);
+		uint256 global_collat_value = IDEIStablecoin(dei_contract_address).globalCollateralValue(collat_usd_price);
 
 		if (global_collateral_ratio > COLLATERAL_RATIO_PRECISION)
 			global_collateral_ratio = COLLATERAL_RATIO_PRECISION; // Handles an overcollateralized contract with CR > 1
@@ -509,8 +498,6 @@ contract DEIPool is AccessControl {
 
 		require(inputs.expireBlock >= block.number, "DEI::recollateralizeDEI: signature is expired.");
 		bytes32 sighash = keccak256(abi.encodePacked(
-                                        inputs.eth_usd_price, 
-                                        inputs.eth_collat_price, 
                                         collateral_address, 
                                         inputs.collateral_price, 
                                         deus_contract_address, 
@@ -524,7 +511,7 @@ contract DEIPool is AccessControl {
 
 		uint256 dei_total_supply = IDEIStablecoin(dei_contract_address).totalSupply();
 		uint256 global_collateral_ratio = IDEIStablecoin(dei_contract_address).global_collateral_ratio();
-		uint256 global_collat_value = IDEIStablecoin(dei_contract_address).globalCollateralValue(inputs.eth_usd_price, inputs.eth_collat_price);
+		uint256 global_collat_value = IDEIStablecoin(dei_contract_address).globalCollateralValue(inputs.collateral_price);
 
 		(uint256 collateral_units, uint256 amount_to_recollat) = poolLibrary
 		.calcRecollateralizeDEIInner(
@@ -552,8 +539,6 @@ contract DEIPool is AccessControl {
 	// Function can be called by an DEUS holder to have the protocol buy back DEUS with excess collateral value from a desired collateral pool
 	// This can also happen if the collateral ratio > 1
 	function buyBackDEUS(
-		uint256 eth_usd_price,
-		uint256 eth_collat_price,
 		uint256 collateral_price,
 		uint256 deus_current_price,
 		uint256 expireBlock,
@@ -563,11 +548,17 @@ contract DEIPool is AccessControl {
 	) external {
 		require(buyBackPaused == false, "POOL::buyBackDEUS: Buyback is paused");
 		require(expireBlock >= block.number, "DEI::buyBackDEUS: signature is expired.");
-		bytes32 sighash = keccak256(abi.encodePacked(eth_usd_price, eth_collat_price, collateral_address, collateral_price, deus_contract_address, deus_current_price, expireBlock, getChainID()));
+		bytes32 sighash = keccak256(abi.encodePacked(
+										collateral_address,
+										collateral_price,
+										deus_contract_address,
+										deus_current_price,
+										expireBlock,
+										getChainID()));
 		require(IDEIStablecoin(dei_contract_address).verify_price(sighash, sigs), "POOL::buyBackDEUS: invalid signatures");
 
 		DEIPoolLibrary.BuybackDEUS_Params memory input_params = DEIPoolLibrary.BuybackDEUS_Params(
-													availableExcessCollatDV(eth_usd_price, eth_collat_price),
+													availableExcessCollatDV(collateral_price),
 													deus_current_price,
 													getCollateralPrice(collateral_price),
 													DEUS_amount
