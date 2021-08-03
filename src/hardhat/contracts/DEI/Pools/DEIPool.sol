@@ -32,12 +32,11 @@ import "./DEIPoolLibrary.sol";
 contract DEIPool is AccessControl {
 
     struct RecollateralizeDEI {
+		uint256 collateral_amount;
 		uint256 collateral_price;
 		uint256 deus_current_price;
 		uint256 expireBlock;
 		bytes[] sigs;
-		uint256 collateral_amount;
-		uint256 DEUS_out_min;
     }
 
 	/* ========== STATE VARIABLES ========== */
@@ -199,7 +198,7 @@ contract DEIPool is AccessControl {
 
 
 	// We separate out the 1t1, fractional and algorithmic minting functions for gas efficiency
-	function mint1t1DEI(uint256 collateral_amount, uint256 DEI_out_min, uint256 collateral_price, uint256 expireBlock, bytes[] calldata sigs)
+	function mint1t1DEI(uint256 collateral_amount, uint256 collateral_price, uint256 expireBlock, bytes[] calldata sigs)
 		external
 		notMintPaused
 	{
@@ -225,7 +224,6 @@ contract DEIPool is AccessControl {
 		); //1 DEI for each $1 worth of collateral
 
 		dei_amount_d18 = (dei_amount_d18 * (uint256(1e6) - minting_fee)) / (1e6); //remove precision at the end
-		require(DEI_out_min <= dei_amount_d18, "Slippage limit reached");
 
 		TransferHelper.safeTransferFrom(
 			address(collateral_token),
@@ -238,11 +236,10 @@ contract DEIPool is AccessControl {
 
 	// 0% collateral-backed
 	function mintAlgorithmicDEI(
+		uint256 deus_amount_d18,
 		uint256 deus_current_price,
 		uint256 expireBlock,
-		bytes[] calldata sigs,
-		uint256 deus_amount_d18,
-		uint256 DEI_out_min
+		bytes[] calldata sigs
 	) external notMintPaused {
 		// uint256 deus_price = DEI.deus_price();
 		require(expireBlock >= block.number, "POOL::mintAlgorithmicDEI: signature is expired.");
@@ -260,7 +257,6 @@ contract DEIPool is AccessControl {
 		);
 
 		dei_amount_d18 = (dei_amount_d18 * (uint256(1e6) - (minting_fee))) / (1e6);
-		require(DEI_out_min <= dei_amount_d18, "Slippage limit reached");
 
 		IDEUSToken(deus_contract_address).pool_burn_from(msg.sender, deus_amount_d18);
 		IDEIStablecoin(dei_contract_address).pool_mint(msg.sender, dei_amount_d18);
@@ -269,13 +265,12 @@ contract DEIPool is AccessControl {
 	// Will fail if fully collateralized or fully algorithmic
 	// > 0% and < 100% collateral-backed
 	function mintFractionalDEI(
+		uint256 collateral_amount,
+		uint256 deus_amount,
 		uint256 collateral_price,
 		uint256 deus_current_price,
 		uint256 expireBlock,
-		bytes[] calldata sigs,
-		uint256 collateral_amount,
-		uint256 deus_amount,
-		uint256 DEI_out_min
+		bytes[] calldata sigs
 	) external notMintPaused {
 		// uint256 deus_price = DEI.deus_price();
 		require(expireBlock >= block.number, "POOL::mintFractionalDEI: signature is expired.");
@@ -293,21 +288,24 @@ contract DEIPool is AccessControl {
 			collateral_token.balanceOf(address(this)) - unclaimedPoolCollateral + collateral_amount <= pool_ceiling,
 			"Pool ceiling reached, no more DEI can be minted with this collateral"
 		);
-
-		uint256 collateral_amount_d18 = collateral_amount *
-			(10**missing_decimals);
-		DEIPoolLibrary.MintFF_Params memory input_params = DEIPoolLibrary.MintFF_Params(
-												deus_current_price,
-												getCollateralPrice(collateral_price),
-												deus_amount,
-												collateral_amount_d18,
-												global_collateral_ratio
-											);
+		DEIPoolLibrary.MintFF_Params memory input_params;
+		
+		// Blocking is just for solving stack depth problem
+		{
+			uint256 collateral_amount_d18 = collateral_amount *
+				(10**missing_decimals);
+			input_params = DEIPoolLibrary.MintFF_Params(
+													deus_current_price,
+													getCollateralPrice(collateral_price),
+													deus_amount,
+													collateral_amount_d18,
+													global_collateral_ratio
+												);
+		}						
 
 		(uint256 mint_amount, uint256 deus_needed) = poolLibrary.calcMintFractionalDEI(input_params);
 
 		mint_amount = (mint_amount * (uint256(1e6) - minting_fee)) / (1e6);
-		require(DEI_out_min <= mint_amount, "Slippage limit reached");
 		require(deus_needed <= deus_amount, "Not enough DEUS inputted");
 
 		IDEUSToken(deus_contract_address).pool_burn_from(msg.sender, deus_needed);
@@ -321,7 +319,7 @@ contract DEIPool is AccessControl {
 	}
 
 	// Redeem collateral. 100% collateral-backed
-	function redeem1t1DEI(uint256 DEI_amount, uint256 COLLATERAL_out_min, uint256 collateral_price, uint256 expireBlock, bytes[] calldata sigs)
+	function redeem1t1DEI(uint256 DEI_amount, uint256 collateral_price, uint256 expireBlock, bytes[] calldata sigs)
 		external
 		notRedeemPaused
 	{
@@ -346,10 +344,6 @@ contract DEIPool is AccessControl {
 			collateral_needed <= collateral_token.balanceOf(address(this)) - unclaimedPoolCollateral,
 			"Not enough collateral in pool"
 		);
-		require(
-			COLLATERAL_out_min <= collateral_needed,
-			"Slippage limit reached"
-		);
 
 		redeemCollateralBalances[msg.sender] = redeemCollateralBalances[msg.sender] + collateral_needed;
 		unclaimedPoolCollateral = unclaimedPoolCollateral + collateral_needed;
@@ -362,13 +356,11 @@ contract DEIPool is AccessControl {
 	// Will fail if fully collateralized or algorithmic
 	// Redeem DEI for collateral and DEUS. > 0% and < 100% collateral-backed
 	function redeemFractionalDEI(
+		uint256 DEI_amount,
 		uint256 collateral_price, 
 		uint256 deus_current_price,
 		uint256 expireBlock,
-		bytes[] calldata sigs,
-		uint256 DEI_amount,
-		uint256 DEUS_out_min,
-		uint256 COLLATERAL_out_min
+		bytes[] calldata sigs
 	) external notRedeemPaused {
 		// uint256 deus_price = DEI.deus_price();
 		require(expireBlock >= block.number, "DEI::redeemFractionalDEI: signature is expired");
@@ -381,27 +373,26 @@ contract DEIPool is AccessControl {
 				global_collateral_ratio > 0,
 			"POOL::redeemFractionalDEI: Collateral ratio needs to be between .000001 and .999999"
 		);
-		uint256 col_price_usd = getCollateralPrice(collateral_price);
+		// Blocking is just for solving stack depth problem
+		uint256 deus_amount;
+		uint256 collateral_amount;
+		{
+			uint256 col_price_usd = getCollateralPrice(collateral_price);
 
-		uint256 DEI_amount_post_fee = (DEI_amount * (uint256(1e6) - redemption_fee)) / (PRICE_PRECISION);
+			uint256 DEI_amount_post_fee = (DEI_amount * (uint256(1e6) - redemption_fee)) / (PRICE_PRECISION);
 
-		uint256 deus_dollar_value_d18 = DEI_amount_post_fee - ((DEI_amount_post_fee * global_collateral_ratio) / (PRICE_PRECISION));
-		uint256 deus_amount = deus_dollar_value_d18 * (PRICE_PRECISION) / (deus_current_price);
+			uint256 deus_dollar_value_d18 = DEI_amount_post_fee - ((DEI_amount_post_fee * global_collateral_ratio) / (PRICE_PRECISION));
+			deus_amount = deus_dollar_value_d18 * (PRICE_PRECISION) / (deus_current_price);
 
-		// Need to adjust for decimals of collateral
-		uint256 DEI_amount_precision = DEI_amount_post_fee / (10**missing_decimals);
-		uint256 collateral_dollar_value = (DEI_amount_precision * global_collateral_ratio) / PRICE_PRECISION;
-		uint256 collateral_amount = (collateral_dollar_value * PRICE_PRECISION) / (col_price_usd);
-
+			// Need to adjust for decimals of collateral
+			uint256 DEI_amount_precision = DEI_amount_post_fee / (10**missing_decimals);
+			uint256 collateral_dollar_value = (DEI_amount_precision * global_collateral_ratio) / PRICE_PRECISION;
+			collateral_amount = (collateral_dollar_value * PRICE_PRECISION) / (col_price_usd);
+		}
 		require(
 			collateral_amount <= collateral_token.balanceOf(address(this)) - unclaimedPoolCollateral,
 			"Not enough collateral in pool"
 		);
-		require(
-			COLLATERAL_out_min <= collateral_amount,
-			"Slippage limit reached [collateral]"
-		);
-		require(DEUS_out_min <= deus_amount, "Slippage limit reached [DEUS]");
 
 		redeemCollateralBalances[msg.sender] = redeemCollateralBalances[msg.sender] + collateral_amount;
 		unclaimedPoolCollateral = unclaimedPoolCollateral + collateral_amount;
@@ -418,11 +409,10 @@ contract DEIPool is AccessControl {
 
 	// Redeem DEI for DEUS. 0% collateral-backed
 	function redeemAlgorithmicDEI(
+		uint256 DEI_amount,
 		uint256 deus_current_price,
 		uint256 expireBlock,
-		bytes[] calldata sigs,
-		uint256 DEI_amount,
-		uint256 DEUS_out_min
+		bytes[] calldata sigs
 	) external notRedeemPaused {
 		require(expireBlock >= block.number, "DEI::redeemAlgorithmicDEI: signature is expired.");
 		bytes32 sighash = keccak256(abi.encodePacked(deus_contract_address, deus_current_price, expireBlock, getChainID()));
@@ -442,7 +432,6 @@ contract DEIPool is AccessControl {
 
 		lastRedeemed[msg.sender] = block.number;
 
-		require(DEUS_out_min <= deus_amount, "POOL::redeemAlgorithmicDEI: Slippage limit reached");
 		// Move all external functions to the end
 		IDEIStablecoin(dei_contract_address).pool_burn_from(msg.sender, DEI_amount);
 		IDEUSToken(deus_contract_address).pool_mint(address(this), deus_amount);
@@ -526,7 +515,6 @@ contract DEIPool is AccessControl {
 
 		uint256 deus_paid_back = (amount_to_recollat * (uint256(1e6) + bonus_rate - recollat_fee)) / inputs.deus_current_price;
 
-		require(inputs.DEUS_out_min <= deus_paid_back, "POOL::recollateralizeDEI: Slippage limit reached");
 		TransferHelper.safeTransferFrom(
 			address(collateral_token),
 			msg.sender,
@@ -539,12 +527,11 @@ contract DEIPool is AccessControl {
 	// Function can be called by an DEUS holder to have the protocol buy back DEUS with excess collateral value from a desired collateral pool
 	// This can also happen if the collateral ratio > 1
 	function buyBackDEUS(
+		uint256 DEUS_amount,
 		uint256 collateral_price,
 		uint256 deus_current_price,
 		uint256 expireBlock,
-		bytes[] calldata sigs,
-		uint256 DEUS_amount,
-		uint256 COLLATERAL_out_min
+		bytes[] calldata sigs
 	) external {
 		require(buyBackPaused == false, "POOL::buyBackDEUS: Buyback is paused");
 		require(expireBlock >= block.number, "DEI::buyBackDEUS: signature is expired.");
@@ -567,10 +554,6 @@ contract DEIPool is AccessControl {
 		uint256 collateral_equivalent_d18 = (poolLibrary.calcBuyBackDEUS(input_params) * (uint256(1e6) - buyback_fee)) / (1e6);
 		uint256 collateral_precision = collateral_equivalent_d18 / (10**missing_decimals);
 
-		require(
-			COLLATERAL_out_min <= collateral_precision,
-			"POOL::buyBackDEUS: Slippage limit reached"
-		);
 		// Give the sender their desired collateral and burn the DEUS
 		IDEUSToken(deus_contract_address).pool_burn_from(msg.sender, DEUS_amount);
 		TransferHelper.safeTransfer(

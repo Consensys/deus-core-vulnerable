@@ -132,6 +132,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 
 	// This is needed to avoid costly repeat calls to different getter functions
 	// It is cheaper gas-wise to just dump everything and only use some of the info
+	// FIXME
 	function dei_info(uint256 collat_usd_price)
 		public
 		view
