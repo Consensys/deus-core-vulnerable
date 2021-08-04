@@ -33,7 +33,8 @@ contract DEIPool is AccessControl {
 
     struct RecollateralizeDEI {
 		uint256 collateral_amount;
-		uint256 collateral_price;
+		uint256 pool_collateral_price;
+		uint256[] collateral_price;
 		uint256 deus_current_price;
 		uint256 expireBlock;
 		bytes[] sigs;
@@ -76,7 +77,7 @@ contract DEIPool is AccessControl {
 	uint256 public bonus_rate = 7500;
 
 	// Number of blocks to wait before being able to collectRedemption()
-	uint256 public redemption_delay = 1;
+	uint256 public redemption_delay = 2;
 
 	DEIPoolLibrary poolLibrary;
 
@@ -159,12 +160,12 @@ contract DEIPool is AccessControl {
 		if (collateralPricePaused == true) {
 			return ((collateral_token.balanceOf(address(this)) - unclaimedPoolCollateral) * (10**missing_decimals) * (pausedPrice)) / (PRICE_PRECISION);
 		} else {
-			return ((collateral_token.balanceOf(address(this)) - (unclaimedPoolCollateral)) * (10**missing_decimals) * collat_usd_price) / (PRICE_PRECISION);
+			return ((collateral_token.balanceOf(address(this)) - unclaimedPoolCollateral) * (10**missing_decimals) * collat_usd_price) / (PRICE_PRECISION);
 		}
 	}
 
 	// Returns the value of excess collateral held in this DEI pool, compared to what is needed to maintain the global collateral ratio
-	function availableExcessCollatDV(uint256 collat_usd_price) public view returns (uint256) {
+	function availableExcessCollatDV(uint256[] memory collat_usd_price) public view returns (uint256) {
 		uint256 total_supply = IDEIStablecoin(dei_contract_address).totalSupply();
 		uint256 global_collateral_ratio = IDEIStablecoin(dei_contract_address).global_collateral_ratio();
 		uint256 global_collat_value = IDEIStablecoin(dei_contract_address).globalCollateralValue(collat_usd_price);
@@ -202,8 +203,6 @@ contract DEIPool is AccessControl {
 		external
 		notMintPaused
 	{
-		uint256 collateral_amount_d18 = collateral_amount *
-			(10**missing_decimals);
 
 		require(
 			IDEIStablecoin(dei_contract_address).global_collateral_ratio() >= COLLATERAL_RATIO_MAX,
@@ -214,16 +213,17 @@ contract DEIPool is AccessControl {
 			"[Pool's Closed]: Ceiling reached"
 		);
 
-		require(expireBlock >= block.number, "POOL::mintAlgorithmicDEI: signature is expired.");
+		require(expireBlock >= block.number, "POOL::mint1t1DEI: signature is expired");
         bytes32 sighash = keccak256(abi.encodePacked(collateral_address, collateral_price, expireBlock, getChainID()));
 		require(IDEIStablecoin(dei_contract_address).verify_price(sighash, sigs), "POOL::mint1t1DEI: invalid signatures");
 
+		uint256 collateral_amount_d18 = collateral_amount * (10**missing_decimals);
 		uint256 dei_amount_d18 = poolLibrary.calcMint1t1DEI(
 			getCollateralPrice(collateral_price),
 			collateral_amount_d18
 		); //1 DEI for each $1 worth of collateral
 
-		dei_amount_d18 = (dei_amount_d18 * (uint256(1e6) - minting_fee)) / (1e6); //remove precision at the end
+		dei_amount_d18 = (dei_amount_d18 * (uint256(1e6) - minting_fee)) / 1e6; //remove precision at the end
 
 		TransferHelper.safeTransferFrom(
 			address(collateral_token),
@@ -241,15 +241,13 @@ contract DEIPool is AccessControl {
 		uint256 expireBlock,
 		bytes[] calldata sigs
 	) external notMintPaused {
-		// uint256 deus_price = DEI.deus_price();
-		require(expireBlock >= block.number, "POOL::mintAlgorithmicDEI: signature is expired.");
-		bytes32 sighash = keccak256(abi.encodePacked(deus_contract_address, deus_current_price, expireBlock, getChainID()));
-		require(IDEIStablecoin(dei_contract_address).verify_price(sighash, sigs), "POOL::mintAlgorithmicDEI: invalid signatures");
-
 		require(
 			IDEIStablecoin(dei_contract_address).global_collateral_ratio() == 0,
 			"Collateral ratio must be 0"
 		);
+		require(expireBlock >= block.number, "POOL::mintAlgorithmicDEI: signature is expired.");
+		bytes32 sighash = keccak256(abi.encodePacked(deus_contract_address, deus_current_price, expireBlock, getChainID()));
+		require(IDEIStablecoin(dei_contract_address).verify_price(sighash, sigs), "POOL::mintAlgorithmicDEI: invalid signatures");
 
 		uint256 dei_amount_d18 = poolLibrary.calcMintAlgorithmicDEI(
 			deus_current_price, // X DEUS / 1 USD
@@ -272,35 +270,32 @@ contract DEIPool is AccessControl {
 		uint256 expireBlock,
 		bytes[] calldata sigs
 	) external notMintPaused {
-		// uint256 deus_price = DEI.deus_price();
-		require(expireBlock >= block.number, "POOL::mintFractionalDEI: signature is expired.");
-		bytes32 sighash = keccak256(abi.encodePacked(collateral_address, collateral_price, deus_contract_address, deus_current_price, expireBlock, getChainID()));
-		require(IDEIStablecoin(dei_contract_address).verify_price(sighash, sigs), "POOL::mintFractionalDEI: invalid signatures");
-
 		uint256 global_collateral_ratio = IDEIStablecoin(dei_contract_address).global_collateral_ratio();
-
 		require(
-			global_collateral_ratio < COLLATERAL_RATIO_MAX &&
-				global_collateral_ratio > 0,
+			global_collateral_ratio < COLLATERAL_RATIO_MAX && global_collateral_ratio > 0,
 			"Collateral ratio needs to be between .000001 and .999999"
 		);
 		require(
 			collateral_token.balanceOf(address(this)) - unclaimedPoolCollateral + collateral_amount <= pool_ceiling,
 			"Pool ceiling reached, no more DEI can be minted with this collateral"
 		);
-		DEIPoolLibrary.MintFF_Params memory input_params;
-		
+
+		require(expireBlock >= block.number, "POOL::mintFractionalDEI: signature is expired.");
+		bytes32 sighash = keccak256(abi.encodePacked(collateral_address, collateral_price, deus_contract_address, deus_current_price, expireBlock, getChainID()));
+		require(IDEIStablecoin(dei_contract_address).verify_price(sighash, sigs), "POOL::mintFractionalDEI: invalid signatures");
+
+		DEIPoolLibrary.MintFD_Params memory input_params;
+
 		// Blocking is just for solving stack depth problem
 		{
-			uint256 collateral_amount_d18 = collateral_amount *
-				(10**missing_decimals);
-			input_params = DEIPoolLibrary.MintFF_Params(
-													deus_current_price,
-													getCollateralPrice(collateral_price),
-													deus_amount,
-													collateral_amount_d18,
-													global_collateral_ratio
-												);
+			uint256 collateral_amount_d18 = collateral_amount * (10**missing_decimals);
+			input_params = DEIPoolLibrary.MintFD_Params(
+											deus_current_price,
+											getCollateralPrice(collateral_price),
+											deus_amount,
+											collateral_amount_d18,
+											global_collateral_ratio
+										);
 		}						
 
 		(uint256 mint_amount, uint256 deus_needed) = poolLibrary.calcMintFractionalDEI(input_params);
@@ -362,17 +357,16 @@ contract DEIPool is AccessControl {
 		uint256 expireBlock,
 		bytes[] calldata sigs
 	) external notRedeemPaused {
-		// uint256 deus_price = DEI.deus_price();
+		uint256 global_collateral_ratio = IDEIStablecoin(dei_contract_address).global_collateral_ratio();
+		require(
+			global_collateral_ratio < COLLATERAL_RATIO_MAX && global_collateral_ratio > 0,
+			"POOL::redeemFractionalDEI: Collateral ratio needs to be between .000001 and .999999"
+		);
+
 		require(expireBlock >= block.number, "DEI::redeemFractionalDEI: signature is expired");
 		bytes32 sighash = keccak256(abi.encodePacked(collateral_address, collateral_price, deus_contract_address, deus_current_price, expireBlock, getChainID()));
 		require(IDEIStablecoin(dei_contract_address).verify_price(sighash, sigs), "POOL::redeemFractionalDEI: invalid signatures");
 
-		uint256 global_collateral_ratio = IDEIStablecoin(dei_contract_address).global_collateral_ratio();
-		require(
-			global_collateral_ratio < COLLATERAL_RATIO_MAX &&
-				global_collateral_ratio > 0,
-			"POOL::redeemFractionalDEI: Collateral ratio needs to be between .000001 and .999999"
-		);
 		// Blocking is just for solving stack depth problem
 		uint256 deus_amount;
 		uint256 collateral_amount;
@@ -414,16 +408,15 @@ contract DEIPool is AccessControl {
 		uint256 expireBlock,
 		bytes[] calldata sigs
 	) external notRedeemPaused {
+		require(IDEIStablecoin(dei_contract_address).global_collateral_ratio() == 0, "POOL::redeemAlgorithmicDEI: Collateral ratio must be 0");
+
 		require(expireBlock >= block.number, "DEI::redeemAlgorithmicDEI: signature is expired.");
 		bytes32 sighash = keccak256(abi.encodePacked(deus_contract_address, deus_current_price, expireBlock, getChainID()));
 		require(IDEIStablecoin(dei_contract_address).verify_price(sighash, sigs), "POOL::redeemAlgorithmicDEI: invalid signatures");
 
-		uint256 global_collateral_ratio = IDEIStablecoin(dei_contract_address).global_collateral_ratio();
-
-		require(global_collateral_ratio == 0, "POOL::redeemAlgorithmicDEI: Collateral ratio must be 0");
 		uint256 deus_dollar_value_d18 = DEI_amount;
 
-		deus_dollar_value_d18 = (deus_dollar_value_d18 * (uint256(1e6) - redemption_fee)) / (PRICE_PRECISION); //apply fees
+		deus_dollar_value_d18 = (deus_dollar_value_d18 * (uint256(1e6) - redemption_fee)) / 1e6; //apply fees
 
 		uint256 deus_amount = (deus_dollar_value_d18 * (PRICE_PRECISION)) / deus_current_price;
 
@@ -485,10 +478,10 @@ contract DEIPool is AccessControl {
 	function recollateralizeDEI(RecollateralizeDEI memory inputs) external {
 		require(recollateralizePaused == false, "POOL::recollateralizeDEI: Recollateralize is paused");
 
-		require(inputs.expireBlock >= block.number, "DEI::recollateralizeDEI: signature is expired.");
+		require(inputs.expireBlock >= block.number, "POOL::recollateralizeDEI: signature is expired.");
 		bytes32 sighash = keccak256(abi.encodePacked(
                                         collateral_address, 
-                                        inputs.collateral_price, 
+                                        inputs.collateral_price,
                                         deus_contract_address, 
                                         inputs.deus_current_price, 
                                         inputs.expireBlock,
@@ -502,14 +495,13 @@ contract DEIPool is AccessControl {
 		uint256 global_collateral_ratio = IDEIStablecoin(dei_contract_address).global_collateral_ratio();
 		uint256 global_collat_value = IDEIStablecoin(dei_contract_address).globalCollateralValue(inputs.collateral_price);
 
-		(uint256 collateral_units, uint256 amount_to_recollat) = poolLibrary
-		.calcRecollateralizeDEIInner(
-			collateral_amount_d18,
-			getCollateralPrice(inputs.collateral_price),
-			global_collat_value,
-			dei_total_supply,
-			global_collateral_ratio
-		);
+		(uint256 collateral_units, uint256 amount_to_recollat) = poolLibrary.calcRecollateralizeDEIInner(
+																				collateral_amount_d18,
+																				getCollateralPrice(inputs.collateral_price[inputs.collateral_price.length - 1]), // pool collateral price exist in last index
+																				global_collat_value,
+																				dei_total_supply,
+																				global_collateral_ratio
+																			);
 
 		uint256 collateral_units_precision = collateral_units / (10**missing_decimals);
 
@@ -528,7 +520,7 @@ contract DEIPool is AccessControl {
 	// This can also happen if the collateral ratio > 1
 	function buyBackDEUS(
 		uint256 DEUS_amount,
-		uint256 collateral_price,
+		uint256[] memory collateral_price,
 		uint256 deus_current_price,
 		uint256 expireBlock,
 		bytes[] calldata sigs
@@ -547,7 +539,7 @@ contract DEIPool is AccessControl {
 		DEIPoolLibrary.BuybackDEUS_Params memory input_params = DEIPoolLibrary.BuybackDEUS_Params(
 													availableExcessCollatDV(collateral_price),
 													deus_current_price,
-													getCollateralPrice(collateral_price),
+													getCollateralPrice(collateral_price[collateral_price.length - 1]), // pool collateral price exist in last index
 													DEUS_amount
 												);
 

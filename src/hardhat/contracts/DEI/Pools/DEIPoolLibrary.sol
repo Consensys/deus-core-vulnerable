@@ -10,7 +10,7 @@ contract DEIPoolLibrary {
 
     // ================ Structs ================
     // Needed to lower stack size
-    struct MintFF_Params {
+    struct MintFD_Params {
         uint256 deus_price_usd; 
         uint256 col_price_usd;
         uint256 deus_amount;
@@ -36,7 +36,7 @@ contract DEIPoolLibrary {
     }
 
     // Must be internal because of the struct
-    function calcMintFractionalDEI(MintFF_Params memory params) public pure returns (uint256, uint256) {
+    function calcMintFractionalDEI(MintFD_Params memory params) public pure returns (uint256, uint256) {
         // Since solidity truncates division, every division operation must be the last operation in the equation to ensure minimum error
         // The contract must check the proper ratio was sent to mint DEI. We do this by seeing the minimum mintable DEI based on each amount 
         uint256 deus_dollar_value_d18;
@@ -45,7 +45,7 @@ contract DEIPoolLibrary {
         // Scoping for stack concerns
         {    
             // USD amounts of the collateral and the DEUS
-            deus_dollar_value_d18 = (params.deus_amount * params.deus_price_usd) / (1e6);
+            deus_dollar_value_d18 = (params.deus_amount * params.deus_price_usd) / (1e6); // EXTRA
             c_dollar_value_d18 = (params.collateral_amount * params.col_price_usd) / (1e6);
 
         }

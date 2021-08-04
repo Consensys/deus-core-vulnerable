@@ -9,7 +9,7 @@ pragma solidity ^0.8.0;
 //  _|_|_|    _|_|_|_|    _|_|    _|_|_|        _|        _|  _|    _|    _|_|_|  _|    _|    _|_|_|    _|_|_|     |
 // =================================================================================================================
 // ========================= DEUS (DEUS) =========================
-// ====================================================================
+// ===============================================================
 // DEUS Finance: https://github.com/DeusFinance
 
 // Primary Author(s)
@@ -35,9 +35,8 @@ contract DEUSToken is ERC20Custom, AccessControl {
     string public symbol;
     string public name;
     uint8 public constant decimals = 18;
-    address public DEIStablecoinAdd;
 
-    uint256 public constant genesis_supply = 100000000e18; // 100M is printed upon genesis
+    uint256 public constant genesis_supply = 166670e18; // 166670 is printed upon genesis
 
     DEIStablecoin private DEI;
 
@@ -79,7 +78,7 @@ contract DEUSToken is ERC20Custom, AccessControl {
         string memory _symbol,
         address _creator_address,
         address _trusty_address
-    ) public {
+    ) {
         require(_creator_address != address(0), "DEUS::constructor: zero address detected");  
         name = _name;
         symbol = _symbol;
@@ -108,7 +107,7 @@ contract DEUSToken is ERC20Custom, AccessControl {
         _mint(to, amount);
     }
 
-    // This function is what other dei pools will call to mint new DEUS (similar to the DEI mint)
+    // This function is what other dei pools will call to mint new DEUS (similar to the DEI mint) and staking contracts can call this function too.
     function pool_mint(address m_address, uint256 m_amount) external onlyPools {
         if (trackingVotes) {
             uint32 srcRepNum = numCheckpoints[address(this)];
@@ -362,12 +361,9 @@ contract DEUSToken is ERC20Custom, AccessControl {
         uint256 previousBalance,
         uint256 newBalance
     );
-
     // Track DEUS burned
     event DEUSBurned(address indexed from, address indexed to, uint256 amount);
-
     // Track DEUS minted
     event DEUSMinted(address indexed from, address indexed to, uint256 amount);
-
     event DEIAddressSet(address addr);
 }
