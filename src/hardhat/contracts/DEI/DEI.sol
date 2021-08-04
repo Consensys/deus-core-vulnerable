@@ -46,7 +46,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 	uint8 public constant decimals = 18;
 	address public creator_address;
 	address public deus_address;
-	uint256 public constant genesis_supply = 2000000e18; // 2M DEI (only for testing, genesis supply will be 5k on Mainnet). This is to help with establishing the Uniswap pools, as they need liquidity
+	uint256 public constant genesis_supply = 10e18; // genesis supply is 10k on Mainnet. This is to help with establishing the Uniswap pools, as they need liquidity
 
 	// The addresses in this array are added by the oracle and these contracts are able to mint DEI
 	address[] public dei_pools_array;
@@ -63,7 +63,6 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 	uint256 public price_target; // The price of DEI at which the collateral ratio will respond to; this value is only used for the collateral ratio mechanism and not for minting and redeeming which are hardcoded at $1
 	uint256 public price_band; // The bound above and below the price target at which the refreshCollateralRatio() will not change the collateral ratio
 
-	address public DEFAULT_ADMIN_ADDRESS;
 	bytes32 public constant COLLATERAL_RATIO_PAUSER = keccak256("COLLATERAL_RATIO_PAUSER");
 	bytes32 public constant TRUSTY_ROLE = keccak256("TRUSTY_ROLE");
 	bool public collateral_ratio_paused = false;
@@ -108,12 +107,11 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 		symbol = _symbol;
 		creator_address = _creator_address;
 		_setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-		DEFAULT_ADMIN_ADDRESS = _msgSender();
 		_mint(creator_address, genesis_supply);
 		grantRole(COLLATERAL_RATIO_PAUSER, creator_address);
 		dei_step = 2500; // 6 decimals of precision, equal to 0.25%
 		global_collateral_ratio = 1000000; // Dei system starts off fully collateralized (6 decimals of precision)
-		refresh_cooldown = 3600; // Refresh cooldown period is set to 1 hour (3600 seconds) at genesis
+		refresh_cooldown = 300; // Refresh cooldown period is set to 5 minutes (300 seconds) at genesis
 		price_target = 1000000; // Collateral ratio will adjust according to the $1 price target at genesis
 		price_band = 5000; // Collateral ratio will not adjust if between $0.995 and $1.005 at genesis
 		grantRole(TRUSTY_ROLE, _trusty_address);
@@ -132,8 +130,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 
 	// This is needed to avoid costly repeat calls to different getter functions
 	// It is cheaper gas-wise to just dump everything and only use some of the info
-	// FIXME
-	function dei_info(uint256 collat_usd_price)
+	function dei_info(uint256[] memory collat_usd_price)
 		public
 		view
 		returns (
@@ -150,13 +147,13 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 	}
 
 	// Iterate through all dei pools and calculate all value of collateral in all pools globally
-	function globalCollateralValue(uint256 collat_usd_price) public view returns (uint256) {
+	function globalCollateralValue(uint256[] memory collat_usd_price) public view returns (uint256) {
 		uint256 total_collateral_value_d18 = 0;
 
 		for (uint256 i = 0; i < dei_pools_array.length; i++) {
 			// Exclude null addresses
 			if (dei_pools_array[i] != address(0)) {
-				total_collateral_value_d18 = total_collateral_value_d18 + DEIPool(dei_pools_array[i]).collatDollarBalance(collat_usd_price);
+				total_collateral_value_d18 = total_collateral_value_d18 + DEIPool(dei_pools_array[i]).collatDollarBalance(collat_usd_price[i]);
 			}
 		}
 		return total_collateral_value_d18;
@@ -175,14 +172,14 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 	// There needs to be a time interval that this can be called. Otherwise it can be called multiple times per expansion.
 	uint256 public last_call_time; // Last time the refreshCollateralRatio function was called
 
-	function refreshCollateralRatio(uint256 dei_price_cur, uint256 expireBlock, bytes[] calldata sigs) public {
+	function refreshCollateralRatio(uint256 dei_price_cur, uint256 expire_block, bytes[] calldata sigs) public {
 		require(
 			collateral_ratio_paused == false,
 			"DEI::refreshCollateralRatio: Collateral Ratio has been paused"
 		);
 
-		require(expireBlock >= block.number, "DEI::refreshCollateralRatio: signature is expired.");
-		bytes32 sighash = keccak256(abi.encodePacked(address(this), dei_price_cur, expireBlock, getChainID()));
+		require(expire_block >= block.number, "DEI::refreshCollateralRatio: signature is expired.");
+		bytes32 sighash = keccak256(abi.encodePacked(address(this), dei_price_cur, expire_block, getChainID()));
 		require(verify_price(sighash, sigs), "DEI::refreshCollateralRatio: invalid signatures");
 
 		require(
@@ -237,8 +234,8 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 		onlyByTrusty
 	{
 		require(pool_address != address(0), "DEI::addPool: Zero address detected");
-
 		require(dei_pools[pool_address] == false, "DEI::addPool: Address already exists");
+
 		dei_pools[pool_address] = true;
 		dei_pools_array.push(pool_address);
 
@@ -337,10 +334,8 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 
 	// Track DEI burned
 	event DEIBurned(address indexed from, address indexed to, uint256 amount);
-
 	// Track DEI minted
 	event DEIMinted(address indexed from, address indexed to, uint256 amount);
-
 	event CollateralRatioRefreshed(uint256 global_collateral_ratio);
 	event PoolAdded(address pool_address);
 	event PoolRemoved(address pool_address);

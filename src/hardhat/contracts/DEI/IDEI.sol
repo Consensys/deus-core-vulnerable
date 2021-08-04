@@ -17,7 +17,7 @@ interface IDEIStablecoin {
 			uint256
 		);
 
-	function globalCollateralValue(uint256 collat_usd_price) external view returns (uint256);
+	function globalCollateralValue(uint256[] memory collat_usd_price) external view returns (uint256);
 
 	function refreshCollateralRatio(uint256 dei_price_cur, uint256 expireBlock, bytes[] calldata sigs) external;
 
