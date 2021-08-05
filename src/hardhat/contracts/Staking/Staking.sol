@@ -16,7 +16,7 @@
 // Vahid: https://github.com/vahid-dev
 // Hosein: https://github.com/hedzed
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.6;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -24,6 +24,10 @@ interface IERC20 {
 	function balanceOf(address account) external view returns (uint256);
 	function transfer(address recipient, uint256 amount) external returns (bool);
 	function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+}
+
+interface DEUSToken {
+	function pool_mint(address m_address, uint256 m_amount) external;
 }
 
 contract Staking is Ownable {
@@ -47,8 +51,8 @@ contract Staking is Ownable {
 	address public earlyFoundersWallet;
 	uint256 public totalStakedToken = 1;  // init with 1 instead of 0 to avoid division by zero
 
-	IERC20 public stakedToken;
-	IERC20 public rewardToken;
+	address public stakedToken;
+	address public rewardToken;
 
 	/* ========== CONSTRUCTOR ========== */
 
@@ -68,8 +72,8 @@ contract Staking is Ownable {
 			_earlyFoundersWallet != address(0),
 			"STAKING::constructor: Zero address detected"
 		);
-		stakedToken = IERC20(_stakedToken);
-		rewardToken = IERC20(_rewardToken);
+		stakedToken = _stakedToken;
+		rewardToken = _rewardToken;
 		rewardPerBlock = _rewardPerBlock;
 		daoShare = _daoShare;
 		earlyFoundersShare = _earlyFoundersShare;
@@ -117,13 +121,13 @@ contract Staking is Ownable {
 
 		if (user.depositAmount > 0) {
 			uint256 _pendingReward = (user.depositAmount * rewardTillNowPerToken / scale) - user.paidReward;
-			sendReward(_user, pendingReward);
+			sendReward(_user, _pendingReward);
 		}
 
 		user.depositAmount = user.depositAmount + amount;
 		user.paidReward = user.depositAmount * rewardTillNowPerToken / scale;
 
-		stakedToken.transferFrom(msg.sender, address(this), amount);
+		IERC20(stakedToken).transferFrom(msg.sender, address(this), amount);
 		totalStakedToken = totalStakedToken + amount;
 		emit Deposit(msg.sender, amount);
 	}
@@ -136,12 +140,12 @@ contract Staking is Ownable {
 		uint256 _pendingReward = (user.depositAmount * rewardTillNowPerToken / scale) - user.paidReward;
 		sendReward(msg.sender, _pendingReward);
 
-		uint256 particleCollectorShare = _pendingReward *‌ (daoShare +‌ earlyFoundersShare) / scale;
-		particleCollector = particleCollector + ‌particleCollectorShare;
+		uint256 particleCollectorShare = _pendingReward * (daoShare + earlyFoundersShare) / scale;
+		particleCollector = particleCollector + particleCollectorShare;
 
 		if (amount > 0) {
 			user.depositAmount = user.depositAmount - amount;
-			stakedToken.transfer(address(msg.sender), amount);
+			IERC20(stakedToken).transfer(address(msg.sender), amount);
 			totalStakedToken = totalStakedToken - amount;
 			emit Withdraw(msg.sender, amount);
 		}
@@ -149,16 +153,16 @@ contract Staking is Ownable {
 		user.paidReward = user.depositAmount * rewardTillNowPerToken / scale;
 	}
 
-	function withdrawParticleCollector() external {
-		uint256 _daoShare = particleCollector *‌ daoShare / (daoShare +‌ earlyFoundersShare);
-		rewardToken.transfer(daoWallet, _daoShare);
+	function withdrawParticleCollector() public {
+		uint256 _daoShare = particleCollector * daoShare / (daoShare + earlyFoundersShare);
+		DEUSToken(rewardToken).pool_mint(daoWallet, _daoShare);
 
-		uint256 _earlyFoundersShare = particleCollector * earlyFoundersShare / (daoShare +‌ earlyFoundersShare);
-		rewardToken.transfer(earlyFoundersWallet, _earlyFoundersShare);
+		uint256 _earlyFoundersShare = particleCollector * earlyFoundersShare / (daoShare + earlyFoundersShare);
+		DEUSToken(rewardToken).pool_mint(earlyFoundersWallet, _earlyFoundersShare);
 
 		particleCollector = 0;
 
-		emit WithdrawParticleCollector(_earlyFoundersShare);
+		emit WithdrawParticleCollectorAmount(_earlyFoundersShare, _daoShare);
 	}
 
 	// Withdraw without caring about rewards. EMERGENCY ONLY.
@@ -166,7 +170,7 @@ contract Staking is Ownable {
 		User storage user = users[msg.sender];
 
 		totalStakedToken = totalStakedToken - user.depositAmount;
-		stakedToken.transfer(msg.sender, user.depositAmount);
+		IERC20(stakedToken).transfer(msg.sender, user.depositAmount);
 
 		emit EmergencyWithdraw(msg.sender, user.depositAmount);
 
@@ -174,9 +178,9 @@ contract Staking is Ownable {
 		user.paidReward = 0;
 	}
 
-	function sendReward(address user, uint256 amount) private {
+	function sendReward(address user, uint256 amount) internal {
 		uint256 _daoShare = amount * daoShare / scale;
-		rewardToken.transfer(user, amount - _daoShare);
+		DEUSToken(rewardToken).pool_mint(user, amount - _daoShare);
 		emit RewardClaimed(user, amount);
 	}
 
@@ -184,16 +188,9 @@ contract Staking is Ownable {
 
 	// Add temporary withdrawal functionality for owner(DAO) to transfer all tokens to a safe place.
 	// Contract ownership will transfer to address(0x) after full auditing of codes.
-	function withdrawAllRewardTokens(address to) external onlyOwner {
-		uint256 totalRewardTokens = rewardToken.balanceOf(address(this));
-		rewardToken.transfer(to, totalRewardTokens);
-	}
-
-	// Add temporary withdrawal functionality for owner(DAO) to transfer all tokens to a safe place.
-	// Contract ownership will transfer to address(0x) after full auditing of codes.
 	function withdrawAllStakedtokens(address to) external onlyOwner {
-		uint256 totalStakedTokens = stakedToken.balanceOf(address(this));
-		stakedToken.transfer(to, totalStakedTokens);
+		uint256 totalStakedTokens = IERC20(stakedToken).balanceOf(address(this));
+		IERC20(stakedToken).transfer(to, totalStakedTokens);
 	}
 
 	function withdrawERC20(address to, address _token, uint256 amount) external onlyOwner {
@@ -225,7 +222,7 @@ contract Staking is Ownable {
 	/* ========== EVENTS ========== */
 
 	event SharesSet(uint256 _daoShare, uint256 _earlyFoundersShare);
-	event WithdrawParticleCollector(uint256 _earlyFoundersShare);
+	event WithdrawParticleCollectorAmount(uint256 _earlyFoundersShare, uint256 _daoShare);
 	event WalletsSet(address _daoWallet, address _earlyFoundersWallet);
 	event Deposit(address user, uint256 amount);
 	event Withdraw(address user, uint256 amount);
