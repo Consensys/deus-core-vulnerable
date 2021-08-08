@@ -1,19 +1,7 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional 
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
+
 const hre = require("hardhat");
 
 async function main() {
-	// Hardhat always runs the compile task when running scripts with its command
-	// line interface.
-	//
-	// If this script is run directly using `node` you may want to call compile 
-	// manually to make sure everything is compiled
-	// await hre.run('compile');
-
-	// We get the contract to deploy
 
 	const collateralAddress = "0x8313949568A16b2Cc786Af26F363071777Af4b8b"; //HUSD decimal: 6
 	const creatorAddress = "0xB02648091da9e0AAcdd9F5cB9080C4893cad6C4E"; // DEUS 2
@@ -40,7 +28,7 @@ async function main() {
 
 	console.log("DEI deployed to:", dei.address);
 	// DEUS
-	const deusContract = await hre.ethers.getContractFactory("DEUSToken")
+	const deusContract = await hre.ethers.getContractFactory("contracts/DEUS/DEUS.sol:DEUSToken")
 	// string memory _name, string memory _symbol, address _creator_address, address _trusty_address
 	const deus = await deusContract.deploy("Deus", "DEUS", creatorAddress, trustyAddress); 
 	
@@ -67,18 +55,19 @@ async function main() {
 	console.log("Pool HUSD deployed to:", poolHUSD.address);
 	
 	// Parameters
-	await dei.addPool(poolHUSD.address)
-	await dei.setOracle(oracle.address)
-	await dei.setDEIStep(10000)
-	await dei.setPriceTarget(1000000)
-	await dei.setRefreshCooldown(30)
-	await dei.setDEUSAddress(deus.address)
-	await dei.setPriceBand(5000)
+	await dei.addPool(poolHUSD.address);
+	await dei.setOracle(oracle.address);
+	await dei.setDEIStep(10000);
+	await dei.setPriceTarget(1000000);
+	await dei.setRefreshCooldown(30);
+	await dei.setDEUSAddress(deus.address);
+	await dei.setPriceBand(5000);
 	
-	await deus.setDEIAddress(dei.address)
+	await deus.setDEIAddress(dei.address);
 	
 	// uint256 new_ceiling, uint256 new_bonus_rate, uint256 new_redemption_delay, uint256 new_mint_fee, uint256 new_redeem_fee, uint256 new_buyback_fee, uint256 new_recollat_fee
-	await poolHUSD.setPoolParameters(HUSDPoolCeiling, 0, 1, 1000, 1000, 1000, 1000)
+	await poolHUSD.setPoolParameters(HUSDPoolCeiling, 0, 1, 1000, 1000, 1000, 1000);
+	await poolHUSD.toggleCollateralPrice(1000000);
 	
 	await hre.run("verify:verify", {
 		address: oracle.address,
