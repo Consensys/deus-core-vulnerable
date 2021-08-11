@@ -97,7 +97,7 @@ contract Staking is Ownable {
 			accRewardPerToken = accRewardPerToken + (rewardAmount * scale / totalStakedToken);
 		}
 		uint256 reward = (user.depositAmount * accRewardPerToken / scale) - user.paidReward;
-		return reward * (1 - daoShare) / scale;
+		return reward * (1e18 - (daoShare + earlyFoundersShare)) / scale;
 	}
 
 	/* ========== PUBLIC FUNCTIONS ========== */
@@ -182,8 +182,8 @@ contract Staking is Ownable {
 	}
 
 	function sendReward(address user, uint256 amount) internal {
-		uint256 _daoShare = amount * daoShare / scale;
-		DEUSToken(rewardToken).pool_mint(user, amount - _daoShare);
+		uint256 _daoShareAndEarlyFoundersShare = amount * (daoShare + earlyFoundersShare) / scale;
+		DEUSToken(rewardToken).pool_mint(user, amount - _daoShareAndEarlyFoundersShare);
 		emit RewardClaimed(user, amount);
 	}
 
