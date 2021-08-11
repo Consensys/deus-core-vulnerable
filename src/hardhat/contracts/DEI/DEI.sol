@@ -46,7 +46,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 	uint8 public constant decimals = 18;
 	address public creator_address;
 	address public deus_address;
-	uint256 public constant genesis_supply = 10e18; // genesis supply is 10k on Mainnet. This is to help with establishing the Uniswap pools, as they need liquidity
+	uint256 public constant genesis_supply = 10000e18; // genesis supply is 10k on Mainnet. This is to help with establishing the Uniswap pools, as they need liquidity
 
 	// The addresses in this array are added by the oracle and these contracts are able to mint DEI
 	address[] public dei_pools_array;
