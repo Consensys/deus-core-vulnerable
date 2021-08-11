@@ -6,8 +6,15 @@ async function main() {
 	const collateralAddress = "0x8313949568A16b2Cc786Af26F363071777Af4b8b"; //HUSD decimal: 6
 	const creatorAddress = "0xB02648091da9e0AAcdd9F5cB9080C4893cad6C4E"; // DEUS 2
 	const trustyAddress = "0xB02648091da9e0AAcdd9F5cB9080C4893cad6C4E"; // DEUS 2
-	const HUSDPoolCeiling = 10000000000000;
-	const minimumRequiredSignature = 1;
+	const HUSDPoolCeiling = "10000000000000";
+	const minimumRequiredSignature = "1";
+
+	// Staking
+	const rewardPerBlock = "1000000000000000000";
+	const daoShare = "100000000000000000";
+	const foundersShasre = "200000000000000000";
+	const daoWallet = "0xB02648091da9e0AAcdd9F5cB9080C4893cad6C4E";			// DEUS 2
+	const foundersWallet = "0xB02648091da9e0AAcdd9F5cB9080C4893cad6C4E";	// DEUS 2
 
 
 	// ORACLE
@@ -54,6 +61,15 @@ async function main() {
 	
 	console.log("Pool HUSD deployed to:", poolHUSD.address);
 	
+	// Staking
+	const stakingContract = await hre.ethers.getContractFactory("Staking");
+	// address _stakedToken, address _rewardToken, uint256 _rewardPerBlock, uint256 _daoShare, uint256 _earlyFoundersShare, address _daoWallet, address _earlyFoundersWallet
+	const staking = await stakingContract.deploy(dei.address, deus.address, rewardPerBlock, daoShare, foundersShasre, daoWallet, foundersWallet);
+
+	await staking.deployed();
+
+	console.log("STAKING deployed to:", staking.address);
+
 	// Parameters
 	await dei.addPool(poolHUSD.address);
 	await dei.setOracle(oracle.address);
@@ -93,6 +109,19 @@ async function main() {
 		address: poolHUSD.address,
 		constructorArguments: [dei.address, deus.address, collateralAddress, trustyAddress, creatorAddress, HUSDPoolCeiling, deiPoolLibrary.address],
 	});
+
+	await hre.run("verify:verify", {
+		address: staking.address,
+		constructorArguments: [dei.address, deus.address, rewardPerBlock, daoShare, foundersShasre, daoWallet, foundersWallet],
+	});
+
+	console.log("Collateral(HUSD) address:", collateralAddress);
+	console.log("ORACLE deployed to:", oracle.address);
+	console.log("DEI deployed to:", dei.address);
+	console.log("DEUS deployed to:", deus.address);
+	console.log("DEI Pool Library deployed to:", deiPoolLibrary.address);
+	console.log("Pool HUSD deployed to:", poolHUSD.address);
+	console.log("STAKING deployed to:", staking.address);
 }
 
 
