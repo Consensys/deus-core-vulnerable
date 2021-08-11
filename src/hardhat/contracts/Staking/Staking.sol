@@ -132,7 +132,7 @@ contract Staking is Ownable {
 
 		IERC20(stakedToken).transferFrom(msg.sender, address(this), amount);
 		totalStakedToken = totalStakedToken + amount;
-		emit Deposit(msg.sender, amount);
+		emit Deposit(_user, amount);
 	}
 
 	function withdraw(uint256 amount) external {
