@@ -18,6 +18,7 @@
 
 // Reviewer(s) / Contributor(s)
 // S.A. Yaghoubnejad: https://github.com/SAYaghoubnejad
+// Hosein: https://github.com/hedzed
 
 pragma solidity 0.8.6;
 
@@ -156,7 +157,7 @@ contract Staking is Ownable {
 		user.paidReward = user.depositAmount * rewardTillNowPerToken / scale;
 	}
 
-	function withdrawParticleCollector() public {
+	function withdrawParticleCollector() external {
 		uint256 _daoShare = particleCollector * daoShare / (daoShare + earlyFoundersShare);
 		DEUSToken(rewardToken).pool_mint(daoWallet, _daoShare);
 
@@ -173,8 +174,8 @@ contract Staking is Ownable {
 		User storage user = users[msg.sender];
 
 		totalStakedToken = totalStakedToken - user.depositAmount;
-		IERC20(stakedToken).transfer(msg.sender, user.depositAmount);
 
+		IERC20(stakedToken).transfer(msg.sender, user.depositAmount);
 		emit EmergencyWithdraw(msg.sender, user.depositAmount);
 
 		user.depositAmount = 0;
@@ -193,6 +194,7 @@ contract Staking is Ownable {
 	// Contract ownership will transfer to address(0x) after full auditing of codes.
 	function withdrawAllStakedtokens(address to) external onlyOwner {
 		uint256 totalStakedTokens = IERC20(stakedToken).balanceOf(address(this));
+		totalStakedToken = 1;
 		IERC20(stakedToken).transfer(to, totalStakedTokens);
 	}
 
@@ -200,14 +202,14 @@ contract Staking is Ownable {
 		IERC20(_token).transfer(to, amount);
 	}
 
-	function setWallets(address _daoWallet, address _earlyFoundersWallet) public onlyOwner {
+	function setWallets(address _daoWallet, address _earlyFoundersWallet) external onlyOwner {
 		daoWallet = _daoWallet;
 		earlyFoundersWallet = _earlyFoundersWallet;
 
 		emit WalletsSet(_daoWallet, _earlyFoundersWallet);
 	}
 
-	function setShares(uint256 _daoShare, uint256 _earlyFoundersShare) public onlyOwner {
+	function setShares(uint256 _daoShare, uint256 _earlyFoundersShare) external onlyOwner {
 		withdrawParticleCollector();
 		daoShare = _daoShare;
 		earlyFoundersShare = _earlyFoundersShare;
@@ -215,7 +217,7 @@ contract Staking is Ownable {
 		emit SharesSet(_daoShare, _earlyFoundersShare);
 	}
 
-	function setRewardPerBlock(uint256 _rewardPerBlock) public onlyOwner {
+	function setRewardPerBlock(uint256 _rewardPerBlock) external onlyOwner {
 		update();
 		emit RewardPerBlockChanged(rewardPerBlock, _rewardPerBlock);
 		rewardPerBlock = _rewardPerBlock;
