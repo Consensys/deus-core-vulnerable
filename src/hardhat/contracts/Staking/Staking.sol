@@ -157,7 +157,7 @@ contract Staking is Ownable {
 		user.paidReward = user.depositAmount * rewardTillNowPerToken / scale;
 	}
 
-	function withdrawParticleCollector() external {
+	function withdrawParticleCollector() public {
 		uint256 _daoShare = particleCollector * daoShare / (daoShare + earlyFoundersShare);
 		DEUSToken(rewardToken).pool_mint(daoWallet, _daoShare);
 

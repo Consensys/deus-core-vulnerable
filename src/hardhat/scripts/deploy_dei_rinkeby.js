@@ -9,6 +9,9 @@ async function main() {
 	const HUSDPoolCeiling = "10000000000000";
 	const minimumRequiredSignature = "1";
 
+	// Oracle
+	const oracleServerAddress = "0x64761516386d42f1ebc48BA388bC189902df4a05";
+
 	// Staking
 	const rewardPerBlock = "1000000000000000000";
 	const daoShare = "100000000000000000";
@@ -71,6 +74,8 @@ async function main() {
 	console.log("STAKING deployed to:", staking.address);
 
 	// Parameters
+	await oracle.grantRole(oracle.ORACLE_ROLE(), oracleServerAddress);
+
 	await dei.addPool(poolHUSD.address);
 	await dei.setOracle(oracle.address);
 	await dei.setDEIStep(10000);
@@ -80,6 +85,7 @@ async function main() {
 	await dei.setPriceBand(5000);
 	
 	await deus.setDEIAddress(dei.address);
+	await deus.grantRole(deus.STAKING_MINTER_ROLE(), staking.address);
 	
 	// uint256 new_ceiling, uint256 new_bonus_rate, uint256 new_redemption_delay, uint256 new_mint_fee, uint256 new_redeem_fee, uint256 new_buyback_fee, uint256 new_recollat_fee
 	await poolHUSD.setPoolParameters(HUSDPoolCeiling, 0, 1, 1000, 1000, 1000, 1000);
