@@ -79,6 +79,9 @@ contract DEIPool is AccessControl {
 	// Number of blocks to wait before being able to collectRedemption()
 	uint256 public redemption_delay = 2;
 
+	// Minting/Redeeming fees goes to daoWallet
+	uint256 public daoShare = 0;
+
 	DEIPoolLibrary poolLibrary;
 
 	// AccessControl Roles
@@ -88,6 +91,7 @@ contract DEIPool is AccessControl {
 	bytes32 private constant RECOLLATERALIZE_PAUSER = keccak256("RECOLLATERALIZE_PAUSER");
 	bytes32 private constant COLLATERAL_PRICE_PAUSER = keccak256("COLLATERAL_PRICE_PAUSER");
     bytes32 public constant TRUSTY_ROLE = keccak256("TRUSTY_ROLE");
+	bytes32 public constant DAO_SHARE_COLLECTOR = keccak256("DAO_SHARE_COLLECTOR");
 
 	// AccessControl state variables
 	bool public mintPaused = false;
@@ -231,6 +235,8 @@ contract DEIPool is AccessControl {
 			address(this),
 			collateral_amount
 		);
+
+		daoShare += dei_amount_d18 *  minting_fee / 1e6;
 		IDEIStablecoin(dei_contract_address).pool_mint(msg.sender, dei_amount_d18);
 	}
 
@@ -255,6 +261,7 @@ contract DEIPool is AccessControl {
 		);
 
 		dei_amount_d18 = (dei_amount_d18 * (uint256(1e6) - (minting_fee))) / (1e6);
+		daoShare += dei_amount_d18 *  minting_fee / 1e6;
 
 		IDEUSToken(deus_contract_address).pool_burn_from(msg.sender, deus_amount_d18);
 		IDEIStablecoin(dei_contract_address).pool_mint(msg.sender, dei_amount_d18);
@@ -299,9 +306,9 @@ contract DEIPool is AccessControl {
 		}						
 
 		(uint256 mint_amount, uint256 deus_needed) = poolLibrary.calcMintFractionalDEI(input_params);
+		require(deus_needed <= deus_amount, "Not enough DEUS inputted");
 
 		mint_amount = (mint_amount * (uint256(1e6) - minting_fee)) / (1e6);
-		require(deus_needed <= deus_amount, "Not enough DEUS inputted");
 
 		IDEUSToken(deus_contract_address).pool_burn_from(msg.sender, deus_needed);
 		TransferHelper.safeTransferFrom(
@@ -310,6 +317,8 @@ contract DEIPool is AccessControl {
 			address(this),
 			collateral_amount
 		);
+
+		daoShare += mint_amount *  minting_fee / 1e6;
 		IDEIStablecoin(dei_contract_address).pool_mint(msg.sender, mint_amount);
 	}
 
@@ -344,6 +353,7 @@ contract DEIPool is AccessControl {
 		unclaimedPoolCollateral = unclaimedPoolCollateral + collateral_needed;
 		lastRedeemed[msg.sender] = block.number;
 
+		daoShare += DEI_amount * redemption_fee / 1e6;
 		// Move all external functions to the end
 		IDEIStablecoin(dei_contract_address).pool_burn_from(msg.sender, DEI_amount);
 	}
@@ -396,6 +406,7 @@ contract DEIPool is AccessControl {
 
 		lastRedeemed[msg.sender] = block.number;
 
+		daoShare += DEI_amount * redemption_fee / 1e6;
 		// Move all external functions to the end
 		IDEIStablecoin(dei_contract_address).pool_burn_from(msg.sender, DEI_amount);
 		IDEUSToken(deus_contract_address).pool_mint(address(this), deus_amount);
@@ -425,6 +436,7 @@ contract DEIPool is AccessControl {
 
 		lastRedeemed[msg.sender] = block.number;
 
+		daoShare += DEI_amount * redemption_fee / 1e6;
 		// Move all external functions to the end
 		IDEIStablecoin(dei_contract_address).pool_burn_from(msg.sender, DEI_amount);
 		IDEUSToken(deus_contract_address).pool_mint(address(this), deus_amount);
@@ -557,6 +569,15 @@ contract DEIPool is AccessControl {
 
 	/* ========== RESTRICTED FUNCTIONS ========== */
 
+	function collectDaoShare(uint256 amount, address to) external {
+		require(hasRole(DAO_SHARE_COLLECTOR, msg.sender));
+		require(amount <= daoShare, "amount<=daoShare");
+		IDEIStablecoin(dei_contract_address).pool_mint(to, amount);
+		daoShare -= amount;
+
+		emit daoShareCollected(amount, to);
+	}
+
 	function toggleMinting() external {
 		require(hasRole(MINT_PAUSER, msg.sender));
 		mintPaused = !mintPaused;
@@ -638,7 +659,7 @@ contract DEIPool is AccessControl {
 		uint256 new_buyback_fee,
 		uint256 new_recollat_fee
 	);
-
+	event daoShareCollected(uint256 daoShare, address to);
 	event MintingToggled(bool toggled);
 	event RedeemingToggled(bool toggled);
 	event RecollateralizeToggled(bool toggled);
