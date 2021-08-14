@@ -22,7 +22,7 @@
 
 pragma solidity 0.8.6;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "../Governance/AccessControl.sol";
 
 interface IERC20 {
 	function balanceOf(address account) external view returns (uint256);
@@ -34,7 +34,7 @@ interface DEUSToken {
 	function pool_mint(address m_address, uint256 m_amount) external;
 }
 
-contract Staking is Ownable {
+contract Staking is AccessControl {
 
 	struct User {
 		uint256 depositAmount;
@@ -58,6 +58,9 @@ contract Staking is Ownable {
 	address public stakedToken;
 	address public rewardToken;
 
+	bytes32 private constant REWARD_PER_BLOCK_SETTER = keccak256("REWARD_PER_BLOCK_SETTER");
+	bytes32 private constant TRUSTY_ROLE = keccak256("TRUSTY_ROLE");
+
 	/* ========== CONSTRUCTOR ========== */
 
 	constructor (
@@ -67,7 +70,8 @@ contract Staking is Ownable {
 		uint256 _daoShare,
 		uint256 _earlyFoundersShare,
 		address _daoWallet,
-		address _earlyFoundersWallet)
+		address _earlyFoundersWallet,
+		address _rewardPerBlockSetter)
 	{
 		require(
 			_stakedToken != address(0) &&
@@ -76,6 +80,9 @@ contract Staking is Ownable {
 			_earlyFoundersWallet != address(0),
 			"STAKING::constructor: Zero address detected"
 		);
+		_setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+		grantRole(REWARD_PER_BLOCK_SETTER, _rewardPerBlockSetter);
+		grantRole(TRUSTY_ROLE, msg.sender);
 		stakedToken = _stakedToken;
 		rewardToken = _rewardToken;
 		rewardPerBlock = _rewardPerBlock;
@@ -84,6 +91,12 @@ contract Staking is Ownable {
 		lastUpdatedBlock = block.number;
 		daoWallet = _daoWallet;
 		earlyFoundersWallet = _earlyFoundersWallet;
+	}
+
+
+	modifier onlyTrusty() {
+		require(hasRole(TRUSTY_ROLE, msg.sender), "STAKING:: Caller is not a trusty");
+		_;
 	}
 
 	/* ========== VIEWS ========== */
@@ -192,24 +205,32 @@ contract Staking is Ownable {
 
 	// Add temporary withdrawal functionality for owner(DAO) to transfer all tokens to a safe place.
 	// Contract ownership will transfer to address(0x) after full auditing of codes.
-	function withdrawAllStakedtokens(address to) external onlyOwner {
+	function withdrawAllStakedtokens(address to) external onlyTrusty {
 		uint256 totalStakedTokens = IERC20(stakedToken).balanceOf(address(this));
 		totalStakedToken = 1;
 		IERC20(stakedToken).transfer(to, totalStakedTokens);
+
+		emit withdrawStakedtokens(totalStakedTokens, to);
 	}
 
-	function withdrawERC20(address to, address _token, uint256 amount) external onlyOwner {
+	function setStakedToken(address _stakedToken) external onlyTrusty {
+		stakedToken = _stakedToken;
+
+		emit StakedTokenSet(_stakedToken);
+	}
+
+	function withdrawERC20(address to, address _token, uint256 amount) external onlyTrusty {
 		IERC20(_token).transfer(to, amount);
 	}
 
-	function setWallets(address _daoWallet, address _earlyFoundersWallet) external onlyOwner {
+	function setWallets(address _daoWallet, address _earlyFoundersWallet) external onlyTrusty {
 		daoWallet = _daoWallet;
 		earlyFoundersWallet = _earlyFoundersWallet;
 
 		emit WalletsSet(_daoWallet, _earlyFoundersWallet);
 	}
 
-	function setShares(uint256 _daoShare, uint256 _earlyFoundersShare) external onlyOwner {
+	function setShares(uint256 _daoShare, uint256 _earlyFoundersShare) external onlyTrusty {
 		withdrawParticleCollector();
 		daoShare = _daoShare;
 		earlyFoundersShare = _earlyFoundersShare;
@@ -217,7 +238,8 @@ contract Staking is Ownable {
 		emit SharesSet(_daoShare, _earlyFoundersShare);
 	}
 
-	function setRewardPerBlock(uint256 _rewardPerBlock) external onlyOwner {
+	function setRewardPerBlock(uint256 _rewardPerBlock) external {
+		require(hasRole(REWARD_PER_BLOCK_SETTER, msg.sender), "STAKING::setRewardPerBlock: Caller is not a rewardPerBlockSetter");
 		update();
 		emit RewardPerBlockChanged(rewardPerBlock, _rewardPerBlock);
 		rewardPerBlock = _rewardPerBlock;
@@ -226,6 +248,8 @@ contract Staking is Ownable {
 
 	/* ========== EVENTS ========== */
 
+	event withdrawStakedtokens(uint256 totalStakedTokens, address to);
+	event StakedTokenSet(address _stakedToken);
 	event SharesSet(uint256 _daoShare, uint256 _earlyFoundersShare);
 	event WithdrawParticleCollectorAmount(uint256 _earlyFoundersShare, uint256 _daoShare);
 	event WalletsSet(address _daoWallet, address _earlyFoundersWallet);
