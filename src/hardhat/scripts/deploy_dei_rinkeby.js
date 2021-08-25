@@ -3,9 +3,9 @@ const hre = require("hardhat");
 
 async function main() {
 
-	const collateralAddress = "0x8313949568A16b2Cc786Af26F363071777Af4b8b"; //HUSD decimal: 6
-	const creatorAddress = "0xB02648091da9e0AAcdd9F5cB9080C4893cad6C4E"; // DEUS 2
-	const trustyAddress = "0xB02648091da9e0AAcdd9F5cB9080C4893cad6C4E"; // DEUS 2
+	const collateralAddress = "0x7a5a3819EcB1E481D656dAbE4a489644FBcb5844"; //HUSD decimal: 8
+	const creatorAddress = "0x00c0c6558Dc28E749C3402766Cd603cec6400F91"; // DEUS 4
+	const trustyAddress = "0x00c0c6558Dc28E749C3402766Cd603cec6400F91"; // DEUS 4
 	const HUSDPoolCeiling = "10000000000000";
 	const minimumRequiredSignature = "1";
 
@@ -16,9 +16,8 @@ async function main() {
 	const rewardPerBlock = "1000000000000000000";
 	const daoShare = "100000000000000000";
 	const foundersShasre = "200000000000000000";
-	const daoWallet = "0xB02648091da9e0AAcdd9F5cB9080C4893cad6C4E";			// DEUS 2
-	const foundersWallet = "0xB02648091da9e0AAcdd9F5cB9080C4893cad6C4E";	// DEUS 2
-
+	const daoWallet = "0x00c0c6558Dc28E749C3402766Cd603cec6400F91";			// DEUS 4
+	const foundersWallet = "0x00c0c6558Dc28E749C3402766Cd603cec6400F91";	// DEUS 4
 
 	// ORACLE
 	const oracleContract = await hre.ethers.getContractFactory("Oracle");
@@ -64,14 +63,14 @@ async function main() {
 	
 	console.log("Pool HUSD deployed to:", poolHUSD.address);
 	
-	// Staking
-	const stakingContract = await hre.ethers.getContractFactory("Staking");
-	// address _stakedToken, address _rewardToken, uint256 _rewardPerBlock, uint256 _daoShare, uint256 _earlyFoundersShare, address _daoWallet, address _earlyFoundersWallet
-	const staking = await stakingContract.deploy(dei.address, deus.address, rewardPerBlock, daoShare, foundersShasre, daoWallet, foundersWallet);
+	// // Staking
+	// const stakingContract = await hre.ethers.getContractFactory("Staking");
+	// // address _stakedToken, address _rewardToken, uint256 _rewardPerBlock, uint256 _daoShare, uint256 _earlyFoundersShare, address _daoWallet, address _earlyFoundersWallet
+	// const staking = await stakingContract.deploy(dei.address, deus.address, rewardPerBlock, daoShare, foundersShasre, daoWallet, foundersWallet);
 
-	await staking.deployed();
+	// await staking.deployed();
 
-	console.log("STAKING deployed to:", staking.address);
+	// console.log("STAKING deployed to:", staking.address);
 
 	// Parameters
 	await oracle.grantRole(oracle.ORACLE_ROLE(), oracleServerAddress);
@@ -82,10 +81,10 @@ async function main() {
 	await dei.setPriceTarget(1000000);
 	await dei.setRefreshCooldown(30);
 	await dei.setDEUSAddress(deus.address);
-	await dei.setPriceBand(5000);
+	await dei.setPriceBand(10000);
 	
 	await deus.setDEIAddress(dei.address);
-	await deus.grantRole(deus.STAKING_MINTER_ROLE(), staking.address);
+	// await deus.grantRole(deus.STAKING_MINTER_ROLE(), staking.address);
 	
 	// uint256 new_ceiling, uint256 new_bonus_rate, uint256 new_redemption_delay, uint256 new_mint_fee, uint256 new_redeem_fee, uint256 new_buyback_fee, uint256 new_recollat_fee
 	await poolHUSD.setPoolParameters(HUSDPoolCeiling, 0, 1, 1000, 1000, 1000, 1000);
@@ -116,10 +115,10 @@ async function main() {
 		constructorArguments: [dei.address, deus.address, collateralAddress, trustyAddress, creatorAddress, HUSDPoolCeiling, deiPoolLibrary.address],
 	});
 
-	await hre.run("verify:verify", {
-		address: staking.address,
-		constructorArguments: [dei.address, deus.address, rewardPerBlock, daoShare, foundersShasre, daoWallet, foundersWallet],
-	});
+	// await hre.run("verify:verify", {
+	// 	address: staking.address,
+	// 	constructorArguments: [dei.address, deus.address, rewardPerBlock, daoShare, foundersShasre, daoWallet, foundersWallet],
+	// });
 
 	console.log("Collateral(HUSD) address:", collateralAddress);
 	console.log("ORACLE deployed to:", oracle.address);
@@ -127,7 +126,7 @@ async function main() {
 	console.log("DEUS deployed to:", deus.address);
 	console.log("DEI Pool Library deployed to:", deiPoolLibrary.address);
 	console.log("Pool HUSD deployed to:", poolHUSD.address);
-	console.log("STAKING deployed to:", staking.address);
+	// console.log("STAKING deployed to:", staking.address);
 }
 
 
