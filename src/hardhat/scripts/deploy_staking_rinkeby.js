@@ -3,14 +3,15 @@ const hre = require("hardhat");
 
 async function main() {
 
-	const DEI_DEUS = "0x5e2ce79ca56c5EA39530BBFe8fEd68aFc69e6B4D";
-	const DEI_HUSD = "0x8f3906394382a7e30961ACDf217b9FBf242c1B96";
-	const DEUSToken = "0xEe70f1FE057A886fbB1990a53228C313875faa3E";
-	const daoAddress = "0xB02648091da9e0AAcdd9F5cB9080C4893cad6C4E"; // DEUS 2
-	const foundersAddress = "0xB02648091da9e0AAcdd9F5cB9080C4893cad6C4E"; // DEUS 2
+	const DEI_DEUS = "0xd0B9d3A52fa1dAee082F9ac998b9fB49F6bb7a16";
+	const DEI_HUSD = "0xcd9383b17264D32F690E1192B5967514034b168D";
+	const DEUSToken = "0x86eD67215aE62a849B5f0c900A7Ed8B9e94945B9";
+	const daoAddress = "0x00c0c6558Dc28E749C3402766Cd603cec6400F91"; // DEUS 4
+	const foundersAddress = "0x00c0c6558Dc28E749C3402766Cd603cec6400F91"; // DEUS 4
 	const daoShare = "100000000000000000";
 	const foundersShare = "200000000000000000";
 	const rewardPerBlock = "1000000000000000000";
+	const rewardPerBlockSetter = "0x00c0c6558Dc28E749C3402766Cd603cec6400F91"; // DEUS 4
 
 	const deusContract = await hre.ethers.getContractFactory("contracts/DEUS/DEUS.sol:DEUSToken");
 
@@ -18,9 +19,9 @@ async function main() {
 
 	// Staking
 	const stakingContract = await hre.ethers.getContractFactory("Staking");
-	// address _stakedToken, address _rewardToken, uint256 _rewardPerBlock, uint256 _daoShare, uint256 _earlyFoundersShare, address _daoWallet, address _earlyFoundersWallet
-	const stakingDEI_DEUS = await stakingContract.deploy(DEI_DEUS, DEUSToken, rewardPerBlock, daoShare, foundersShare, daoAddress, foundersAddress);
-	const stakingDEI_HUSD = await stakingContract.deploy(DEI_HUSD, DEUSToken, rewardPerBlock, daoShare, foundersShare, daoAddress, foundersAddress);
+	// address _stakedToken, address _rewardToken, uint256 _rewardPerBlock, uint256 _daoShare, uint256 _earlyFoundersShare, address _daoWallet, address _earlyFoundersWallet, address _rewardPerBlockSetter
+	const stakingDEI_DEUS = await stakingContract.deploy(DEI_DEUS, DEUSToken, rewardPerBlock, daoShare, foundersShare, daoAddress, foundersAddress, rewardPerBlockSetter);
+	const stakingDEI_HUSD = await stakingContract.deploy(DEI_HUSD, DEUSToken, rewardPerBlock, daoShare, foundersShare, daoAddress, foundersAddress, rewardPerBlockSetter);
 
 	await stakingDEI_DEUS.deployed();
 
@@ -35,12 +36,12 @@ async function main() {
 	
 	await hre.run("verify:verify", {
 		address: stakingDEI_DEUS.address,
-		constructorArguments: [DEI_DEUS, DEUSToken, rewardPerBlock, daoShare, foundersShare, daoAddress, foundersAddress],
+		constructorArguments: [DEI_DEUS, DEUSToken, rewardPerBlock, daoShare, foundersShare, daoAddress, foundersAddress, rewardPerBlockSetter],
 	});
 
 	await hre.run("verify:verify", {
 		address: stakingDEI_HUSD.address,
-		constructorArguments: [DEI_HUSD, DEUSToken, rewardPerBlock, daoShare, foundersShare, daoAddress, foundersAddress],
+		constructorArguments: [DEI_HUSD, DEUSToken, rewardPerBlock, daoShare, foundersShare, daoAddress, foundersAddress, rewardPerBlockSetter],
 	});
 
 	console.log("STAKING DEI-DEUS deployed to:", stakingDEI_DEUS.address);

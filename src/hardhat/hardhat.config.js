@@ -77,6 +77,14 @@ module.exports = {
 			gas: "auto",
 			gasPrice: "auto",
 			gasMultiplier: 1.2
+		},
+		heco: {
+			url : "https://http-mainnet.hecochain.com",
+			accounts: [process.env.PRIVATE_KEY],
+			chainId: 128,
+			gas: "auto",
+			gasPrice: "auto",
+			gasMultiplier: 1.2
 		}
     },
 	solidity: {
@@ -147,7 +155,8 @@ module.exports = {
       timeout: 360000
 	},
 	etherscan: {
-		apiKey: process.env.ETHERSCAN_API_KEY, // ETH Mainnet
+		// apiKey: process.env.ETHERSCAN_API_KEY, // ETH Mainnet
+		apiKey: process.env.HECO_API_KEY, // HECO Mainnet
 		// apiKey: process.env.BSCSCAN_API_KEY // BSC
 	},
 
