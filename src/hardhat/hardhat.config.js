@@ -85,6 +85,22 @@ module.exports = {
 			gas: "auto",
 			gasPrice: "auto",
 			gasMultiplier: 1.2
+		},
+		avalanche: {
+			url : "https://api.avax.network/ext/bc/C/rpc",
+			accounts: [process.env.PRIVATE_KEY],
+			chainId: 43114,
+			gas: "auto",
+			gasPrice: "auto",
+			gasMultiplier: 1.2
+		},
+		fuji: {
+			url : "https://api.avax-test.network/ext/bc/C/rpc",
+			accounts: [process.env.PRIVATE_KEY],
+			chainId: 43113,
+			gas: "auto",
+			gasPrice: "auto",
+			gasMultiplier: 1.2
 		}
     },
 	solidity: {
