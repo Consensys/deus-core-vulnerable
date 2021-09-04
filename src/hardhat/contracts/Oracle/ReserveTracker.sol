@@ -1,6 +1,5 @@
-/*
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity >=0.6.11;
+pragma solidity ^0.8.7;
 
 // =================================================================================================================
 //  _|_|_|    _|_|_|_|  _|    _|    _|_|_|      _|_|_|_|  _|                                                       |
@@ -26,32 +25,34 @@ pragma solidity >=0.6.11;
 import "../Math/SafeMath.sol";
 import "../Math/Math.sol";
 import "../Uniswap/Interfaces/IUniswapV2Pair.sol";
-import "../Staking/Owned.sol";
+import "../Governance/AccessControl.sol";
 
-contract ReserveTracker is Owned {
+contract ReserveTracker is AccessControl {
 	using SafeMath for uint256;
 
+	// Roles
+    bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
+
 	// Various precisions
-	uint256 public CONSULT_DEUS_DEC;
-	uint256 public CONSULT_DEI_DEC;
+	// uint256 public CONSULT_DEUS_DEC;
+	// uint256 public CONSULT_DEI_DEC;
 	uint256 private PRICE_PRECISION = 1e6;
 
 	// Contract addresses
 	address private dei_contract_address;
 	address private deus_contract_address;
-	address public timelock_address;
 
 	// The pair of which to get DEUS price from
 	// address public deus_weth_oracle_address;
 	// address public weth_collat_oracle_address;
-	address private weth_address;
+	// address private weth_address;
 	// UniswapPairOracle private deus_weth_oracle;
 	// UniswapPairOracle private weth_collat_oracle;
-	uint256 public weth_collat_decimals;
+	// uint256 public weth_collat_decimals;
 
 	// Chainlink
 	// ChainlinkFXSUSDPriceConsumer private chainlink_deus_oracle;
-	uint256 public chainlink_deus_oracle_decimals;
+	// uint256 public chainlink_deus_oracle_decimals;
 
 	// Array of pairs for DEUS
 	address[] public deus_pairs_array;
@@ -70,16 +71,16 @@ contract ReserveTracker is Owned {
 	// IMetaImplementationUSD private dei_metapool;
 
 	// TWAP Related
-	uint256 public last_timestamp;
-	uint256[2] public old_twap;
-	uint256 public dei_twap_price;
-	uint256 public PERIOD = 3600; // 1-hour TWAP on deployment
-	bool public twap_paused;
+	// uint256 public last_timestamp;
+	// uint256[2] public old_twap;
+	// uint256 public dei_twap_price;
+	// uint256 public PERIOD = 3600; // 1-hour TWAP on deployment
+	// bool public twap_paused;
 
 	// ========== MODIFIERS ==========
 
 	modifier onlyByOwnerOrGovernance() {
-		require(msg.sender == owner || msg.sender == timelock_address, "Not owner or timelock");
+		require(hasRole(OWNER_ROLE, msg.sender), "Caller is not owner");
 		_;
 	}
 
@@ -87,11 +88,12 @@ contract ReserveTracker is Owned {
 
 	constructor(
 		address _dei_contract_address,
-		address _deus_contract_address,
-		address _creator_address
-	) Owned(_creator_address) {
+		address _deus_contract_address
+	) {
 		dei_contract_address = _dei_contract_address;
 		deus_contract_address = _deus_contract_address;
+		_setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+		grantRole(OWNER_ROLE, msg.sender);
 	}
 
 	// ========== VIEWS ==========
@@ -116,7 +118,7 @@ contract ReserveTracker is Owned {
 	// }
 
 	function getDEUSReserves() public view returns (uint256) {
-		uint256 total_deus_reserves = 0; 
+		uint256 total_deus_reserves = 0;
 
 		for (uint i = 0; i < deus_pairs_array.length; i++){ 
 			// Exclude null addresses
@@ -136,23 +138,23 @@ contract ReserveTracker is Owned {
 
 	// ========== PUBLIC MUTATIVE FUNCTIONS ==========
 
-	function refreshDEICurveTWAP() public returns (uint256) {
-		require(twap_paused == false, "TWAP has been paused");
-		uint256 time_elapsed = (block.timestamp).sub(last_timestamp);
-		require(time_elapsed >= PERIOD, 'ReserveTracker: PERIOD_NOT_ELAPSED');
-		uint256[2] memory new_twap = dei_metapool.get_price_cumulative_last();
-		uint256[2] memory balances = dei_metapool.get_twap_balances(old_twap, new_twap, time_elapsed);
-		last_timestamp = block.timestamp;
-		old_twap = new_twap;
-		dei_twap_price = dei_metapool.get_dy(1, 0, 1e18, balances).mul(1e6).div(dei_metapool.get_virtual_price());
-		return dei_twap_price;
-	}
+	// function refreshDEICurveTWAP() public returns (uint256) {
+	// 	require(twap_paused == false, "TWAP has been paused");
+	// 	uint256 time_elapsed = (block.timestamp).sub(last_timestamp);
+	// 	require(time_elapsed >= PERIOD, 'ReserveTracker: PERIOD_NOT_ELAPSED');
+	// 	uint256[2] memory new_twap = dei_metapool.get_price_cumulative_last();
+	// 	uint256[2] memory balances = dei_metapool.get_twap_balances(old_twap, new_twap, time_elapsed);
+	// 	last_timestamp = block.timestamp;
+	// 	old_twap = new_twap;
+	// 	dei_twap_price = dei_metapool.get_dy(1, 0, 1e18, balances).mul(1e6).div(dei_metapool.get_virtual_price());
+	// 	return dei_twap_price;
+	// }
 
 	// ========== RESTRICTED FUNCTIONS ==========
 
-	function toggleCurveTWAP(bool _state) external onlyByOwnerOrGovernance {
-		twap_paused = _state;
-	}
+	// function toggleCurveTWAP(bool _state) external onlyByOwnerOrGovernance {
+	// 	twap_paused = _state;
+	// }
 
 	// Adds collateral addresses supported, such as tether and busd, must be ERC20 
 	function addDEUSPair(address pair_address) public onlyByOwnerOrGovernance {
@@ -177,4 +179,3 @@ contract ReserveTracker is Owned {
 		}
 	}
 }
-*/
