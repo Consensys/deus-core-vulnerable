@@ -1,229 +1,241 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity >=0.6.11;
+pragma solidity 0.8.7;
 
-// ====================================================================
-// |     ______                   _______                             |
-// |    / _____________ __  __   / ____(_____  ____ _____  ________   |
-// |   / /_  / ___/ __ `| |/_/  / /_  / / __ \/ __ `/ __ \/ ___/ _ \  |
-// |  / __/ / /  / /_/ _>  <   / __/ / / / / / /_/ / / / / /__/  __/  |
-// | /_/   /_/   \__,_/_/|_|  /_/   /_/_/ /_/\__,_/_/ /_/\___/\___/   |
-// |                                                                  |
-// ====================================================================
+// =================================================================================================================
+//  _|_|_|    _|_|_|_|  _|    _|    _|_|_|      _|_|_|_|  _|                                                       |
+//  _|    _|  _|        _|    _|  _|            _|            _|_|_|      _|_|_|  _|_|_|      _|_|_|    _|_|       |
+//  _|    _|  _|_|_|    _|    _|    _|_|        _|_|_|    _|  _|    _|  _|    _|  _|    _|  _|        _|_|_|_|     |
+//  _|    _|  _|        _|    _|        _|      _|        _|  _|    _|  _|    _|  _|    _|  _|        _|           |
+//  _|_|_|    _|_|_|_|    _|_|    _|_|_|        _|        _|  _|    _|    _|_|_|  _|    _|    _|_|_|    _|_|_|     | 
+// =================================================================================================================
 // =========================== PIDController ==========================
 // ====================================================================
-// Frax Finance: https://github.com/FraxFinance
+// Deus Finance: https://github.com/DeusFinance
 
 // Primary Author(s)
 // Jason Huan: https://github.com/jasonhuan
 // Sam Kazemian: https://github.com/samkazemian
+// Vahid: https://github.com/vahid-dev
+// SAYaghoubnejad: https://github.com/SAYaghoubnejad
 
 // Reviewer(s) / Contributor(s)
 // Travis Moore: https://github.com/FortisFortuna
 
-import '../Frax/Frax.sol';
+import '../DEUS/DEUS.sol';
 import "../Math/SafeMath.sol";
 import "./ReserveTracker.sol";
-import "../Curve/IMetaImplementationUSD.sol";
 
 
-contract PIDController is Owned {
-    using SafeMath for uint256;
+contract PIDController is AccessControl {
+	using SafeMath for uint256;
 
-    // Instances
-    FRAXStablecoin private FRAX;
-    FRAXShares private FXS;
-    ReserveTracker private reserve_tracker;
-    IMetaImplementationUSD private frax_metapool;
+	// Roles
+    bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
 
-    // FRAX and FXS addresses
-    address private frax_contract_address;
-    address private fxs_contract_address;
+	// Instances
+	DEIStablecoin private DEI;
+	DEUSToken private DEUS;
+	ReserveTracker private reserve_tracker;
+	// IMetaImplementationUSD private dei_metapool;
 
-    // Misc addresses
-    address public timelock_address;
-    address public reserve_tracker_address;
-    address private frax_metapool_address;
+	// DEI and DEUS addresses
+	address private dei_contract_address;
+	address private deus_contract_address;
 
-    // 6 decimals of precision
-    uint256 public growth_ratio;
-    uint256 public frax_step;
-    uint256 public GR_top_band;
-    uint256 public GR_bottom_band;
+	// Misc addresses
+	address public reserve_tracker_address;
+	// address private dei_metapool_address;
 
-    // Bands
-    uint256 public FRAX_top_band;
-    uint256 public FRAX_bottom_band;
+	// 6 decimals of precision
+	uint256 public growth_ratio;
+	uint256 public dei_step;
+	uint256 public GR_top_band;
+	uint256 public GR_bottom_band;
 
-    // Time-related
-    uint256 public internal_cooldown;
-    uint256 public last_update;
-    
-    // Booleans
-    bool public is_active;
-    bool public use_growth_ratio;
-    bool public collateral_ratio_paused;
-    bool public FIP_6;
+	// Bands
+	uint256 public DEI_top_band;
+	uint256 public DEI_bottom_band;
 
-    /* ========== MODIFIERS ========== */
+	// Time-related
+	uint256 public internal_cooldown;
+	uint256 public last_update;
+	
+	// Booleans
+	bool public is_active;
+	bool public use_growth_ratio;
+	bool public collateral_ratio_paused;
+	bool public FIP_6;
 
-    modifier onlyByOwnerOrGovernance() {
-        require(msg.sender == owner || msg.sender == timelock_address, "Not owner or timelock");
-        _;
-    }
+	// ========== MODIFIERS ==========
 
-    /* ========== CONSTRUCTOR ========== */
+	modifier onlyOwner() {
+		require(hasRole(OWNER_ROLE, msg.sender), "PIDController: You are not owner");
+		_;
+	}
 
-    constructor(
-        address _frax_contract_address,
-        address _fxs_contract_address,
-        address _creator_address,
-        address _timelock_address,
-        address _reserve_tracker_address
-    ) Owned(_creator_address) {
-        frax_contract_address = _frax_contract_address;
-        fxs_contract_address = _fxs_contract_address;
-        timelock_address = _timelock_address;
-        reserve_tracker_address = _reserve_tracker_address;
-        reserve_tracker = ReserveTracker(reserve_tracker_address);
-        frax_step = 2500;
-        FRAX = FRAXStablecoin(frax_contract_address);
-        FXS = FRAXShares(fxs_contract_address);
+	// ========== CONSTRUCTOR ==========
 
-        // Upon genesis, if GR changes by more than 1% percent, enable change of collateral ratio
-        GR_top_band = 1000;
-        GR_bottom_band = 1000; 
-        is_active = false;
-    }
+	constructor(
+		address _dei_contract_address,
+		address _deus_contract_address,
+		address _reserve_tracker_address
+	) {
+		dei_contract_address = _dei_contract_address;
+		deus_contract_address = _deus_contract_address;
+		reserve_tracker_address = _reserve_tracker_address;
+		reserve_tracker = ReserveTracker(reserve_tracker_address);
+		dei_step = 2500;
+		DEI = DEIStablecoin(dei_contract_address);
+		DEUS = DEUSToken(deus_contract_address);
 
-    
-    /* ========== PUBLIC MUTATIVE FUNCTIONS ========== */
-    
-    function refreshCollateralRatio() public {
-    	require(collateral_ratio_paused == false, "Collateral Ratio has been paused");
-        uint256 time_elapsed = (block.timestamp).sub(last_update);
-        require(time_elapsed >= internal_cooldown, "internal cooldown not passed");
-        uint256 fxs_reserves = reserve_tracker.getFXSReserves();
-        uint256 fxs_price = reserve_tracker.getFXSPrice();
-        
-        uint256 fxs_liquidity = (fxs_reserves.mul(fxs_price)); // Has 6 decimals of precision
+		// Upon genesis, if GR changes by more than 1% percent, enable change of collateral ratio
+		GR_top_band = 1000;
+		GR_bottom_band = 1000; 
+		is_active = false;
 
-        uint256 frax_supply = FRAX.totalSupply();
-        
-        // Get the FRAX TWAP on Curve Metapool
-        uint256 frax_price = reserve_tracker.frax_twap_price();
+		_setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+		grantRole(OWNER_ROLE, msg.sender);
+	}
 
-        uint256 new_growth_ratio = fxs_liquidity.div(frax_supply); // (E18 + E6) / E18
+	// ========== PUBLIC MUTATIVE FUNCTIONS ==========
 
-        uint256 last_collateral_ratio = FRAX.global_collateral_ratio();
-        uint256 new_collateral_ratio = last_collateral_ratio;
-
-        if(FIP_6){
-            require(frax_price > FRAX_top_band || frax_price < FRAX_bottom_band, "Use PIDController when FRAX is outside of peg");
+	function getChainID() public view returns (uint256) {
+        uint256 id;
+        assembly {
+            id := chainid()
         }
-
-        // First, check if the price is out of the band
-        if(frax_price > FRAX_top_band){
-            new_collateral_ratio = last_collateral_ratio.sub(frax_step);
-        } else if (frax_price < FRAX_bottom_band){
-            new_collateral_ratio = last_collateral_ratio.add(frax_step);
-
-        // Else, check if the growth ratio has increased or decreased since last update
-        } else if(use_growth_ratio){
-            if(new_growth_ratio > growth_ratio.mul(1e6 + GR_top_band).div(1e6)){
-                new_collateral_ratio = last_collateral_ratio.sub(frax_step);
-            } else if (new_growth_ratio < growth_ratio.mul(1e6 - GR_bottom_band).div(1e6)){
-                new_collateral_ratio = last_collateral_ratio.add(frax_step);
-            }
-        }
-
-        growth_ratio = new_growth_ratio;
-        last_update = block.timestamp;
-
-        // No need for checking CR under 0 as the last_collateral_ratio.sub(frax_step) will throw 
-        // an error above in that case
-        if(new_collateral_ratio > 1e6){
-            new_collateral_ratio = 1e6;
-        }
-
-        if(is_active){
-            uint256 delta_collateral_ratio;
-            if(new_collateral_ratio > last_collateral_ratio){
-                delta_collateral_ratio = new_collateral_ratio - last_collateral_ratio;
-                FRAX.setPriceTarget(0); // Set to zero to increase CR
-                emit FRAXdecollateralize(new_collateral_ratio);
-            } else if (new_collateral_ratio < last_collateral_ratio){
-                delta_collateral_ratio = last_collateral_ratio - new_collateral_ratio;
-                FRAX.setPriceTarget(1000e6); // Set to high value to decrease CR
-                emit FRAXrecollateralize(new_collateral_ratio);
-            }
-
-            FRAX.setFraxStep(delta_collateral_ratio); // Change by the delta
-            uint256 cooldown_before = FRAX.refresh_cooldown(); // Note the existing cooldown period
-            FRAX.setRefreshCooldown(0); // Unlock the CR cooldown
-
-            FRAX.refreshCollateralRatio(); // Refresh CR
-
-            // Reset params
-            FRAX.setFraxStep(0);
-            FRAX.setRefreshCooldown(cooldown_before); // Set the cooldown period to what it was before, or until next controller refresh
-            FRAX.setPriceTarget(1e6);           
-        }
+        return id;
     }
+	
+	function refreshCollateralRatio(uint deus_price, uint dei_price, uint256 expire_block, bytes[] calldata sigs) external {
+		require(collateral_ratio_paused == false, "PIDController::Collateral Ratio has been paused");
+		uint256 time_elapsed = (block.timestamp).sub(last_update);
+		require(time_elapsed >= internal_cooldown, "PIDController::Internal cooldown not passed");
+		uint256 deus_reserves = reserve_tracker.getDEUSReserves();
 
-    /* ========== RESTRICTED FUNCTIONS ========== */
+		bytes32 sighash = keccak256(abi.encodePacked(
+										deus_contract_address,
+										deus_price,
+										expire_block,
+                                    	getChainID()
+                                    ));
 
-    function activate(bool _state) external onlyByOwnerOrGovernance {
-        is_active = _state;
-    }
+		DEI.verify_price(sighash, sigs);
 
-    function useGrowthRatio(bool _use_growth_ratio) external onlyByOwnerOrGovernance {
-        use_growth_ratio = _use_growth_ratio;
-    }
+		uint256 deus_liquidity = (deus_reserves.mul(deus_price)); // Has 6 decimals of precision
 
-    function setReserveTracker(address _reserve_tracker_address) external onlyByOwnerOrGovernance {
-        reserve_tracker_address = _reserve_tracker_address;
-        reserve_tracker = ReserveTracker(_reserve_tracker_address);
-    }
+		uint256 dei_supply = DEI.totalSupply();
+		
+		// Get the DEI TWAP on Curve Metapool
+		// uint256 dei_price = reserve_tracker.dei_twap_price();
 
-    function setMetapool(address _metapool_address) external onlyByOwnerOrGovernance {
-        frax_metapool_address = _metapool_address;
-        frax_metapool = IMetaImplementationUSD(_metapool_address);
-    }
+		uint256 new_growth_ratio = deus_liquidity.div(dei_supply); // (E18 + E6) / E18
 
-    // As a percentage added/subtracted from the previous; e.g. top_band = 4000 = 0.4% -> will decollat if GR increases by 0.4% or more
-    function setGrowthRatioBands(uint256 _GR_top_band, uint256 _GR_bottom_band) external onlyByOwnerOrGovernance {
-        GR_top_band = _GR_top_band;
-        GR_bottom_band = _GR_bottom_band;
-    }
+		uint256 last_collateral_ratio = DEI.global_collateral_ratio();
+		uint256 new_collateral_ratio = last_collateral_ratio;
 
-    function setInternalCooldown(uint256 _internal_cooldown) external onlyByOwnerOrGovernance {
-        internal_cooldown = _internal_cooldown;
-    }
+		if(FIP_6){
+			require(dei_price > DEI_top_band || dei_price < DEI_bottom_band, "PIDController::Use PIDController when DEI is outside of peg");
+		}
 
-    function setFraxStep(uint256 _new_step) external onlyByOwnerOrGovernance {
-        frax_step = _new_step;
-    }
+		// First, check if the price is out of the band
+		if(dei_price > DEI_top_band){
+			new_collateral_ratio = last_collateral_ratio.sub(dei_step);
+		} else if (dei_price < DEI_bottom_band){
+			new_collateral_ratio = last_collateral_ratio.add(dei_step);
 
-    function setPriceBands(uint256 _top_band, uint256 _bottom_band) external onlyByOwnerOrGovernance {
-        FRAX_top_band = _top_band;
-        FRAX_bottom_band = _bottom_band;
-    }
+		// Else, check if the growth ratio has increased or decreased since last update
+		} else if(use_growth_ratio){
+			if(new_growth_ratio > growth_ratio.mul(1e6 + GR_top_band).div(1e6)){
+				new_collateral_ratio = last_collateral_ratio.sub(dei_step);
+			} else if (new_growth_ratio < growth_ratio.mul(1e6 - GR_bottom_band).div(1e6)){
+				new_collateral_ratio = last_collateral_ratio.add(dei_step);
+			}
+		}
 
-    function setTimelock(address new_timelock) external onlyByOwnerOrGovernance {
-        require(new_timelock != address(0), "Timelock address cannot be 0");
-        timelock_address = new_timelock;
-    }
+		growth_ratio = new_growth_ratio;
+		last_update = block.timestamp;
 
-    function toggleCollateralRatio(bool _is_paused) external onlyByOwnerOrGovernance {
-    	collateral_ratio_paused = _is_paused;
-    }
+		// No need for checking CR under 0 as the last_collateral_ratio.sub(dei_step) will throw 
+		// an error above in that case
+		if(new_collateral_ratio > 1e6){
+			new_collateral_ratio = 1e6;
+		}
 
-    function activateFIP6(bool _activate) external onlyByOwnerOrGovernance {
-        FIP_6 = _activate;
-    }
+		if(is_active){
+			uint256 delta_collateral_ratio;
+			if(new_collateral_ratio > last_collateral_ratio){
+				delta_collateral_ratio = new_collateral_ratio - last_collateral_ratio;
+				DEI.setPriceTarget(0); // Set to zero to increase CR
+				emit DEIdecollateralize(new_collateral_ratio);
+			} else if (new_collateral_ratio < last_collateral_ratio){
+				delta_collateral_ratio = last_collateral_ratio - new_collateral_ratio;
+				DEI.setPriceTarget(1000e6); // Set to high value to decrease CR
+				emit DEIrecollateralize(new_collateral_ratio);
+			}
+
+			DEI.setDEIStep(delta_collateral_ratio); // Change by the delta
+			uint256 cooldown_before = DEI.refresh_cooldown(); // Note the existing cooldown period
+			DEI.setRefreshCooldown(0); // Unlock the CR cooldown
+
+			DEI.refreshCollateralRatio(dei_price, expire_block, sigs); // Refresh CR
+
+			// Reset params
+			DEI.setDEIStep(0);
+			DEI.setRefreshCooldown(cooldown_before); // Set the cooldown period to what it was before, or until next controller refresh
+			DEI.setPriceTarget(1e6);           
+		}
+	}
+
+	// ========== RESTRICTED FUNCTIONS ==========
+
+	function activate(bool _state) external onlyOwner {
+		is_active = _state;
+	}
+
+	function useGrowthRatio(bool _use_growth_ratio) external onlyOwner {
+		use_growth_ratio = _use_growth_ratio;
+	}
+
+	function setReserveTracker(address _reserve_tracker_address) external onlyOwner {
+		reserve_tracker_address = _reserve_tracker_address;
+		reserve_tracker = ReserveTracker(_reserve_tracker_address);
+	}
+
+	// function setMetapool(address _metapool_address) external onlyOwner {
+	// 	dei_metapool_address = _metapool_address;
+	// 	dei_metapool = IMetaImplementationUSD(_metapool_address);
+	// }
+
+	// As a percentage added/subtracted from the previous; e.g. top_band = 4000 = 0.4% -> will decollat if GR increases by 0.4% or more
+	function setGrowthRatioBands(uint256 _GR_top_band, uint256 _GR_bottom_band) external onlyOwner {
+		GR_top_band = _GR_top_band;
+		GR_bottom_band = _GR_bottom_band;
+	}
+
+	function setInternalCooldown(uint256 _internal_cooldown) external onlyOwner {
+		internal_cooldown = _internal_cooldown;
+	}
+
+	function setDEIStep(uint256 _new_step) external onlyOwner {
+		dei_step = _new_step;
+	}
+
+	function setPriceBands(uint256 _top_band, uint256 _bottom_band) external onlyOwner {
+		DEI_top_band = _top_band;
+		DEI_bottom_band = _bottom_band;
+	}
+
+	function toggleCollateralRatio(bool _is_paused) external onlyOwner {
+		collateral_ratio_paused = _is_paused;
+	}
+
+	function activateFIP6(bool _activate) external onlyOwner {
+		FIP_6 = _activate;
+	}
 
 
-    /* ========== EVENTS ========== */  
-    event FRAXdecollateralize(uint256 new_collateral_ratio);
-    event FRAXrecollateralize(uint256 new_collateral_ratio);
+	// ========== EVENTS ==========
+	event DEIdecollateralize(uint256 new_collateral_ratio);
+	event DEIrecollateralize(uint256 new_collateral_ratio);
 }
