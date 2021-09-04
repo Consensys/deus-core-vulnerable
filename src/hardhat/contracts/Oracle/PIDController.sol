@@ -1,6 +1,5 @@
-/*
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity >=0.6.11;
+pragma solidity 0.8.7;
 
 // =================================================================================================================
 //  _|_|_|    _|_|_|_|  _|    _|    _|_|_|      _|_|_|_|  _|                                                       |
@@ -27,14 +26,17 @@ import "../Math/SafeMath.sol";
 import "./ReserveTracker.sol";
 
 
-contract PIDController is Owned {
+contract PIDController is AccessControl {
 	using SafeMath for uint256;
+
+	// Roles
+    bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
 
 	// Instances
 	DEIStablecoin private DEI;
 	DEUSToken private DEUS;
 	ReserveTracker private reserve_tracker;
-	IMetaImplementationUSD private dei_metapool;
+	// IMetaImplementationUSD private dei_metapool;
 
 	// DEI and DEUS addresses
 	address private dei_contract_address;
@@ -42,7 +44,7 @@ contract PIDController is Owned {
 
 	// Misc addresses
 	address public reserve_tracker_address;
-	address private dei_metapool_address;
+	// address private dei_metapool_address;
 
 	// 6 decimals of precision
 	uint256 public growth_ratio;
@@ -66,8 +68,8 @@ contract PIDController is Owned {
 
 	// ========== MODIFIERS ==========
 
-	modifier onlyByOwnerOrGovernance() {
-		require(msg.sender == owner, "PIDController: You are not owner");
+	modifier onlyOwner() {
+		require(hasRole(OWNER_ROLE, msg.sender), "PIDController: You are not owner");
 		_;
 	}
 
@@ -76,9 +78,8 @@ contract PIDController is Owned {
 	constructor(
 		address _dei_contract_address,
 		address _deus_contract_address,
-		address _creator_address,
 		address _reserve_tracker_address
-	) Owned(_creator_address) {
+	) {
 		dei_contract_address = _dei_contract_address;
 		deus_contract_address = _deus_contract_address;
 		reserve_tracker_address = _reserve_tracker_address;
@@ -91,23 +92,42 @@ contract PIDController is Owned {
 		GR_top_band = 1000;
 		GR_bottom_band = 1000; 
 		is_active = false;
+
+		_setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+		grantRole(OWNER_ROLE, msg.sender);
 	}
 
 	// ========== PUBLIC MUTATIVE FUNCTIONS ==========
+
+	function getChainID() public view returns (uint256) {
+        uint256 id;
+        assembly {
+            id := chainid()
+        }
+        return id;
+    }
 	
-	function refreshCollateralRatio() public {
-		require(collateral_ratio_paused == false, "Collateral Ratio has been paused");
+	function refreshCollateralRatio(uint deus_price, uint dei_price, uint256 expire_block, bytes[] calldata sigs) external {
+		require(collateral_ratio_paused == false, "PIDController::Collateral Ratio has been paused");
 		uint256 time_elapsed = (block.timestamp).sub(last_update);
-		require(time_elapsed >= internal_cooldown, "internal cooldown not passed");
+		require(time_elapsed >= internal_cooldown, "PIDController::Internal cooldown not passed");
 		uint256 deus_reserves = reserve_tracker.getDEUSReserves();
-		uint256 deus_price = reserve_tracker.getDEUSPrice();
-		
+
+		bytes32 sighash = keccak256(abi.encodePacked(
+										deus_contract_address,
+										deus_price,
+										expire_block,
+                                    	getChainID()
+                                    ));
+
+		DEI.verify_price(sighash, sigs);
+
 		uint256 deus_liquidity = (deus_reserves.mul(deus_price)); // Has 6 decimals of precision
 
 		uint256 dei_supply = DEI.totalSupply();
 		
 		// Get the DEI TWAP on Curve Metapool
-		uint256 dei_price = reserve_tracker.dei_twap_price();
+		// uint256 dei_price = reserve_tracker.dei_twap_price();
 
 		uint256 new_growth_ratio = deus_liquidity.div(dei_supply); // (E18 + E6) / E18
 
@@ -115,7 +135,7 @@ contract PIDController is Owned {
 		uint256 new_collateral_ratio = last_collateral_ratio;
 
 		if(FIP_6){
-			require(dei_price > DEI_top_band || dei_price < DEI_bottom_band, "Use PIDController when DEI is outside of peg");
+			require(dei_price > DEI_top_band || dei_price < DEI_bottom_band, "PIDController::Use PIDController when DEI is outside of peg");
 		}
 
 		// First, check if the price is out of the band
@@ -158,7 +178,7 @@ contract PIDController is Owned {
 			uint256 cooldown_before = DEI.refresh_cooldown(); // Note the existing cooldown period
 			DEI.setRefreshCooldown(0); // Unlock the CR cooldown
 
-			DEI.refreshCollateralRatio(); // Refresh CR
+			DEI.refreshCollateralRatio(dei_price, expire_block, sigs); // Refresh CR
 
 			// Reset params
 			DEI.setDEIStep(0);
@@ -169,53 +189,48 @@ contract PIDController is Owned {
 
 	// ========== RESTRICTED FUNCTIONS ==========
 
-	function activate(bool _state) external onlyByOwnerOrGovernance {
+	function activate(bool _state) external onlyOwner {
 		is_active = _state;
 	}
 
-	function useGrowthRatio(bool _use_growth_ratio) external onlyByOwnerOrGovernance {
+	function useGrowthRatio(bool _use_growth_ratio) external onlyOwner {
 		use_growth_ratio = _use_growth_ratio;
 	}
 
-	function setReserveTracker(address _reserve_tracker_address) external onlyByOwnerOrGovernance {
+	function setReserveTracker(address _reserve_tracker_address) external onlyOwner {
 		reserve_tracker_address = _reserve_tracker_address;
 		reserve_tracker = ReserveTracker(_reserve_tracker_address);
 	}
 
-	function setMetapool(address _metapool_address) external onlyByOwnerOrGovernance {
-		dei_metapool_address = _metapool_address;
-		dei_metapool = IMetaImplementationUSD(_metapool_address);
-	}
+	// function setMetapool(address _metapool_address) external onlyOwner {
+	// 	dei_metapool_address = _metapool_address;
+	// 	dei_metapool = IMetaImplementationUSD(_metapool_address);
+	// }
 
 	// As a percentage added/subtracted from the previous; e.g. top_band = 4000 = 0.4% -> will decollat if GR increases by 0.4% or more
-	function setGrowthRatioBands(uint256 _GR_top_band, uint256 _GR_bottom_band) external onlyByOwnerOrGovernance {
+	function setGrowthRatioBands(uint256 _GR_top_band, uint256 _GR_bottom_band) external onlyOwner {
 		GR_top_band = _GR_top_band;
 		GR_bottom_band = _GR_bottom_band;
 	}
 
-	function setInternalCooldown(uint256 _internal_cooldown) external onlyByOwnerOrGovernance {
+	function setInternalCooldown(uint256 _internal_cooldown) external onlyOwner {
 		internal_cooldown = _internal_cooldown;
 	}
 
-	function setDEIStep(uint256 _new_step) external onlyByOwnerOrGovernance {
+	function setDEIStep(uint256 _new_step) external onlyOwner {
 		dei_step = _new_step;
 	}
 
-	function setPriceBands(uint256 _top_band, uint256 _bottom_band) external onlyByOwnerOrGovernance {
+	function setPriceBands(uint256 _top_band, uint256 _bottom_band) external onlyOwner {
 		DEI_top_band = _top_band;
 		DEI_bottom_band = _bottom_band;
 	}
 
-	function setTimelock(address new_timelock) external onlyByOwnerOrGovernance {
-		require(new_timelock != address(0), "Timelock address cannot be 0");
-		timelock_address = new_timelock;
-	}
-
-	function toggleCollateralRatio(bool _is_paused) external onlyByOwnerOrGovernance {
+	function toggleCollateralRatio(bool _is_paused) external onlyOwner {
 		collateral_ratio_paused = _is_paused;
 	}
 
-	function activateFIP6(bool _activate) external onlyByOwnerOrGovernance {
+	function activateFIP6(bool _activate) external onlyOwner {
 		FIP_6 = _activate;
 	}
 
@@ -224,4 +239,3 @@ contract PIDController is Owned {
 	event DEIdecollateralize(uint256 new_collateral_ratio);
 	event DEIrecollateralize(uint256 new_collateral_ratio);
 }
-*/
