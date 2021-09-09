@@ -30,6 +30,7 @@ import "../Staking/Owned.sol";
 import "../DEUS/DEUS.sol";
 import "./Pools/DEIPool.sol";
 import "../Oracle/Oracle.sol";
+import "../Oracle/ReserveTracker.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 contract DEIStablecoin is ERC20Custom, AccessControl {
@@ -47,6 +48,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 	address public creator_address;
 	address public deus_address;
 	uint256 public constant genesis_supply = 10000e18; // genesis supply is 10k on Mainnet. This is to help with establishing the Uniswap pools, as they need liquidity
+	address public reserve_tracker_address;
 
 	// The addresses in this array are added by the oracle and these contracts are able to mint DEI
 	address[] public dei_pools_array;
@@ -66,6 +68,22 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 	bytes32 public constant COLLATERAL_RATIO_PAUSER = keccak256("COLLATERAL_RATIO_PAUSER");
 	bytes32 public constant TRUSTY_ROLE = keccak256("TRUSTY_ROLE");
 	bool public collateral_ratio_paused = false;
+
+
+	// 6 decimals of precision
+	uint256 public growth_ratio;
+	uint256 public GR_top_band;
+	uint256 public GR_bottom_band;
+
+	// Bands
+	uint256 public DEI_top_band;
+	uint256 public DEI_bottom_band;
+
+	// Booleans
+	bool public is_active;
+	bool public use_growth_ratio;
+	bool public FIP_6;
+
 
 	/* ========== MODIFIERS ========== */
 
@@ -96,8 +114,8 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 		string memory _name,
 		string memory _symbol,
 		address _creator_address,
-		address _trusty_address
-		// address _timelock_address
+		address _trusty_address,
+		address _reserve_tracker_address
 	){
 		require(
 			_creator_address != address(0),
@@ -115,6 +133,13 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 		price_target = 1000000; // Collateral ratio will adjust according to the $1 price target at genesis
 		price_band = 5000; // Collateral ratio will not adjust if between $0.995 and $1.005 at genesis
 		grantRole(TRUSTY_ROLE, _trusty_address);
+
+		reserve_tracker_address = _reserve_tracker_address;
+
+		// Upon genesis, if GR changes by more than 1% percent, enable change of collateral ratio
+		GR_top_band = 1000;
+		GR_bottom_band = 1000; 
+		is_active = false;
 	}
 
 	/* ========== VIEWS ========== */
@@ -172,46 +197,166 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 	// There needs to be a time interval that this can be called. Otherwise it can be called multiple times per expansion.
 	uint256 public last_call_time; // Last time the refreshCollateralRatio function was called
 
-	function refreshCollateralRatio(uint256 dei_price_cur, uint256 expire_block, bytes[] calldata sigs) public {
-		require(
-			collateral_ratio_paused == false,
-			"DEI::refreshCollateralRatio: Collateral Ratio has been paused"
-		);
+	// Note: New function to refresh collateral ratio
+	function refreshCollateralRatio(uint deus_price, uint dei_price, uint256 expire_block, bytes[] calldata sigs) external {
+		require(collateral_ratio_paused == false, "DEI::Collateral Ratio has been paused");
+		uint256 time_elapsed = (block.timestamp) - last_call_time;
+		require(time_elapsed >= refresh_cooldown, "DEI::Internal cooldown not passed");
+		uint256 deus_reserves = ReserveTracker(reserve_tracker_address).getDEUSReserves();
 
-		require(expire_block >= block.number, "DEI::refreshCollateralRatio: signature is expired.");
-		bytes32 sighash = keccak256(abi.encodePacked(address(this), dei_price_cur, expire_block, getChainID()));
-		require(verify_price(sighash, sigs), "DEI::refreshCollateralRatio: invalid signatures");
+		bytes32 sighash = keccak256(abi.encodePacked(
+										deus_address,
+										deus_price,
+										address(this),
+										dei_price,
+										expire_block,
+                                    	getChainID()
+                                    ));
 
-		require(
-			block.timestamp - last_call_time >= refresh_cooldown,
-			"DEI: Must wait for the refresh cooldown since last refresh"
-		);
+		verify_price(sighash, sigs);
 
-		// Step increments are 0.25% (upon genesis, changable by setDEIStep())
+		uint256 deus_liquidity = deus_reserves * deus_price; // Has 6 decimals of precision
 
-		if (dei_price_cur > price_target + price_band) {
-			//decrease collateral ratio
-			if (global_collateral_ratio <= dei_step) {
-				//if within a step of 0, go to 0
-				global_collateral_ratio = 0;
-			} else {
-				global_collateral_ratio = global_collateral_ratio - dei_step;
-			}
-		} else if (dei_price_cur < price_target - price_band) {
-			//increase collateral ratio
-			if (global_collateral_ratio + dei_step >= 1000000) {
-				global_collateral_ratio = 1000000; // cap collateral ratio at 1.000000
-			} else {
-				global_collateral_ratio = global_collateral_ratio + dei_step;
+		uint256 dei_supply = totalSupply();
+
+		uint256 new_growth_ratio = deus_liquidity / dei_supply; // (E18 + E6) / E18
+
+		uint256 last_collateral_ratio = global_collateral_ratio;
+		uint256 new_collateral_ratio = last_collateral_ratio;
+
+		if(FIP_6){
+			require(dei_price > DEI_top_band || dei_price < DEI_bottom_band, "DEI::Use refreshCollateralRatio when DEI is outside of peg");
+		}
+
+		// First, check if the price is out of the band
+		if(dei_price > DEI_top_band){
+			new_collateral_ratio = last_collateral_ratio - dei_step;
+		} else if (dei_price < DEI_bottom_band){
+			new_collateral_ratio = last_collateral_ratio + dei_step;
+
+		// Else, check if the growth ratio has increased or decreased since last update
+		} else if(use_growth_ratio){
+			if(new_growth_ratio > growth_ratio * (1e6 + GR_top_band) / 1e6){
+				new_collateral_ratio = last_collateral_ratio - dei_step;
+			} else if (new_growth_ratio < growth_ratio * (1e6 - GR_bottom_band) / 1e6){
+				new_collateral_ratio = last_collateral_ratio + dei_step;
 			}
 		}
 
-		last_call_time = block.timestamp; // Set the time of the last expansion
+		growth_ratio = new_growth_ratio;
+		last_call_time = block.timestamp;
 
-		emit CollateralRatioRefreshed(global_collateral_ratio);
+		// No need for checking CR under 0 as the last_collateral_ratio.sub(dei_step) will throw 
+		// an error above in that case
+		if(new_collateral_ratio > 1e6){
+			new_collateral_ratio = 1e6;
+		}
+
+		if(is_active){
+			uint256 delta_collateral_ratio;
+			if(new_collateral_ratio > last_collateral_ratio){
+				delta_collateral_ratio = new_collateral_ratio - last_collateral_ratio;
+				price_target = 0; // Set to zero to increase CR
+				emit DEIdecollateralize(new_collateral_ratio);
+			} else if (new_collateral_ratio < last_collateral_ratio){
+				delta_collateral_ratio = last_collateral_ratio - new_collateral_ratio;
+				price_target = 1000e6; // Set to high value to decrease CR
+				emit DEIrecollateralize(new_collateral_ratio);
+			}
+
+			// refreshCollateralRatio(dei_price, expire_block, sigs); // Refresh CR
+			
+			if (dei_price > price_target + price_band) {
+				//decrease collateral ratio
+				if (global_collateral_ratio <= delta_collateral_ratio) {
+					//if within a step of 0, go to 0
+					global_collateral_ratio = 0;
+				} else {
+					global_collateral_ratio = global_collateral_ratio - delta_collateral_ratio;
+				}
+			} else if (dei_price < price_target - price_band) {
+				//increase collateral ratio
+				if (global_collateral_ratio + delta_collateral_ratio >= 1000000) {
+					global_collateral_ratio = 1000000; // cap collateral ratio at 1.000000
+				} else {
+					global_collateral_ratio = global_collateral_ratio + delta_collateral_ratio;
+				}
+			}
+
+			// Reset params
+			price_target = 1e6;
+		}
 	}
 
+
+
+	// Note: Old function to refresh collateral ratio
+	// function refreshCollateralRatio(uint256 dei_price_cur, uint256 expire_block, bytes[] calldata sigs) public {
+	// 	require(
+	// 		collateral_ratio_paused == false,
+	// 		"DEI::refreshCollateralRatio: Collateral Ratio has been paused"
+	// 	);
+
+	// 	require(expire_block >= block.number, "DEI::refreshCollateralRatio: signature is expired.");
+	// 	bytes32 sighash = keccak256(abi.encodePacked(address(this), dei_price_cur, expire_block, getChainID()));
+	// 	require(verify_price(sighash, sigs), "DEI::refreshCollateralRatio: invalid signatures");
+
+	// 	require(
+	// 		block.timestamp - last_call_time >= refresh_cooldown,
+	// 		"DEI: Must wait for the refresh cooldown since last refresh"
+	// 	);
+
+	// 	// Step increments are 0.25% (upon genesis, changable by setDEIStep())
+
+	// 	if (dei_price_cur > price_target + price_band) {
+	// 		//decrease collateral ratio
+	// 		if (global_collateral_ratio <= dei_step) {
+	// 			//if within a step of 0, go to 0
+	// 			global_collateral_ratio = 0;
+	// 		} else {
+	// 			global_collateral_ratio = global_collateral_ratio - dei_step;
+	// 		}
+	// 	} else if (dei_price_cur < price_target - price_band) {
+	// 		//increase collateral ratio
+	// 		if (global_collateral_ratio + dei_step >= 1000000) {
+	// 			global_collateral_ratio = 1000000; // cap collateral ratio at 1.000000
+	// 		} else {
+	// 			global_collateral_ratio = global_collateral_ratio + dei_step;
+	// 		}
+	// 	}
+
+	// 	last_call_time = block.timestamp; // Set the time of the last expansion
+
+	// 	emit CollateralRatioRefreshed(global_collateral_ratio);
+	// }
+
 	/* ========== RESTRICTED FUNCTIONS ========== */
+
+	function activate(bool _state) external onlyByTrusty {
+		is_active = _state;
+	}
+
+	function useGrowthRatio(bool _use_growth_ratio) external onlyByTrusty {
+		use_growth_ratio = _use_growth_ratio;
+	}
+
+	function setReserveTracker(address _reserve_tracker_address) external onlyByTrusty {
+		reserve_tracker_address = _reserve_tracker_address;
+	}
+
+	function setGrowthRatioBands(uint256 _GR_top_band, uint256 _GR_bottom_band) external onlyByTrusty {
+		GR_top_band = _GR_top_band;
+		GR_bottom_band = _GR_bottom_band;
+	}
+
+	function setPriceBands(uint256 _top_band, uint256 _bottom_band) external onlyByTrusty {
+		DEI_top_band = _top_band;
+		DEI_bottom_band = _bottom_band;
+	}
+
+	function activateFIP6(bool _activate) external onlyByTrusty {
+		FIP_6 = _activate;
+	}
 
 	// Used by pools when user redeems
 	function pool_burn_from(address b_address, uint256 b_amount)
@@ -346,4 +491,6 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 	event PriceBandSet(uint256 price_band);
 	event CollateralRatioToggled(bool collateral_ratio_paused);
 	event OracleSet(address oracle);
+	event DEIdecollateralize(uint256 new_collateral_ratio);
+	event DEIrecollateralize(uint256 new_collateral_ratio);
 }
