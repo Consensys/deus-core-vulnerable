@@ -28,7 +28,6 @@ import "../Uniswap/Interfaces/IUniswapV2Pair.sol";
 import "../Governance/AccessControl.sol";
 
 contract ReserveTracker is AccessControl {
-	using SafeMath for uint256;
 
 	// Roles
     bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
@@ -64,8 +63,8 @@ contract ReserveTracker is AccessControl {
 
 	// The pair of which to get DEI price from
 	// address public dei_price_oracle_address;
-	address public dei_pair_collateral_address;
-	uint256 public dei_pair_collateral_decimals;
+	// address public dei_pair_collateral_address;
+	// uint256 public dei_pair_collateral_decimals;
 	// UniswapPairOracle private dei_price_oracle;
 	// address public dei_metapool_address;
 	// IMetaImplementationUSD private dei_metapool;
@@ -125,10 +124,10 @@ contract ReserveTracker is AccessControl {
 			if (deus_pairs_array[i] != address(0)){
 				if(IUniswapV2Pair(deus_pairs_array[i]).token0() == deus_contract_address) {
 					(uint reserves0, , ) = IUniswapV2Pair(deus_pairs_array[i]).getReserves();
-					total_deus_reserves = total_deus_reserves.add(reserves0);
+					total_deus_reserves = total_deus_reserves + reserves0;
 				} else if (IUniswapV2Pair(deus_pairs_array[i]).token1() == deus_contract_address) {
 					( , uint reserves1, ) = IUniswapV2Pair(deus_pairs_array[i]).getReserves();
-					total_deus_reserves = total_deus_reserves.add(reserves1);
+					total_deus_reserves = total_deus_reserves + reserves1;
 				}
 			}
 		}

@@ -6,7 +6,7 @@ async function main() {
 	const collateralAddress = "0x9Ea9F4F8DDeb79f2b8d16EBA1Aff0306f8035919"; //DAI decimal: 18
 	const creatorAddress = "0x00c0c6558Dc28E749C3402766Cd603cec6400F91"; // DEUS 4
 	const trustyAddress = "0x00c0c6558Dc28E749C3402766Cd603cec6400F91"; // DEUS 4
-	const DAIPoolCeiling = "10000000000000";
+	const DAIPoolCeiling = "1000000000000000000000"; //1000 DAI
 	const minimumRequiredSignature = "1";
 
 	// Oracle

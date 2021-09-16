@@ -31,8 +31,8 @@ async function main() {
 
 	console.log("STAKING DEI-DAI deployed to:", stakingDEI_DAI.address);
 
-	deus.grantRole(deus.STAKING_MINTER_ROLE(), stakingDEI_DEUS.address)
-	deus.grantRole(deus.STAKING_MINTER_ROLE(), stakingDEI_DAI.address)
+	await deus.grantRole(deus.STAKING_MINTER_ROLE(), stakingDEI_DEUS.address)
+	await deus.grantRole(deus.STAKING_MINTER_ROLE(), stakingDEI_DAI.address)
 
 	console.log("STAKING DEI-DEUS deployed to:", stakingDEI_DEUS.address);
 	console.log("STAKING DEI-DAI deployed to:", stakingDEI_DAI.address);
