@@ -3,10 +3,10 @@ const hre = require("hardhat");
 
 async function main() {
 
-	const routerAddress = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'; // UniswapV2Router02
-	const collateralAddress = "0x6ea88583cd04C4D3fF36d3FB2B25deEf93FC78dD"; //D-USDC decimal: 6
-	const creatorAddress = "0xB02648091da9e0AAcdd9F5cB9080C4893cad6C4E"; // DEUS 2
-	const trustyAddress = "0xB02648091da9e0AAcdd9F5cB9080C4893cad6C4E"; // DEUS 2
+	const routerAddress = '0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff'; // UniswapV2Router02
+	const collateralAddress = "0x0eF52C70fB995d0334fcBc98F4a3b2e6B1f062F5"; //D-USDC decimal: 6
+	const creatorAddress = "0x00c0c6558Dc28E749C3402766Cd603cec6400F91"; // DEUS 4
+	const trustyAddress = "0x00c0c6558Dc28E749C3402766Cd603cec6400F91"; // DEUS 4
 	const USDCPoolCeiling = "10000000000000";
 	const minimumRequiredSignature = "1";
 
@@ -17,12 +17,12 @@ async function main() {
 	const collatInDei_Collat = "1000000000" // 1000
 
 	// Staking
-	const daoAddress = "0xB02648091da9e0AAcdd9F5cB9080C4893cad6C4E"; // DEUS 2
-	const foundersAddress = "0xB02648091da9e0AAcdd9F5cB9080C4893cad6C4E"; // DEUS 2
+	const daoAddress = "0x00c0c6558Dc28E749C3402766Cd603cec6400F91"; // DEUS 4
+	const foundersAddress = "0x00c0c6558Dc28E749C3402766Cd603cec6400F91"; // DEUS 4
 	const daoShare = "100000000000000000";
 	const foundersShare = "200000000000000000";
 	const rewardPerBlock = "1000000000000000000";
-	const rewardPerBlockSetter = "0xB02648091da9e0AAcdd9F5cB9080C4893cad6C4E"; // DEUS 2
+	const rewardPerBlockSetter = "0x00c0c6558Dc28E749C3402766Cd603cec6400F91"; // DEUS 4
 
 	// Oracle
 	const oracleServerAddress = "0x64761516386d42f1ebc48BA388bC189902df4a05";
@@ -52,7 +52,7 @@ async function main() {
 	// DEUS
 	const deusContract = await hre.ethers.getContractFactory("contracts/DEUS/DEUS.sol:DEUSToken")
 	// string memory _name, string memory _symbol, address _creator_address, address _trusty_address
-	const deus = await deusContract.deploy("Deus", "DEUS", creatorAddress, trustyAddress); 
+	const deus = await deusContract.deploy("DEUS", "DEUS", creatorAddress, trustyAddress); 
 	
 	await deus.deployed();
 	
@@ -95,13 +95,13 @@ async function main() {
 	await dei.approve(routerAddress, deiInDei_Collat + '0');
 	await deus.approve(routerAddress, deusInDei_Deus + '0');
 	await collateral.approve(routerAddress, collatInDei_Collat + '0')
-	await new Promise((resolve) => setTimeout(resolve, 10000));
+	await new Promise((resolve) => setTimeout(resolve, 60000));
 	// address tokenA, address tokenB, uint256 amountADesired, uint256 amountBDesired, uint256 amountAMin, uint256 amountBMin, address to, uint256 deadline
 	await router.addLiquidity(dei.address, collateralAddress, deiInDei_Collat, collatInDei_Collat, deiInDei_Collat, collatInDei_Collat, creatorAddress, (Date.now() + 10000));
-	await new Promise((resolve) => setTimeout(resolve, 10000));
+	await new Promise((resolve) => setTimeout(resolve, 120000));
 	await router.addLiquidity(dei.address, deus.address, deiInDei_Deus, deusInDei_Deus, deiInDei_Deus, deusInDei_Deus, creatorAddress, (Date.now() + 10000));
 
-	await new Promise((resolve) => setTimeout(resolve, 100000));
+	await new Promise((resolve) => setTimeout(resolve, 360000));
 
 	const dei_deusAddress =  await factory.getPair(dei.address, deus.address);
 	const dei_collatAddress =  await factory.getPair(dei.address, collateralAddress);

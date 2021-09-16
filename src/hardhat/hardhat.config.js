@@ -101,6 +101,14 @@ module.exports = {
 			gas: "auto",
 			gasPrice: "auto",
 			gasMultiplier: 1.2
+		},
+		polygon: {
+			url : "https://polygon-rpc.com/",
+			accounts: [process.env.PRIVATE_KEY],
+			chainId: 137,
+			gas: "auto",
+			gasPrice: 20000000000,
+			gasMultiplier: 1.2
 		}
     },
 	solidity: {
@@ -116,6 +124,15 @@ module.exports = {
 			},
 			{
 				version: "0.6.11",
+				settings: {
+					optimizer: {
+						enabled: true,
+						runs: 100000
+					}
+				  }
+			},
+			{
+				version: "0.6.6",
 				settings: {
 					optimizer: {
 						enabled: true,
@@ -181,7 +198,8 @@ module.exports = {
 	},
 	etherscan: {
 		// apiKey: process.env.ETHERSCAN_API_KEY, // ETH Mainnet
-		apiKey: process.env.HECO_API_KEY, // HECO Mainnet
+		apiKey: process.env.POLYGON_API_KEY, // ETH Mainnet
+		// apiKey: process.env.HECO_API_KEY, // HECO Mainnet
 		// apiKey: process.env.BSCSCAN_API_KEY // BSC
 	},
 
