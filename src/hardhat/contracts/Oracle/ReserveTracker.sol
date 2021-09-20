@@ -33,25 +33,11 @@ contract ReserveTracker is AccessControl {
     bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
 
 	// Various precisions
-	// uint256 public CONSULT_DEUS_DEC;
-	// uint256 public CONSULT_DEI_DEC;
 	uint256 private PRICE_PRECISION = 1e6;
 
 	// Contract addresses
 	address private dei_contract_address;
 	address private deus_contract_address;
-
-	// The pair of which to get DEUS price from
-	// address public deus_weth_oracle_address;
-	// address public weth_collat_oracle_address;
-	// address private weth_address;
-	// UniswapPairOracle private deus_weth_oracle;
-	// UniswapPairOracle private weth_collat_oracle;
-	// uint256 public weth_collat_decimals;
-
-	// Chainlink
-	// ChainlinkFXSUSDPriceConsumer private chainlink_deus_oracle;
-	// uint256 public chainlink_deus_oracle_decimals;
 
 	// Array of pairs for DEUS
 	address[] public deus_pairs_array;
@@ -60,21 +46,6 @@ contract ReserveTracker is AccessControl {
 	mapping(address => bool) public deus_pairs;
 
 	uint256 public deus_reserves;
-
-	// The pair of which to get DEI price from
-	// address public dei_price_oracle_address;
-	// address public dei_pair_collateral_address;
-	// uint256 public dei_pair_collateral_decimals;
-	// UniswapPairOracle private dei_price_oracle;
-	// address public dei_metapool_address;
-	// IMetaImplementationUSD private dei_metapool;
-
-	// TWAP Related
-	// uint256 public last_timestamp;
-	// uint256[2] public old_twap;
-	// uint256 public dei_twap_price;
-	// uint256 public PERIOD = 3600; // 1-hour TWAP on deployment
-	// bool public twap_paused;
 
 	// ========== MODIFIERS ==========
 
@@ -97,25 +68,6 @@ contract ReserveTracker is AccessControl {
 
 	// ========== VIEWS ==========
 
-	// // Returns DEI price with 6 decimals of precision
-	// function getDEIPrice() public view returns (uint256) {
-	//     return dei_price_oracle.consult(dei_contract_address, CONSULT_DEI_DEC);
-	// }
-
-	// // Returns DEUS price with 6 decimals of precision
-	// function getDEUSPrice() public view returns (uint256) {
-	//     uint256 deus_weth_price = deus_weth_oracle.consult(deus_contract_address, 1e6);
-	//     return weth_collat_oracle.consult(weth_address, CONSULT_DEUS_DEC).mul(deus_weth_price).div(1e6);
-	// }
-
-	// function getDEIPrice() public view returns (uint256) {
-	// 	return dei_twap_price;
-	// }
-
-	// function getDEUSPrice() public view returns (uint256) {
-	// 	return uint256(chainlink_deus_oracle.getLatestPrice()).mul(PRICE_PRECISION).div(10 ** chainlink_deus_oracle_decimals);
-	// }
-
 	function getDEUSReserves() public view returns (uint256) {
 		uint256 total_deus_reserves = 0;
 
@@ -134,26 +86,6 @@ contract ReserveTracker is AccessControl {
 
 		return total_deus_reserves;
 	}
-
-	// ========== PUBLIC MUTATIVE FUNCTIONS ==========
-
-	// function refreshDEICurveTWAP() public returns (uint256) {
-	// 	require(twap_paused == false, "TWAP has been paused");
-	// 	uint256 time_elapsed = (block.timestamp).sub(last_timestamp);
-	// 	require(time_elapsed >= PERIOD, 'ReserveTracker: PERIOD_NOT_ELAPSED');
-	// 	uint256[2] memory new_twap = dei_metapool.get_price_cumulative_last();
-	// 	uint256[2] memory balances = dei_metapool.get_twap_balances(old_twap, new_twap, time_elapsed);
-	// 	last_timestamp = block.timestamp;
-	// 	old_twap = new_twap;
-	// 	dei_twap_price = dei_metapool.get_dy(1, 0, 1e18, balances).mul(1e6).div(dei_metapool.get_virtual_price());
-	// 	return dei_twap_price;
-	// }
-
-	// ========== RESTRICTED FUNCTIONS ==========
-
-	// function toggleCurveTWAP(bool _state) external onlyByOwnerOrGovernance {
-	// 	twap_paused = _state;
-	// }
 
 	// Adds collateral addresses supported, such as tether and busd, must be ERC20 
 	function addDEUSPair(address pair_address) public onlyByOwnerOrGovernance {
