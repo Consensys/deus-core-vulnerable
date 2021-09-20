@@ -29,67 +29,68 @@ async function main() {
 
 	
 	// ERC20
-	const erc20Contract = await hre.ethers.getContractFactory("ERC20");
-	const collateral = await erc20Contract.attach(collateralAddress);
+	const erc20Instance = await hre.ethers.getContractFactory("ERC20");
+	const collateral = await erc20Instance.attach(collateralAddress);
 
 	// ORACLE
-	const oracleContract = await hre.ethers.getContractFactory("Oracle");
+	const oracleInstance = await hre.ethers.getContractFactory("Oracle");
 	// address _admin, uint256 _minimumRequiredSignature, address _trusty_address
-	const oracle = await oracleContract.deploy(creatorAddress, minimumRequiredSignature, trustyAddress);
+	const oracle = await oracleInstance.deploy(creatorAddress, minimumRequiredSignature, trustyAddress);
 
 	await oracle.deployed();
 
 	console.log("ORACLE deployed to:", oracle.address);
 	
 	// DEI
-	const deiContract = await hre.ethers.getContractFactory("DEIStablecoin");
+	const deiInstance = await hre.ethers.getContractFactory("DEIStablecoin");
 	// string memory _name, string memory _symbol, address _creator_address, address _trusty_address
-	const dei = await deiContract.deploy("DEI", "DEI", creatorAddress, trustyAddress);
+	const dei = await deiInstance.deploy("DEI", "DEI", creatorAddress, trustyAddress);
 
 	await dei.deployed();
 
 	console.log("DEI deployed to:", dei.address);
+
 	// DEUS
-	const deusContract = await hre.ethers.getContractFactory("contracts/DEUS/DEUS.sol:DEUSToken")
+	const deusInstance = await hre.ethers.getContractFactory("contracts/DEUS/DEUS.sol:DEUSToken")
 	// string memory _name, string memory _symbol, address _creator_address, address _trusty_address
-	const deus = await deusContract.deploy("DEUS", "DEUS", creatorAddress, trustyAddress); 
+	const deus = await deusInstance.deploy("DEUS", "DEUS", creatorAddress, trustyAddress); 
 	
 	await deus.deployed();
 	
 	console.log("DEUS deployed to:", deus.address);
 	
 	// DEI POOL Librariy
-	const deiPoolLibraryContract = await hre.ethers.getContractFactory("DEIPoolLibrary")
+	const deiPoolLibraryInstance = await hre.ethers.getContractFactory("DEIPoolLibrary")
 	// empty
-	const deiPoolLibrary = await deiPoolLibraryContract.deploy();               
+	const deiPoolLibrary = await deiPoolLibraryInstance.deploy();               
 	
 	await deiPoolLibrary.deployed();
 	
 	console.log("DEI Pool Library deployed to:", deiPoolLibrary.address);
 	
 	// POOl USDC
-	const poolUSDCContract = await hre.ethers.getContractFactory("Pool_USDC")
+	const poolUSDCInstance = await hre.ethers.getContractFactory("Pool_USDC")
 	// address _dei_contract_address, address _deus_contract_address, address _collateral_address, address _trusty_address, address _admin_address, uint256 _pool_ceiling, address _library
-	const poolUSDC = await poolUSDCContract.deploy(dei.address, deus.address, collateralAddress, trustyAddress, creatorAddress, USDCPoolCeiling, deiPoolLibrary.address);
+	const poolUSDC = await poolUSDCInstance.deploy(dei.address, deus.address, collateralAddress, trustyAddress, creatorAddress, USDCPoolCeiling, deiPoolLibrary.address);
 	
 	await poolUSDC.deployed();
 	
 	console.log("Pool USDC deployed to:", poolUSDC.address);
 	
 	// ReserveTracker
-	const reserveTrackerContract = await hre.ethers.getContractFactory("ReserveTracker");
-	const reserveTracker = await reserveTrackerContract.deploy(dei.address, deus.address);
+	const reserveTrackerInstance = await hre.ethers.getContractFactory("ReserveTracker");
+	const reserveTracker = await reserveTrackerInstance.deploy(dei.address, deus.address);
 
 	await reserveTracker.deployed();
 
 	console.log("ReserveTracker deployed to:", reserveTracker.address);
 
 	// Uni
-	const routerContract = await hre.ethers.getContractFactory("UniswapV2Router02");
-	const router = await routerContract.attach(routerAddress);
+	const routerInstance = await hre.ethers.getContractFactory("UniswapV2Router02");
+	const router = await routerInstance.attach(routerAddress);
 
-	const factoryContract = await hre.ethers.getContractFactory("UniswapV2Factory");
-	const factory = await factoryContract.attach(await router.factory());
+	const factoryInstance = await hre.ethers.getContractFactory("UniswapV2Factory");
+	const factory = await factoryInstance.attach(await router.factory());
 
 	// Creating Pairs
 	await dei.approve(routerAddress, deiInDei_Collat + '0');
@@ -110,10 +111,10 @@ async function main() {
 	console.log("Dei-Collateral:", dei_collatAddress);
 
 	// Staking
-	const stakingContract = await hre.ethers.getContractFactory("Staking");
+	const stakingInstance = await hre.ethers.getContractFactory("Staking");
 	// address _stakedToken, address _rewardToken, uint256 _rewardPerBlock, uint256 _daoShare, uint256 _earlyFoundersShare, address _daoWallet, address _earlyFoundersWallet, address _rewardPerBlockSetter
-	const stakingDEI_DEUS = await stakingContract.deploy(dei_deusAddress, deus.address, rewardPerBlock, daoShare, foundersShare, daoAddress, foundersAddress, rewardPerBlockSetter);
-	const stakingDEI_USDC = await stakingContract.deploy(dei_collatAddress, deus.address, rewardPerBlock, daoShare, foundersShare, daoAddress, foundersAddress, rewardPerBlockSetter);
+	const stakingDEI_DEUS = await stakingInstance.deploy(dei_deusAddress, deus.address, rewardPerBlock, daoShare, foundersShare, daoAddress, foundersAddress, rewardPerBlockSetter);
+	const stakingDEI_USDC = await stakingInstance.deploy(dei_collatAddress, deus.address, rewardPerBlock, daoShare, foundersShare, daoAddress, foundersAddress, rewardPerBlockSetter);
 
 	await stakingDEI_DEUS.deployed();
 

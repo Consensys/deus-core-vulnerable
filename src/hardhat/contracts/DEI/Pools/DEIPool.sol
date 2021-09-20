@@ -206,6 +206,7 @@ contract DEIPool is AccessControl {
 	function mint1t1DEI(uint256 collateral_amount, uint256 collateral_price, uint256 expireBlock, bytes[] calldata sigs)
 		external
 		notMintPaused
+		returns (uint256)
 	{
 
 		require(
@@ -238,6 +239,7 @@ contract DEIPool is AccessControl {
 
 		daoShare += dei_amount_d18 *  minting_fee / 1e6;
 		IDEIStablecoin(dei_contract_address).pool_mint(msg.sender, dei_amount_d18);
+		return dei_amount_d18;
 	}
 
 	// 0% collateral-backed
@@ -246,7 +248,7 @@ contract DEIPool is AccessControl {
 		uint256 deus_current_price,
 		uint256 expireBlock,
 		bytes[] calldata sigs
-	) external notMintPaused {
+	) external notMintPaused returns (uint256) {
 		require(
 			IDEIStablecoin(dei_contract_address).global_collateral_ratio() == 0,
 			"Collateral ratio must be 0"
@@ -265,6 +267,7 @@ contract DEIPool is AccessControl {
 
 		IDEUSToken(deus_contract_address).pool_burn_from(msg.sender, deus_amount_d18);
 		IDEIStablecoin(dei_contract_address).pool_mint(msg.sender, dei_amount_d18);
+		return dei_amount_d18;
 	}
 
 	// Will fail if fully collateralized or fully algorithmic
@@ -276,7 +279,7 @@ contract DEIPool is AccessControl {
 		uint256 deus_current_price,
 		uint256 expireBlock,
 		bytes[] calldata sigs
-	) external notMintPaused {
+	) external notMintPaused returns (uint256) {
 		uint256 global_collateral_ratio = IDEIStablecoin(dei_contract_address).global_collateral_ratio();
 		require(
 			global_collateral_ratio < COLLATERAL_RATIO_MAX && global_collateral_ratio > 0,
@@ -320,6 +323,7 @@ contract DEIPool is AccessControl {
 
 		daoShare += mint_amount *  minting_fee / 1e6;
 		IDEIStablecoin(dei_contract_address).pool_mint(msg.sender, mint_amount);
+		return mint_amount;
 	}
 
 	// Redeem collateral. 100% collateral-backed
