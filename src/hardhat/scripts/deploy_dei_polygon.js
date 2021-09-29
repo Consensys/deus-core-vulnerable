@@ -144,7 +144,6 @@ async function main() {
 	
 	// uint256 new_ceiling, uint256 new_bonus_rate, uint256 new_redemption_delay, uint256 new_mint_fee, uint256 new_redeem_fee, uint256 new_buyback_fee, uint256 new_recollat_fee
 	await poolUSDC.setPoolParameters(USDCPoolCeiling, 0, 1, 1000, 1000, 1000, 1000);
-	await poolUSDC.toggleCollateralPrice(1000000);
 
 	await deus.grantRole(deus.STAKING_MINTER_ROLE(), stakingDEI_DEUS.address);
 	await deus.grantRole(deus.STAKING_MINTER_ROLE(), stakingDEI_USDC.address);

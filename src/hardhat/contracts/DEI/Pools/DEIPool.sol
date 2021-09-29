@@ -89,7 +89,6 @@ contract DEIPool is AccessControl {
 	bytes32 private constant REDEEM_PAUSER = keccak256("REDEEM_PAUSER");
 	bytes32 private constant BUYBACK_PAUSER = keccak256("BUYBACK_PAUSER");
 	bytes32 private constant RECOLLATERALIZE_PAUSER = keccak256("RECOLLATERALIZE_PAUSER");
-	bytes32 private constant COLLATERAL_PRICE_PAUSER = keccak256("COLLATERAL_PRICE_PAUSER");
     bytes32 public constant TRUSTY_ROLE = keccak256("TRUSTY_ROLE");
 	bytes32 public constant DAO_SHARE_COLLECTOR = keccak256("DAO_SHARE_COLLECTOR");
 
@@ -98,7 +97,6 @@ contract DEIPool is AccessControl {
 	bool public redeemPaused = false;
 	bool public recollateralizePaused = false;
 	bool public buyBackPaused = false;
-	bool public collateralPricePaused = false;
 
 	/* ========== MODIFIERS ========== */
 
@@ -153,7 +151,6 @@ contract DEIPool is AccessControl {
 		grantRole(REDEEM_PAUSER, _trusty_address);
 		grantRole(RECOLLATERALIZE_PAUSER, _trusty_address);
 		grantRole(BUYBACK_PAUSER, _trusty_address);
-		grantRole(COLLATERAL_PRICE_PAUSER, _trusty_address);
         grantRole(TRUSTY_ROLE, _trusty_address);
 	}
 
@@ -161,11 +158,7 @@ contract DEIPool is AccessControl {
 
 	// Returns dollar value of collateral held in this DEI pool
 	function collatDollarBalance(uint256 collat_usd_price) public view returns (uint256) {
-		if (collateralPricePaused == true) {
-			return ((collateral_token.balanceOf(address(this)) - unclaimedPoolCollateral) * (10**missing_decimals) * (pausedPrice)) / (PRICE_PRECISION);
-		} else {
-			return ((collateral_token.balanceOf(address(this)) - unclaimedPoolCollateral) * (10**missing_decimals) * collat_usd_price) / (PRICE_PRECISION);
-		}
+		return ((collateral_token.balanceOf(address(this)) - unclaimedPoolCollateral) * (10**missing_decimals) * collat_usd_price) / (PRICE_PRECISION);
 	}
 
 	// Returns the value of excess collateral held in this DEI pool, compared to what is needed to maintain the global collateral ratio
@@ -192,21 +185,11 @@ contract DEIPool is AccessControl {
 
 	/* ========== PUBLIC FUNCTIONS ========== */
 
-	// Returns the price of the pool collateral in USD
-	function getCollateralPrice(uint256 collateral_price) public view returns (uint256) {
-		if (collateralPricePaused == true) {
-			return pausedPrice;
-		} else {
-			return collateral_price;
-		}
-	}
-
-
 	// We separate out the 1t1, fractional and algorithmic minting functions for gas efficiency
 	function mint1t1DEI(uint256 collateral_amount, uint256 collateral_price, uint256 expireBlock, bytes[] calldata sigs)
 		external
 		notMintPaused
-		returns (uint256)
+		returns (uint256 dei_amount_d18)
 	{
 
 		require(
@@ -223,8 +206,8 @@ contract DEIPool is AccessControl {
 		require(IDEIStablecoin(dei_contract_address).verify_price(sighash, sigs), "POOL::mint1t1DEI: invalid signatures");
 
 		uint256 collateral_amount_d18 = collateral_amount * (10**missing_decimals);
-		uint256 dei_amount_d18 = poolLibrary.calcMint1t1DEI(
-			getCollateralPrice(collateral_price),
+		dei_amount_d18 = poolLibrary.calcMint1t1DEI(
+			collateral_price,
 			collateral_amount_d18
 		); //1 DEI for each $1 worth of collateral
 
@@ -239,7 +222,6 @@ contract DEIPool is AccessControl {
 
 		daoShare += dei_amount_d18 *  minting_fee / 1e6;
 		IDEIStablecoin(dei_contract_address).pool_mint(msg.sender, dei_amount_d18);
-		return dei_amount_d18;
 	}
 
 	// 0% collateral-backed
@@ -248,7 +230,7 @@ contract DEIPool is AccessControl {
 		uint256 deus_current_price,
 		uint256 expireBlock,
 		bytes[] calldata sigs
-	) external notMintPaused returns (uint256) {
+	) external notMintPaused returns (uint256 dei_amount_d18) {
 		require(
 			IDEIStablecoin(dei_contract_address).global_collateral_ratio() == 0,
 			"Collateral ratio must be 0"
@@ -257,7 +239,7 @@ contract DEIPool is AccessControl {
 		bytes32 sighash = keccak256(abi.encodePacked(deus_contract_address, deus_current_price, expireBlock, getChainID()));
 		require(IDEIStablecoin(dei_contract_address).verify_price(sighash, sigs), "POOL::mintAlgorithmicDEI: invalid signatures");
 
-		uint256 dei_amount_d18 = poolLibrary.calcMintAlgorithmicDEI(
+		dei_amount_d18 = poolLibrary.calcMintAlgorithmicDEI(
 			deus_current_price, // X DEUS / 1 USD
 			deus_amount_d18
 		);
@@ -267,7 +249,6 @@ contract DEIPool is AccessControl {
 
 		IDEUSToken(deus_contract_address).pool_burn_from(msg.sender, deus_amount_d18);
 		IDEIStablecoin(dei_contract_address).pool_mint(msg.sender, dei_amount_d18);
-		return dei_amount_d18;
 	}
 
 	// Will fail if fully collateralized or fully algorithmic
@@ -279,7 +260,7 @@ contract DEIPool is AccessControl {
 		uint256 deus_current_price,
 		uint256 expireBlock,
 		bytes[] calldata sigs
-	) external notMintPaused returns (uint256) {
+	) external notMintPaused returns (uint256 mint_amount) {
 		uint256 global_collateral_ratio = IDEIStablecoin(dei_contract_address).global_collateral_ratio();
 		require(
 			global_collateral_ratio < COLLATERAL_RATIO_MAX && global_collateral_ratio > 0,
@@ -301,16 +282,16 @@ contract DEIPool is AccessControl {
 			uint256 collateral_amount_d18 = collateral_amount * (10**missing_decimals);
 			input_params = DEIPoolLibrary.MintFD_Params(
 											deus_current_price,
-											getCollateralPrice(collateral_price),
-											deus_amount,
+											collateral_price,
 											collateral_amount_d18,
 											global_collateral_ratio
 										);
 		}						
 
-		(uint256 mint_amount, uint256 deus_needed) = poolLibrary.calcMintFractionalDEI(input_params);
+		uint256 deus_needed;
+		(mint_amount, deus_needed) = poolLibrary.calcMintFractionalDEI(input_params);
 		require(deus_needed <= deus_amount, "Not enough DEUS inputted");
-
+		
 		mint_amount = (mint_amount * (uint256(1e6) - minting_fee)) / (1e6);
 
 		IDEUSToken(deus_contract_address).pool_burn_from(msg.sender, deus_needed);
@@ -323,7 +304,6 @@ contract DEIPool is AccessControl {
 
 		daoShare += mint_amount *  minting_fee / 1e6;
 		IDEIStablecoin(dei_contract_address).pool_mint(msg.sender, mint_amount);
-		return mint_amount;
 	}
 
 	// Redeem collateral. 100% collateral-backed
@@ -343,7 +323,7 @@ contract DEIPool is AccessControl {
 		// Need to adjust for decimals of collateral
 		uint256 DEI_amount_precision = DEI_amount / (10**missing_decimals);
 		uint256 collateral_needed = poolLibrary.calcRedeem1t1DEI(
-			getCollateralPrice(collateral_price),
+			collateral_price,
 			DEI_amount_precision
 		);
 
@@ -385,7 +365,7 @@ contract DEIPool is AccessControl {
 		uint256 deus_amount;
 		uint256 collateral_amount;
 		{
-			uint256 col_price_usd = getCollateralPrice(collateral_price);
+			uint256 col_price_usd = collateral_price;
 
 			uint256 DEI_amount_post_fee = (DEI_amount * (uint256(1e6) - redemption_fee)) / (PRICE_PRECISION);
 
@@ -513,7 +493,7 @@ contract DEIPool is AccessControl {
 
 		(uint256 collateral_units, uint256 amount_to_recollat) = poolLibrary.calcRecollateralizeDEIInner(
 																				collateral_amount_d18,
-																				getCollateralPrice(inputs.collateral_price[inputs.collateral_price.length - 1]), // pool collateral price exist in last index
+																				inputs.collateral_price[inputs.collateral_price.length - 1], // pool collateral price exist in last index
 																				global_collat_value,
 																				dei_total_supply,
 																				global_collateral_ratio
@@ -555,7 +535,7 @@ contract DEIPool is AccessControl {
 		DEIPoolLibrary.BuybackDEUS_Params memory input_params = DEIPoolLibrary.BuybackDEUS_Params(
 													availableExcessCollatDV(collateral_price),
 													deus_current_price,
-													getCollateralPrice(collateral_price[collateral_price.length - 1]), // pool collateral price exist in last index
+													collateral_price[collateral_price.length - 1], // pool collateral price exist in last index
 													DEUS_amount
 												);
 
@@ -610,19 +590,6 @@ contract DEIPool is AccessControl {
 		emit BuybackToggled(buyBackPaused);
 	}
 
-	function toggleCollateralPrice(uint256 _new_price) external {
-		require(hasRole(COLLATERAL_PRICE_PAUSER, msg.sender));
-		// If pausing, set paused price; else if unpausing, clear pausedPrice
-		if (collateralPricePaused == false) {
-			pausedPrice = _new_price;
-		} else {
-			pausedPrice = 0;
-		}
-		collateralPricePaused = !collateralPricePaused;
-
-		emit CollateralPriceToggled(collateralPricePaused);
-	}
-
 	// Combined into one function due to 24KiB contract memory limit
 	function setPoolParameters(
 		uint256 new_ceiling,
@@ -668,5 +635,4 @@ contract DEIPool is AccessControl {
 	event RedeemingToggled(bool toggled);
 	event RecollateralizeToggled(bool toggled);
 	event BuybackToggled(bool toggled);
-	event CollateralPriceToggled(bool toggled);
 }
