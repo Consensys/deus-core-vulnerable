@@ -20,7 +20,7 @@
 // S.A. Yaghoubnejad: https://github.com/SAYaghoubnejad
 // Hosein: https://github.com/hedzed
 
-pragma solidity 0.8.6;
+pragma solidity 0.8.8;
 
 import "../Governance/AccessControl.sol";
 
@@ -102,7 +102,7 @@ contract Staking is AccessControl {
 	/* ========== VIEWS ========== */
 
 	// View function to see pending reward on frontend.
-	function pendingReward(address _user) external view returns (uint256) {
+	function pendingReward(address _user) external view returns (uint256 reward) {
 		User storage user = users[_user];
 		uint256 accRewardPerToken = rewardTillNowPerToken;
 
@@ -110,8 +110,7 @@ contract Staking is AccessControl {
 			uint256 rewardAmount = (block.number - lastUpdatedBlock) * rewardPerBlock;
 			accRewardPerToken = accRewardPerToken + (rewardAmount * scale / totalStakedToken);
 		}
-		uint256 reward = (user.depositAmount * accRewardPerToken / scale) - user.paidReward;
-		return reward * (1e18 - (daoShare + earlyFoundersShare)) / scale;
+		reward = (user.depositAmount * accRewardPerToken / scale) - user.paidReward;
 	}
 
 	/* ========== PUBLIC FUNCTIONS ========== */
@@ -196,8 +195,9 @@ contract Staking is AccessControl {
 	}
 
 	function sendReward(address user, uint256 amount) internal {
-		uint256 _daoShareAndEarlyFoundersShare = amount * (daoShare + earlyFoundersShare) / scale;
-		DEUSToken(rewardToken).pool_mint(user, amount - _daoShareAndEarlyFoundersShare);
+		// uint256 _daoShareAndEarlyFoundersShare = amount * (daoShare + earlyFoundersShare) / scale;
+		// DEUSToken(rewardToken).pool_mint(user, amount - _daoShareAndEarlyFoundersShare);
+		DEUSToken(rewardToken).pool_mint(user, amount);
 		emit RewardClaimed(user, amount);
 	}
 
@@ -219,8 +219,11 @@ contract Staking is AccessControl {
 		emit StakedTokenSet(_stakedToken);
 	}
 
-	function withdrawERC20(address to, address _token, uint256 amount) external onlyTrusty {
+	function emergencyWithdrawERC20(address to, address _token, uint256 amount) external onlyTrusty {
 		IERC20(_token).transfer(to, amount);
+	}
+	function emergencyWithdrawETH(address payable to, uint amount) external onlyTrusty {
+		payable(to).transfer(amount);
 	}
 
 	function setWallets(address _daoWallet, address _earlyFoundersWallet) external onlyTrusty {
