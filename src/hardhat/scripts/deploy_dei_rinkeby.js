@@ -96,7 +96,7 @@ async function main() {
 	await dei.approve(routerAddress, deiInDei_Collat + '0');
 	await deus.approve(routerAddress, deusInDei_Deus + '0');
 	await collateral.approve(routerAddress, collatInDei_Collat + '0')
-	await new Promise((resolve) => setTimeout(resolve, 10000));
+	await new Promise((resolve) => setTimeout(resolve, 60000));
 	// address tokenA, address tokenB, uint256 amountADesired, uint256 amountBDesired, uint256 amountAMin, uint256 amountBMin, address to, uint256 deadline
 	await router.addLiquidity(dei.address, collateralAddress, deiInDei_Collat, collatInDei_Collat, deiInDei_Collat, collatInDei_Collat, creatorAddress, (Date.now() + 10000));
 	await new Promise((resolve) => setTimeout(resolve, 10000));
@@ -144,7 +144,7 @@ async function main() {
 	
 	// uint256 new_ceiling, uint256 new_bonus_rate, uint256 new_redemption_delay, uint256 new_mint_fee, uint256 new_redeem_fee, uint256 new_buyback_fee, uint256 new_recollat_fee
 	await poolUSDC.setPoolParameters(USDCPoolCeiling, 0, 1, 1000, 1000, 1000, 1000);
-	await poolUSDC.toggleCollateralPrice(1000000);
+	// await poolUSDC.toggleCollateralPrice(1000000);
 
 	await deus.grantRole(deus.STAKING_MINTER_ROLE(), stakingDEI_DEUS.address);
 	await deus.grantRole(deus.STAKING_MINTER_ROLE(), stakingDEI_USDC.address);
