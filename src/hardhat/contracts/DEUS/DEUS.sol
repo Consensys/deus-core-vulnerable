@@ -55,14 +55,14 @@ contract DEUSToken is ERC20Custom, AccessControl {
     mapping(address => uint32) public numCheckpoints;
 
     bytes32 public constant TRUSTY_ROLE = keccak256("TRUSTY_ROLE");
-    bytes32 public constant STAKING_MINTER_ROLE = keccak256("STAKING_MINTER_ROLE");
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     /* ========== MODIFIERS ========== */
 
-    modifier onlyPoolsOrStaking() {
+    modifier onlyPoolsOrMinters() {
         require(
-            DEI.dei_pools(msg.sender) == true || hasRole(STAKING_MINTER_ROLE, msg.sender),
-            "DEUS: Only dei pools or staking contracts are allowed to do this operation"
+            DEI.dei_pools(msg.sender) == true || hasRole(MINTER_ROLE, msg.sender),
+            "DEUS: Only dei pools or minters are allowed to do this operation"
         );
         _;
     }
@@ -112,12 +112,12 @@ contract DEUSToken is ERC20Custom, AccessControl {
         emit DEIAddressSet(dei_contract_address);
     }
 
-    function mint(address to, uint256 amount) public onlyPoolsOrStaking {
+    function mint(address to, uint256 amount) public onlyPoolsOrMinters {
         _mint(to, amount);
     }
 
     // This function is what other dei pools will call to mint new DEUS (similar to the DEI mint) and staking contracts can call this function too.
-    function pool_mint(address m_address, uint256 m_amount) external onlyPoolsOrStaking {
+    function pool_mint(address m_address, uint256 m_amount) external onlyPoolsOrMinters {
         if (trackingVotes) {
             uint32 srcRepNum = numCheckpoints[address(this)];
             uint96 srcRepOld = srcRepNum > 0

@@ -67,6 +67,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 
 	bytes32 public constant COLLATERAL_RATIO_PAUSER = keccak256("COLLATERAL_RATIO_PAUSER");
 	bytes32 public constant TRUSTY_ROLE = keccak256("TRUSTY_ROLE");
+	bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 	bool public collateral_ratio_paused = false;
 
 
@@ -89,6 +90,14 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 
 	modifier onlyCollateralRatioPauser() {
 		require(hasRole(COLLATERAL_RATIO_PAUSER, msg.sender), "DEI: you are not the collateral ratio pauser");
+		_;
+	}
+
+	modifier onlyPoolsOrMinters() {
+		require(
+			hasRole(MINTER_ROLE, msg.sender),
+			"DEI: you are not minter"
+		);
 		_;
 	}
 
@@ -283,7 +292,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 	}
 
 	// This function is what other dei pools will call to mint new DEI
-	function pool_mint(address m_address, uint256 m_amount) public onlyPools {
+	function pool_mint(address m_address, uint256 m_amount) public onlyPoolsOrMinters {
 		super._mint(m_address, m_amount);
 		emit DEIMinted(msg.sender, m_address, m_amount);
 	}
