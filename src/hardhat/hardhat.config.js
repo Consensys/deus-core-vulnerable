@@ -120,7 +120,7 @@ module.exports = {
 						enabled: true,
 						runs: 100000
 					}
-				  }
+				}
 			},
 			{
 				version: "0.6.11",
@@ -129,7 +129,7 @@ module.exports = {
 						enabled: true,
 						runs: 100000
 					}
-				  }
+				}
 			},
 			{
 				version: "0.6.6",
@@ -138,7 +138,7 @@ module.exports = {
 						enabled: true,
 						runs: 100000
 					}
-				  }
+				}
 			},
 			{
 				version: "0.7.6",
@@ -147,7 +147,7 @@ module.exports = {
 						enabled: true,
 						runs: 100000
 					}
-				  }
+				}
 			},
 			{
 				version: "0.8.0",
@@ -156,7 +156,7 @@ module.exports = {
 						enabled: true,
 						runs: 100000
 					}
-				  }
+				}
 			},
 			{
 				version: "0.8.4",
@@ -165,7 +165,7 @@ module.exports = {
 						enabled: true,
 						runs: 100000
 					}
-				  }
+				}
 			},
 			{
 				version: "0.8.6",
@@ -174,7 +174,7 @@ module.exports = {
 						enabled: true,
 						runs: 100000
 					}
-				  }
+				}
 			},
 			{
 				version: "0.8.7",
@@ -183,7 +183,16 @@ module.exports = {
 						enabled: true,
 						runs: 100000
 					}
-				  }
+				}
+			},
+			{
+				version: "0.8.8",
+				settings: {
+					optimizer: {
+						enabled: true,
+						runs: 100000
+					}
+				}
 			}
 		],
 	},

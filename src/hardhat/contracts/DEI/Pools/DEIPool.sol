@@ -91,6 +91,7 @@ contract DEIPool is AccessControl {
 	bytes32 private constant RECOLLATERALIZE_PAUSER = keccak256("RECOLLATERALIZE_PAUSER");
     bytes32 public constant TRUSTY_ROLE = keccak256("TRUSTY_ROLE");
 	bytes32 public constant DAO_SHARE_COLLECTOR = keccak256("DAO_SHARE_COLLECTOR");
+	bytes32 public constant PARAMETER_SETTER_ROLE = keccak256("PARAMETER_SETTER_ROLE");
 
 	// AccessControl state variables
 	bool public mintPaused = false;
@@ -562,6 +563,10 @@ contract DEIPool is AccessControl {
 		emit daoShareCollected(amount, to);
 	}
 
+	function emergencyWithdrawERC20(address token, uint amount, address to) external onlyByTrusty {
+		IERC20(token).transfer(to, amount);
+	}
+
 	function toggleMinting() external {
 		require(hasRole(MINT_PAUSER, msg.sender));
 		mintPaused = !mintPaused;
@@ -599,7 +604,8 @@ contract DEIPool is AccessControl {
 		uint256 new_redeem_fee,
 		uint256 new_buyback_fee,
 		uint256 new_recollat_fee
-	) external onlyByTrusty {
+	) external {
+		require(hasRole(PARAMETER_SETTER_ROLE, msg.sender), "POOL: Caller is not PARAMETER_SETTER_ROLE");
 		pool_ceiling = new_ceiling;
 		bonus_rate = new_bonus_rate;
 		redemption_delay = new_redemption_delay;
