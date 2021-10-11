@@ -1,3 +1,6 @@
+// Be name Khoda
+// Bime Abolfazl
+
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 interface IDEIStablecoin {
@@ -41,3 +44,5 @@ interface IDEIStablecoin {
 	
     function toggleCollateralRatio() external;
 }
+
+//Dar panah khoda

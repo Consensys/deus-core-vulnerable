@@ -1,3 +1,6 @@
+// Be name Khoda
+// Bime Abolfazl
+
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity ^0.8.0;
 pragma abicoder v2;
@@ -148,11 +151,13 @@ contract DEIPool is AccessControl {
 		missing_decimals = uint256(18) - collateral_token.decimals();
 
 		_setupRole(DEFAULT_ADMIN_ROLE, _admin_address);
-		grantRole(MINT_PAUSER, _trusty_address);
-		grantRole(REDEEM_PAUSER, _trusty_address);
-		grantRole(RECOLLATERALIZE_PAUSER, _trusty_address);
-		grantRole(BUYBACK_PAUSER, _trusty_address);
-        grantRole(TRUSTY_ROLE, _trusty_address);
+		_setupRole(MINT_PAUSER, _trusty_address);
+		_setupRole(REDEEM_PAUSER, _trusty_address);
+		_setupRole(RECOLLATERALIZE_PAUSER, _trusty_address);
+		_setupRole(BUYBACK_PAUSER, _trusty_address);
+        _setupRole(TRUSTY_ROLE, _trusty_address);
+        _setupRole(TRUSTY_ROLE, _trusty_address);
+        _setupRole(PARAMETER_SETTER_ROLE, _trusty_address);
 	}
 
 	/* ========== VIEWS ========== */
@@ -642,3 +647,5 @@ contract DEIPool is AccessControl {
 	event RecollateralizeToggled(bool toggled);
 	event BuybackToggled(bool toggled);
 }
+
+//Dar panah khoda

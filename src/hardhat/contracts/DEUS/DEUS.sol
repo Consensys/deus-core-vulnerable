@@ -1,3 +1,6 @@
+// Be name Khoda
+// Bime Abolfazl
+
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity ^0.8.0;
 
@@ -91,8 +94,8 @@ contract DEUSToken is ERC20Custom, AccessControl {
         require(_creator_address != address(0), "DEUS::constructor: zero address detected");  
         name = _name;
         symbol = _symbol;
-        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        grantRole(TRUSTY_ROLE, _trusty_address);
+        _setupRole(DEFAULT_ADMIN_ROLE, _trusty_address);
+        _setupRole(TRUSTY_ROLE, _trusty_address);
         _mint(_creator_address, genesis_supply);
 
         // Do a checkpoint for the owner
@@ -376,3 +379,5 @@ contract DEUSToken is ERC20Custom, AccessControl {
     event DEUSMinted(address indexed from, address indexed to, uint256 amount);
     event DEIAddressSet(address addr);
 }
+
+//Dar panah khoda

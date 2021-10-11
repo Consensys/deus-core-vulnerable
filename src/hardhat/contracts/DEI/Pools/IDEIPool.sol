@@ -1,3 +1,6 @@
+// Be name Khoda
+// Bime Abolfazl
+
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.6.11;
 
@@ -28,3 +31,5 @@ interface IDEIPool {
     function setTimelock(address new_timelock) external;
     function setOwner(address _owner_address) external;
 }
+
+//Dar panah khoda

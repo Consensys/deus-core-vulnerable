@@ -1,3 +1,6 @@
+// Be name Khoda
+// Bime Abolfazl
+
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity ^0.8.7;
 
@@ -63,7 +66,7 @@ contract ReserveTracker is AccessControl {
 		dei_contract_address = _dei_contract_address;
 		deus_contract_address = _deus_contract_address;
 		_setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-		grantRole(OWNER_ROLE, msg.sender);
+		_setupRole(OWNER_ROLE, msg.sender);
 	}
 
 	// ========== VIEWS ==========
@@ -110,3 +113,5 @@ contract ReserveTracker is AccessControl {
 		}
 	}
 }
+
+//Dar panah khoda

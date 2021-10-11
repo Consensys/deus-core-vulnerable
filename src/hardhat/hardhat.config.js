@@ -60,22 +60,31 @@ module.exports = {
 		// 	gasPrice: 15000000000,
 		// 	gasMultiplier: 1.2
 		// },
-		// ropsten: {
-		// 	url:`https://ropsten.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
-		// 	accounts: {
-		// 		mnemonic: process.env.MNEMONIC_PHRASE
-		// 	},
-		// 	chainId: 3,
-		// 	gas: "auto",     
-		// 	gasPrice: "auto", 
-		// 	gasMultiplier: 1.2
-		// },
+		ropsten: {
+			url:`https://ropsten.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
+			accounts: [process.env.PRIVATE_KEY],
+			chainId: 3,
+			gas: "auto",
+			minGasPrice: 1000000000,
+			initialBaseFeePerGas: 360000000,   
+			gasPrice: "auto", 
+			gasMultiplier: 1.2
+		},
 		rinkeby: {
 			url:`https://rinkeby.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
 			accounts: [process.env.PRIVATE_KEY],
 			chainId: 4,
 			gas: "auto",
-			gasPrice: "auto",
+			minGasPrice: 1000000000,
+			initialBaseFeePerGas: 360000000,
+			gasMultiplier: 1.2
+		},
+		mainnet: {
+			url:`https://mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
+			accounts: [process.env.PRIVATE_KEY],
+			chainId: 1,
+			gas: "auto",
+			gasPrice: 77100000000,
 			gasMultiplier: 1.2
 		},
 		heco: {
@@ -107,7 +116,7 @@ module.exports = {
 			accounts: [process.env.PRIVATE_KEY],
 			chainId: 137,
 			gas: "auto",
-			gasPrice: 20000000000,
+			gasPrice: 36100000000,
 			gasMultiplier: 1.2
 		}
     },
@@ -186,7 +195,7 @@ module.exports = {
 				}
 			},
 			{
-				version: "0.8.8",
+				version: "0.8.9",
 				settings: {
 					optimizer: {
 						enabled: true,
@@ -206,8 +215,8 @@ module.exports = {
       timeout: 360000
 	},
 	etherscan: {
-		// apiKey: process.env.ETHERSCAN_API_KEY, // ETH Mainnet
-		apiKey: process.env.POLYGON_API_KEY, // ETH Mainnet
+		apiKey: process.env.ETHERSCAN_API_KEY, // ETH Mainnet
+		// apiKey: process.env.POLYGON_API_KEY, // ETH Mainnet
 		// apiKey: process.env.HECO_API_KEY, // HECO Mainnet
 		// apiKey: process.env.BSCSCAN_API_KEY // BSC
 	},
