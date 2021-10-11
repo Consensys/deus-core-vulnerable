@@ -1,3 +1,6 @@
+// Be name Khoda
+// Bime Abolfazl
+
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 interface IDEUSToken {
@@ -43,3 +46,5 @@ interface IDEUSToken {
         view
         returns (uint96);
 }
+
+//Dar panah khoda

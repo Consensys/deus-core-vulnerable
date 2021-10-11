@@ -1,5 +1,5 @@
-//Be name khoda
-// SPDX-License-Identifier: GPL-2.0-or-later
+// Be name Khoda
+// Bime Abolfazl
 
 // =================================================================================================================
 //  _|_|_|    _|_|_|_|  _|    _|    _|_|_|      _|_|_|_|  _|                                                       |
@@ -20,7 +20,7 @@
 // S.A. Yaghoubnejad: https://github.com/SAYaghoubnejad
 // Hosein: https://github.com/hedzed
 
-pragma solidity 0.8.8;
+pragma solidity 0.8.9;
 
 import "../Governance/AccessControl.sol";
 
@@ -58,8 +58,8 @@ contract Staking is AccessControl {
 	address public stakedToken;
 	address public rewardToken;
 
-	bytes32 private constant REWARD_PER_BLOCK_SETTER = keccak256("REWARD_PER_BLOCK_SETTER");
-	bytes32 private constant TRUSTY_ROLE = keccak256("TRUSTY_ROLE");
+	bytes32 public constant REWARD_PER_BLOCK_SETTER = keccak256("REWARD_PER_BLOCK_SETTER");
+	bytes32 public constant TRUSTY_ROLE = keccak256("TRUSTY_ROLE");
 
 	/* ========== CONSTRUCTOR ========== */
 
@@ -81,8 +81,8 @@ contract Staking is AccessControl {
 			"STAKING::constructor: Zero address detected"
 		);
 		_setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-		grantRole(REWARD_PER_BLOCK_SETTER, _rewardPerBlockSetter);
-		grantRole(TRUSTY_ROLE, msg.sender);
+		_setupRole(REWARD_PER_BLOCK_SETTER, _rewardPerBlockSetter);
+		_setupRole(TRUSTY_ROLE, msg.sender);
 		stakedToken = _stakedToken;
 		rewardToken = _rewardToken;
 		rewardPerBlock = _rewardPerBlock;

@@ -1,3 +1,6 @@
+// Be name Khoda
+// Bime Abolfazl
+
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity ^0.8.0;
 
@@ -95,6 +98,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 
 	modifier onlyPoolsOrMinters() {
 		require(
+			dei_pools[msg.sender] == true ||
 			hasRole(MINTER_ROLE, msg.sender),
 			"DEI: you are not minter"
 		);
@@ -132,14 +136,14 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 		name = _name;
 		symbol = _symbol;
 		creator_address = _creator_address;
-		_setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+		_setupRole(DEFAULT_ADMIN_ROLE, _trusty_address);
 		_mint(creator_address, genesis_supply);
-		grantRole(COLLATERAL_RATIO_PAUSER, creator_address);
+		_setupRole(COLLATERAL_RATIO_PAUSER, creator_address);
 		dei_step = 2500; // 6 decimals of precision, equal to 0.25%
-		global_collateral_ratio = 1000000; // Dei system starts off fully collateralized (6 decimals of precision)
+		global_collateral_ratio = 800000; // Dei system starts off fully collateralized (6 decimals of precision)
 		refresh_cooldown = 300; // Refresh cooldown period is set to 5 minutes (300 seconds) at genesis
 		price_band = 5000; // Collateral ratio will not adjust if between $0.995 and $1.005 at genesis
-		grantRole(TRUSTY_ROLE, _trusty_address);
+		_setupRole(TRUSTY_ROLE, _trusty_address);
 
 		// Upon genesis, if GR changes by more than 1% percent, enable change of collateral ratio
 		GR_top_band = 1000;
@@ -410,3 +414,5 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 	event FIP_6Set(bool activate);
 	event GrowthRatioBandSet(uint256 GR_top_band, uint256 GR_bottom_band);
 }
+
+//Dar panah khoda

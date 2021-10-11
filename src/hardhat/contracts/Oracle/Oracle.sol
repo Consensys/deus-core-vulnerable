@@ -1,4 +1,6 @@
-// SPDX-License-Identifier: MIT
+// Be name Khoda
+// Bime Abolfazl
+
 pragma solidity >=0.6.12;
 
 import "../Governance/AccessControl.sol";
@@ -18,7 +20,7 @@ contract Oracle is AccessControl {
 	constructor(address _admin, uint256 _minimumRequiredSignature, address _trusty_address) {
 		require(_admin != address(0), "ORACLE::constructor: Zero address detected");
 		_setupRole(DEFAULT_ADMIN_ROLE, _admin);
-		grantRole(TRUSTY_ROLE, _trusty_address);
+		_setupRole(TRUSTY_ROLE, _trusty_address);
 		minimumRequiredSignature = _minimumRequiredSignature;
 	}
 
@@ -49,3 +51,5 @@ contract Oracle is AccessControl {
 		emit MinimumRequiredSignatureSet(_minimumRequiredSignature);
 	}
 }
+
+//Dar panah khoda
