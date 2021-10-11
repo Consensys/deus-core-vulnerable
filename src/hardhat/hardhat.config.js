@@ -72,11 +72,10 @@ module.exports = {
 		},
 		rinkeby: {
 			url:`https://rinkeby.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
-			accounts: [process.env.PRIVATE_KEY],
+			accounts: [process.env.PRIVATE_KEY, process.env.PRIVATE_KEY1],
 			chainId: 4,
 			gas: "auto",
-			minGasPrice: 1000000000,
-			initialBaseFeePerGas: 360000000,
+			gasPrice: 7100000000,
 			gasMultiplier: 1.2
 		},
 		mainnet: {
@@ -228,6 +227,6 @@ module.exports = {
 	},
     vyper: {
 		version: "0.2.12"
-    }
+    },
 };
 
