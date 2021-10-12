@@ -12,8 +12,9 @@ src/hardhat/flatten
 
 package-lock.json
 
-node_modules/*
-build/*
+node_modules
+build
+bfg.jar
 
 .DS_STORE
 */.DS_STORE
