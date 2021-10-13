@@ -50,11 +50,22 @@ async function main() {
     const AdminAddress = '0xE5227F141575DcE74721f4A9bE2D7D636F923044';
     const deployer = process.env.MAIN_DEPLOYER;
 
+    // Role Of Pool
+    const MINT_PAUSER = '0xc65532185ed70b2e999433e2e9fac124e083acb13ec183a4e05944da0792337b';
+	const REDEEM_PAUSER = '0xa84a5389ad41f9aab0831b01e5384cae76e7a7fd09131c206ff7927c201c3857';
+	const BUYBACK_PAUSER = '0x103da79ff3755ff7a17a557d28b73d37cb4de0b3c3cc02fa6c48df0f35071fbf';
+	const RECOLLATERALIZE_PAUSER = '0x8118eeb5231a5fe4008a55b62860f6a0db4f6c3ac04f8141927a9b3fedd86d2f';
+
+    // ----------------
+    // Start Deploying
+    // ----------------
+
     // ERC20
     const erc20Instance = await hre.ethers.getContractFactory("ERC20");
     const usdc = await erc20Instance.attach(usdcAddress);
 
-    const dei = await deployDei();
+    const dei= await deployDei();
+
     const deus = await deployDeus();
 
     const oracle = await deployOracle()
@@ -81,16 +92,14 @@ async function main() {
     // Creating Pairs
     await dei.approve(routerAddress, deiInDei_Deus * BigInt(1000));
     await deus.approve(routerAddress, deusInDei_Deus * BigInt(1000));
-    await new Promise((resolve) => setTimeout(resolve, 60000));
+    await new Promise((resolve) => setTimeout(resolve, 30000));
 
     await router.addLiquidity(dei.address, deus.address, deiInDei_Deus, deusInDei_Deus, deiInDei_Deus, deusInDei_Deus, creatorAddress, (Date.now() + 10000));
-    await new Promise((resolve) => setTimeout(resolve, 60000));
-
-    await usdc.approve(routerAddress, USDCInDei_USDC + BigInt(1000))
-    await new Promise((resolve) => setTimeout(resolve, 60000));
+    await usdc.approve(routerAddress, USDCInDei_USDC * BigInt(1000))
+    await new Promise((resolve) => setTimeout(resolve, 30000));
 
     await router.addLiquidity(dei.address, usdcAddress, deiInDei_USDC, USDCInDei_USDC, deiInDei_USDC, USDCInDei_USDC, creatorAddress, (Date.now() + 10000));
-    await new Promise((resolve) => setTimeout(resolve, 100000));
+    await new Promise((resolve) => setTimeout(resolve, 60000));
 
     const dei_deusAddress = await factory.getPair(dei.address, deus.address);
     console.log("Dei-Deus:", dei_deusAddress);
@@ -102,8 +111,9 @@ async function main() {
     // | Skip 2 nonce in other networks | //
     // ---------------------------------- //
     // in main net we created pair in curve.finance
-    await skipNonce(depoyer, 2);
+    await skipNonce(deployer, 2);
 
+    console.log("Deploying DEI-DEUS Staking");
     // Staking
     const stakingDEI_DEUS = await deployStaking({
         stakeTokenAddress: dei_deusAddress,
@@ -114,6 +124,7 @@ async function main() {
         rewardPerBlockSetter
     });
 
+    console.log("Deploying DEI-USDC Staking");
     const stakingDEI_USDC = await deployStaking({
         stakeTokenAddress: dei_usdcAddress,
         rewardTokenAddress: deus.address,
@@ -155,34 +166,32 @@ async function main() {
     await dei.grantRole(dei.DEFAULT_ADMIN_ROLE(), AdminAddress);
     await deus.grantRole(deus.DEFAULT_ADMIN_ROLE(), AdminAddress);
     await oracle.grantRole(oracle.DEFAULT_ADMIN_ROLE(), AdminAddress);
-
     await USDCPool.grantRole(USDCPool.DEFAULT_ADMIN_ROLE(), AdminAddress);
     await reserveTracker.grantRole(reserveTracker.DEFAULT_ADMIN_ROLE(), AdminAddress);
     await stakingDEI_DEUS.grantRole(stakingDEI_DEUS.DEFAULT_ADMIN_ROLE(), AdminAddress);
-
     await stakingDEI_USDC.grantRole(stakingDEI_USDC.DEFAULT_ADMIN_ROLE(), AdminAddress);
+    
     await dei.transfer(AdminAddress, await dei.balanceOf(deployer));
-    await deus.transfer(AdminAddress, await deus.balanceOf(deployer));
-
-    await collateral.transfer(AdminAddress, await collateral.balanceOf(deployer));
+    await deus.transfer(AdminAddress, BigInt(await deus.balanceOf(deployer)) - deusInDeus_NativeToken);
+    await usdc.transfer(AdminAddress, await usdc.balanceOf(deployer));
     await deiDeus.transfer(AdminAddress, await deiDeus.balanceOf(deployer));
     await deiUsdc.transfer(AdminAddress, await deiUsdc.balanceOf(deployer));
 
     // ---------------------------------- //
     // | Skip 4 nonce in other networks | //
     // ---------------------------------- //
-    await skipNonce(depoyer, 4);
+    await skipNonce(deployer, 4);
 
     const wrappedNativeContract = await hre.ethers.getContractFactory("WETH");
     const wrappedNativeToken = await wrappedNativeContract.attach(wrappedNativeTokenAddress); // weth
     await wrappedNativeToken.deposit({
-        value: ethers.utils.parseEther(NativeTokenInDeus_NativeToken)
+        value: NativeTokenInDeus_NativeToken
     });
 
     // Creating Pairs
     await wrappedNativeToken.approve(routerAddress, NativeTokenInDeus_NativeToken * BigInt(1000));
     await deus.approve(routerAddress, deusInDeus_NativeToken * BigInt(1000));
-    await new Promise((resolve) => setTimeout(resolve, 60000));
+    await new Promise((resolve) => setTimeout(resolve, 30000));
 
     await router.addLiquidity(
         deus.address,
@@ -194,15 +203,16 @@ async function main() {
         creatorAddress,
         (Date.now() + 10000)
     );
-    await new Promise((resolve) => setTimeout(resolve, 100000));
+    await new Promise((resolve) => setTimeout(resolve, 60000));
 
     const deus_NativeTokenAddress = await factory.getPair(deus.address, wrappedNativeToken.address);
     console.log("Deus NativeToken:", deus_NativeTokenAddress)
 
+    console.log("Deploying DEUS-NativeToken Staking");
     // Staking
     const stakingDEUS_NativeToken = await deployStaking({
         stakeTokenAddress: deus_NativeTokenAddress,
-        rewardTokenAddress: DEUSToken,
+        rewardTokenAddress: deus.address,
         rewardPerBlock,
         daoShare,
         foundersShare,
@@ -219,10 +229,45 @@ async function main() {
     // ---------------------------------- //
     // | Skip 2 nonce in other networks | //
     // ---------------------------------- //
-    await skipNonce(depoyer, 2);
+    await skipNonce(deployer, 2);
 
     await reserveTracker.addDEUSPair(deus_NativeTokenAddress);
 
+    console.log("Start to renounce roles...");
+    await dei.renounceRole(dei.DEFAULT_ADMIN_ROLE(), deployer)
+    await dei.renounceRole(dei.COLLATERAL_RATIO_PAUSER(), deployer)
+    await dei.renounceRole(dei.TRUSTY_ROLE(), deployer)
+
+    await deus.renounceRole(deus.DEFAULT_ADMIN_ROLE(), deployer)
+    await deus.renounceRole(deus.TRUSTY_ROLE(), deployer)
+    
+    await oracle.renounceRole(oracle.DEFAULT_ADMIN_ROLE(), deployer)
+    await oracle.renounceRole(oracle.TRUSTY_ROLE(), deployer)
+    
+    await USDCPool.renounceRole(USDCPool.DEFAULT_ADMIN_ROLE(), deployer)
+    await USDCPool.renounceRole(MINT_PAUSER, deployer)
+    await USDCPool.renounceRole(REDEEM_PAUSER, deployer)
+    await USDCPool.renounceRole(RECOLLATERALIZE_PAUSER, deployer)
+    await USDCPool.renounceRole(BUYBACK_PAUSER, deployer)
+    await USDCPool.renounceRole(USDCPool.TRUSTY_ROLE(), deployer)
+    await USDCPool.renounceRole(USDCPool.PARAMETER_SETTER_ROLE(), deployer)
+    
+    await reserveTracker.renounceRole(reserveTracker.DEFAULT_ADMIN_ROLE(), deployer)
+    await reserveTracker.renounceRole(reserveTracker.OWNER_ROLE(), deployer)
+    
+    await stakingDEI_DEUS.renounceRole(stakingDEI_DEUS.DEFAULT_ADMIN_ROLE(), deployer)
+    await stakingDEI_DEUS.renounceRole(stakingDEI_DEUS.REWARD_PER_BLOCK_SETTER(), deployer)
+    await stakingDEI_DEUS.renounceRole(stakingDEI_DEUS.TRUSTY_ROLE(), deployer)
+    
+    await stakingDEI_USDC.renounceRole(stakingDEI_USDC.DEFAULT_ADMIN_ROLE(), deployer)
+    await stakingDEI_USDC.renounceRole(stakingDEI_USDC.REWARD_PER_BLOCK_SETTER(), deployer)
+    await stakingDEI_USDC.renounceRole(stakingDEI_USDC.TRUSTY_ROLE(), deployer)
+    
+    await stakingDEUS_NativeToken.renounceRole(stakingDEUS_NativeToken.DEFAULT_ADMIN_ROLE(), deployer)
+    await stakingDEUS_NativeToken.renounceRole(stakingDEUS_NativeToken.REWARD_PER_BLOCK_SETTER(), deployer)
+    await stakingDEUS_NativeToken.renounceRole(stakingDEUS_NativeToken.TRUSTY_ROLE(), deployer)
+
+    console.log("Start to verify the contracts...");
     verifyAll();
 }
 

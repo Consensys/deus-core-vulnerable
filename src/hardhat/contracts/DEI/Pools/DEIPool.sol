@@ -156,7 +156,6 @@ contract DEIPool is AccessControl {
 		_setupRole(RECOLLATERALIZE_PAUSER, _trusty_address);
 		_setupRole(BUYBACK_PAUSER, _trusty_address);
         _setupRole(TRUSTY_ROLE, _trusty_address);
-        _setupRole(TRUSTY_ROLE, _trusty_address);
         _setupRole(PARAMETER_SETTER_ROLE, _trusty_address);
 	}
 
