@@ -27,6 +27,7 @@ bfg.jar
 
 # testing
 /coverage
+/src/hardhat/scripts/test.js
 
 # production
 /build
