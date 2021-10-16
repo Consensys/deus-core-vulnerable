@@ -18,11 +18,11 @@ module.exports = {
         return contract
     },
     verifyAll: async () => {
-        let verifies = []
+        console.log(deployedContract);
         deployedContracts.forEach(async (contract) => {
-            verifies.push(hre.run('verify:verify', contract));
+            console.log("verifing", contract['address']);
+            await hre.run('verify:verify', contract);
         })
-        await Promise.all(verifies);
         deployedContracts = [];
     }
 }

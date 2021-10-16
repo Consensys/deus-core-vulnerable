@@ -273,7 +273,7 @@ async function main() {
     await stakingDEUS_NativeToken.renounceRole(stakingDEUS_NativeToken.TRUSTY_ROLE(), deployer)
 
     console.log("Start to verify the contracts...");
-    verifyAll();
+    await verifyAll();
 }
 
 
