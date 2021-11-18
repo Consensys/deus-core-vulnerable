@@ -10,10 +10,21 @@ const deployReserveTracker = require('./deploy_contracts/deploy_reserve_tracker.
 const deployStaking = require('./deploy_contracts/deploy_staking.js');
 
 const { verifyAll } = require('./helpers/deploy_contract.js');
-const { skipNonce } = require('./helpers/skip_nonce.js');
+const skipNonce = require('./helpers/skip_nonce.js');
+
+function assert(condition, message) {
+    if (!condition) {
+        throw message || "Assertion failed";
+    }
+}
 
 async function main() {
-
+    
+    // ---------------
+    // Configurations
+    // ---------------
+    
+    const wrappedNativeTokenAddress = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"; // Wrapped Native Token
     const usdcAddress = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"; // USDC decimal: 6
     const routerAddress = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'; // UniswapV2Router02
 
@@ -25,11 +36,13 @@ async function main() {
     const deusInDei_Deus = BigInt(10e18)
     const deiInDei_USDC = BigInt(1000e18)
     const USDCInDei_USDC = BigInt(1000e6)
+    const NativeTokenInDeus_NativeToken = BigInt(2e18);
+    const deusInDeus_NativeToken = BigInt(99.75e18);
 
     // Staking
-    const daoShare = BigInt(10e16);
-    const foundersShare = BigInt(1e16);
-    const rewardPerBlock = "1000";
+    const daoShare = BigInt(10e16); //10%
+    const foundersShare = BigInt(1e16); //1%
+    const rewardPerBlock = "1000"; //1000e-18
     const rewardPerBlockSetter = "0x35749cAAf96369b8927A28D1E5C9b2E8367D8aa9";
 
     // USDC Pool Parameters
@@ -39,10 +52,6 @@ async function main() {
     const newRedeemFee = 5000
     const newBuyBackFee = 5000
     const newRecollatFee = 5000
-
-    const wrappedNativeTokenAddress = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
-    const NativeTokenInDeus_NativeToken = BigInt(2e18);
-    const deusInDeus_NativeToken = BigInt(99.75e18);
 
     // Oracle
     const oracleServerAddress = "0xCaFf370042F1F9617c2a53d1E2c95C6f8ceEfa98";
@@ -56,6 +65,15 @@ async function main() {
 	const BUYBACK_PAUSER = '0x103da79ff3755ff7a17a557d28b73d37cb4de0b3c3cc02fa6c48df0f35071fbf';
 	const RECOLLATERALIZE_PAUSER = '0x8118eeb5231a5fe4008a55b62860f6a0db4f6c3ac04f8141927a9b3fedd86d2f';
 
+    assert(deusInDeus_NativeToken + deusInDei_Deus <= deusGenesisSupply, 
+        "There will not enough DEUS be minted for DEUS-NATIVE and DEI-DEUS");
+
+    assert(deiInDei_Deus + deiInDei_USDC <= deiGenesisSupply, 
+        "There will not enough DEUS be minted for DEUS-NATIVE and DEI-DEUS");
+
+    assert(deployer.toLowerCase() != AdminAddress.toLowerCase(), 
+        "DEPLOYER address and ADMIN ADDRESS is the same.");
+
     // ----------------
     // Start Deploying
     // ----------------
@@ -63,6 +81,9 @@ async function main() {
     // ERC20
     const erc20Instance = await hre.ethers.getContractFactory("ERC20");
     const usdc = await erc20Instance.attach(usdcAddress);
+
+    assert(BigInt(await usdc.balanceOf(deployer)) >= USDCInDei_USDC, 
+        "There is not enough USDC in deployer for DEI-USDC");
 
     const dei= await deployDei();
 

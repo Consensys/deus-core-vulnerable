@@ -12,6 +12,12 @@ const deployStaking = require('./deploy_contracts/deploy_staking.js');
 const { verifyAll } = require('./helpers/deploy_contract.js');
 const skipNonce = require('./helpers/skip_nonce.js');
 
+function assert(condition, message) {
+    if (!condition) {
+        throw message || "Assertion failed";
+    }
+}
+
 async function main() {
 
     // ---------------
@@ -62,11 +68,14 @@ async function main() {
 	const BUYBACK_PAUSER = '0x103da79ff3755ff7a17a557d28b73d37cb4de0b3c3cc02fa6c48df0f35071fbf';
 	const RECOLLATERALIZE_PAUSER = '0x8118eeb5231a5fe4008a55b62860f6a0db4f6c3ac04f8141927a9b3fedd86d2f';
 
-    console.assert(deusInDeus_NativeToken + deusInDei_Deus <= deusGenesisSupply, 
+    assert(deusInDeus_NativeToken + deusInDei_Deus <= deusGenesisSupply, 
         "There will not enough DEUS be minted for DEUS-NATIVE and DEI-DEUS");
 
-    console.assert(deiInDei_Deus + deiInDei_USDC <= deiGenesisSupply, 
+    assert(deiInDei_Deus + deiInDei_USDC <= deiGenesisSupply, 
         "There will not enough DEUS be minted for DEUS-NATIVE and DEI-DEUS");
+
+    assert(deployer.toLowerCase() != AdminAddress.toLowerCase(), 
+        "DEPLOYER address and ADMIN ADDRESS is the same.");
 
     // ----------------
     // Start Deploying
@@ -76,7 +85,7 @@ async function main() {
     const erc20Instance = await hre.ethers.getContractFactory("ERC20");
     const usdc = await erc20Instance.attach(usdcAddress);
 
-    console.assert(BigInt(await usdc.balanceOf(deployer)) >= USDCInDei_USDC, 
+    assert(BigInt(await usdc.balanceOf(deployer)) >= USDCInDei_USDC, 
         "There is not enough USDC in deployer for DEI-USDC");
 
     const dei= await deployDei();
