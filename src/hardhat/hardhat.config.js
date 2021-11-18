@@ -271,8 +271,8 @@ module.exports = {
       timeout: 360000
 	},
 	etherscan: {
-		// apiKey: process.env.ETHERSCAN_API_KEY, // ETH Mainnet
-		apiKey: process.env.FANTOM_API_KEY, // FANTOM Mainnet
+		apiKey: process.env.ETHERSCAN_API_KEY, // ETH Mainnet
+		// apiKey: process.env.FANTOM_API_KEY, // FANTOM Mainnet
 		// apiKey: process.env.POLYGON_API_KEY, // ETH Mainnet
 		// apiKey: process.env.HECO_API_KEY, // HECO Mainnet
 		// apiKey: process.env.BSCSCAN_API_KEY // BSC
