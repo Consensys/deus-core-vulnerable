@@ -33,13 +33,13 @@ async function main() {
     const deusInDei_Deus = BigInt(10e18)
     const deiInDei_USDC = BigInt(1000e18)
     const USDCInDei_USDC = BigInt(1000e6)
-    const NativeTokenInDeus_NativeToken = BigInt(2e16);
+    const NativeTokenInDeus_NativeToken = BigInt(0.02e18);
     const deusInDeus_NativeToken = BigInt(99.75e18);
 
     // Staking
-    const daoShare = BigInt(10e16);
-    const foundersShare = BigInt(1e16);
-    const rewardPerBlock = "1000";
+    const daoShare = BigInt(10e16); //10%
+    const foundersShare = BigInt(1e16); //1%
+    const rewardPerBlock = "1000"; //1000e-18
     const rewardPerBlockSetter = "0x35749cAAf96369b8927A28D1E5C9b2E8367D8aa9";
 
     // USDC Pool Parameters

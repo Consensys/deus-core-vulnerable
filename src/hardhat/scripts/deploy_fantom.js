@@ -33,7 +33,7 @@ async function main() {
     const deusInDei_Deus = BigInt(50e18)
     const deiInDei_USDC = BigInt(1e18)
     const USDCInDei_USDC = BigInt(1e6)
-    const NativeTokenInDeus_NativeToken = BigInt(1e16);
+    const NativeTokenInDeus_NativeToken = BigInt(0.01e18);
     const deusInDeus_NativeToken = BigInt(10e18);
 
     // Staking
