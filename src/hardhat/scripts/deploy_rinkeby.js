@@ -19,7 +19,7 @@ async function main() {
     // ---------------
     
     const wrappedNativeTokenAddress = "0xc778417E063141139Fce010982780140Aa0cD5Ab"; // Wrapped Native Token
-    const usdcAddress = "0x8894E40e763bF32Ff6eeCa1827888AA54B30044b"; // USDC decimal: 6
+    const usdcAddress = "0xbb5157A653cb798B7Ca69F1157dbE12d414DA2FE"; // USDC decimal: 6
     const routerAddress = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'; // UniswapV2Router02
 
     const creatorAddress = process.env.MAIN_DEPLOYER;

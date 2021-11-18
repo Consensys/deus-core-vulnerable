@@ -53,7 +53,7 @@ async function main() {
     // Oracle
     const oracleServerAddress = "0xCaFf370042F1F9617c2a53d1E2c95C6f8ceEfa98";
 
-    const AdminAddress = '0x192c5dc089b61Ad4E5810f4f041f18c5056d0b9d';
+    const AdminAddress = '0xE5227F141575DcE74721f4A9bE2D7D636F923044';
     const deployer = process.env.MAIN_DEPLOYER;
 
     // Role Of Pool
