@@ -18,23 +18,23 @@ async function main() {
     // Configurations
     // ---------------
     
-    const wrappedNativeTokenAddress = "0xc778417E063141139Fce010982780140Aa0cD5Ab"; // Wrapped Native Token
-    const usdcAddress = "0x8894E40e763bF32Ff6eeCa1827888AA54B30044b"; // USDC decimal: 6
-    const routerAddress = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'; // UniswapV2Router02
+    const wrappedNativeTokenAddress = "0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83"; // Wrapped Native Token
+    const usdcAddress = "0x04068da6c83afcfa0e13ba15a6696662335d5b75"; // USDC decimal: 6
+    const routerAddress = '0x16327E3FbDaCA3bcF7E38F5Af2599D2DDc33aE52'; // SpiritRouter
 
     const creatorAddress = process.env.MAIN_DEPLOYER;
-    const USDCPoolCeiling = "20000000000000";
+    const USDCPoolCeiling = "200000000";
 
     const deiGenesisSupply = BigInt(10000e18);
     const deusGenesisSupply = BigInt(166670e18);
 
     // Pairing
-    const deiInDei_Deus = BigInt(1500e18)
-    const deusInDei_Deus = BigInt(10e18)
-    const deiInDei_USDC = BigInt(1000e18)
-    const USDCInDei_USDC = BigInt(1000e6)
-    const NativeTokenInDeus_NativeToken = BigInt(2e16);
-    const deusInDeus_NativeToken = BigInt(99.75e18);
+    const deiInDei_Deus = BigInt(100e18)
+    const deusInDei_Deus = BigInt(50e18)
+    const deiInDei_USDC = BigInt(1e18)
+    const USDCInDei_USDC = BigInt(1e6)
+    const NativeTokenInDeus_NativeToken = BigInt(1e16);
+    const deusInDeus_NativeToken = BigInt(10e18);
 
     // Staking
     const daoShare = BigInt(10e16);
@@ -53,7 +53,7 @@ async function main() {
     // Oracle
     const oracleServerAddress = "0xCaFf370042F1F9617c2a53d1E2c95C6f8ceEfa98";
 
-    const AdminAddress = '0xE5227F141575DcE74721f4A9bE2D7D636F923044';
+    const AdminAddress = '0x192c5dc089b61Ad4E5810f4f041f18c5056d0b9d';
     const deployer = process.env.MAIN_DEPLOYER;
 
     // Role Of Pool

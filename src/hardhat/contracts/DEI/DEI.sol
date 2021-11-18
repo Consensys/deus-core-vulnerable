@@ -65,8 +65,6 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 	uint256 public global_collateral_ratio; // 6 decimals of precision, e.g. 924102 = 0.924102
 	uint256 public dei_step; // Amount to change the collateralization ratio by upon refreshCollateralRatio()
 	uint256 public refresh_cooldown; // Seconds to wait before being able to run refreshCollateralRatio() again
-	// uint256 public price_target; // The price of DEI at which the collateral ratio will respond to; this value is only used for the collateral ratio mechanism and not for minting and redeeming which are hardcoded at $1
-	uint256 public price_band; // The bound above and below the price target at which the refreshCollateralRatio() will not change the collateral ratio
 
 	bytes32 public constant COLLATERAL_RATIO_PAUSER = keccak256("COLLATERAL_RATIO_PAUSER");
 	bytes32 public constant TRUSTY_ROLE = keccak256("TRUSTY_ROLE");
@@ -86,7 +84,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 	// Booleans
 	// bool public is_active;
 	bool public use_growth_ratio;
-	bool public FIP_6;
+	bool public DIP;
 
 
 	/* ========== MODIFIERS ========== */
@@ -142,7 +140,6 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 		dei_step = 2500; // 6 decimals of precision, equal to 0.25%
 		global_collateral_ratio = 800000; // Dei system starts off fully collateralized (6 decimals of precision)
 		refresh_cooldown = 300; // Refresh cooldown period is set to 5 minutes (300 seconds) at genesis
-		price_band = 5000; // Collateral ratio will not adjust if between $0.995 and $1.005 at genesis
 		_setupRole(TRUSTY_ROLE, _trusty_address);
 
 		// Upon genesis, if GR changes by more than 1% percent, enable change of collateral ratio
@@ -229,7 +226,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 
 		uint256 new_growth_ratio = deus_liquidity / dei_supply; // (E18 + E6) / E18
 
-		if(FIP_6){
+		if(DIP){
 			require(dei_price > DEI_top_band || dei_price < DEI_bottom_band, "DEI::Use refreshCollateralRatio when DEI is outside of peg");
 		}
 
@@ -280,10 +277,10 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 		emit PriceBandSet(_top_band, _bottom_band);
 	}
 
-	function activateFIP6(bool _activate) external onlyByTrusty {
-		FIP_6 = _activate;
+	function activateDIP(bool _activate) external onlyByTrusty {
+		DIP = _activate;
 
-		emit FIP_6Set(_activate);
+		emit DIPSet(_activate);
 	}
 
 	// Used by pools when user redeems
@@ -411,7 +408,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 	event OracleSet(address oracle);
 	event ReserveTrackerSet(address reserve_tracker_address);
 	event UseGrowthRatioSet( bool use_growth_ratio);
-	event FIP_6Set(bool activate);
+	event DIPSet(bool activate);
 	event GrowthRatioBandSet(uint256 GR_top_band, uint256 GR_bottom_band);
 }
 

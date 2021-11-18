@@ -20,7 +20,7 @@
 // S.A. Yaghoubnejad: https://github.com/SAYaghoubnejad
 // Hosein: https://github.com/hedzed
 
-pragma solidity 0.8.9;
+pragma solidity ^0.8.9;
 
 import "../Governance/AccessControl.sol";
 

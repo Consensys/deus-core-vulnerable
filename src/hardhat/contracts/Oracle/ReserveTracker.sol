@@ -48,11 +48,9 @@ contract ReserveTracker is AccessControl {
 	// Mapping is also used for faster verification
 	mapping(address => bool) public deus_pairs;
 
-	uint256 public deus_reserves;
-
 	// ========== MODIFIERS ==========
 
-	modifier onlyByOwnerOrGovernance() {
+	modifier onlyByOwner() {
 		require(hasRole(OWNER_ROLE, msg.sender), "Caller is not owner");
 		_;
 	}
@@ -91,14 +89,14 @@ contract ReserveTracker is AccessControl {
 	}
 
 	// Adds collateral addresses supported, such as tether and busd, must be ERC20 
-	function addDEUSPair(address pair_address) public onlyByOwnerOrGovernance {
+	function addDEUSPair(address pair_address) public onlyByOwner {
 		require(deus_pairs[pair_address] == false, "Address already exists");
 		deus_pairs[pair_address] = true; 
 		deus_pairs_array.push(pair_address);
 	}
 
 	// Remove a pool 
-	function removeDEUSPair(address pair_address) public onlyByOwnerOrGovernance {
+	function removeDEUSPair(address pair_address) public onlyByOwner {
 		require(deus_pairs[pair_address] == true, "Address nonexistant");
 		
 		// Delete from the mapping

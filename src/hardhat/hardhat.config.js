@@ -154,7 +154,7 @@ module.exports = {
 			gasMultiplier: 1.2
 		},
 		fantom: {
-			url : "https://rpc.ftm.tools/",
+			url : "https://rpcapi.fantom.network/",
 			accounts: [
 				process.env.MAIN_DEPLOYER_PRIVATE_KEY, 
 				process.env.SECOND_DEPLOYER_PRIVATE_KEY, 
@@ -163,7 +163,7 @@ module.exports = {
 			],
 			chainId: 250,
 			gas: "auto",
-			gasPrice: 36100000000,
+			gasPrice: 500100000000,	//500.1 Gwei
 			gasMultiplier: 1.2
 		}
     },
@@ -249,6 +249,15 @@ module.exports = {
 						runs: 100000
 					}
 				}
+			},
+			{
+				version: "0.8.10",
+				settings: {
+					optimizer: {
+						enabled: true,
+						runs: 100000
+					}
+				}
 			}
 		],
 	},
@@ -262,7 +271,8 @@ module.exports = {
       timeout: 360000
 	},
 	etherscan: {
-		apiKey: process.env.ETHERSCAN_API_KEY, // ETH Mainnet
+		// apiKey: process.env.ETHERSCAN_API_KEY, // ETH Mainnet
+		apiKey: process.env.FANTOM_API_KEY, // FANTOM Mainnet
 		// apiKey: process.env.POLYGON_API_KEY, // ETH Mainnet
 		// apiKey: process.env.HECO_API_KEY, // HECO Mainnet
 		// apiKey: process.env.BSCSCAN_API_KEY // BSC
