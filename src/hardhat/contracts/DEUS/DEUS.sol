@@ -25,13 +25,11 @@ pragma solidity ^0.8.9;
 // Reviewer(s) / Contributor(s)
 // Sam Sun: https://github.com/samczsun
 
-import "../Common/Context.sol";
-import "../ERC20/ERC20Custom.sol";
-import "../ERC20/IERC20.sol";
-import "../DEI/DEI.sol";
+import "../DEI/IDEI.sol";
+import "../ERC20/draft-ERC20Permit.sol";
 import "../Governance/AccessControl.sol";
 
-contract DEUSToken is ERC20Custom, AccessControl {
+contract DEUSToken is ERC20Permit, AccessControl {
 
     /* ========== STATE VARIABLES ========== */
 
@@ -41,7 +39,7 @@ contract DEUSToken is ERC20Custom, AccessControl {
 
     uint256 public constant genesis_supply = 166670e18; // 166670 is printed upon genesis
 
-    DEIStablecoin private DEI;
+    address public dei_contract_address;
 
     bytes32 public constant TRUSTY_ROLE = keccak256("TRUSTY_ROLE");
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -50,7 +48,7 @@ contract DEUSToken is ERC20Custom, AccessControl {
 
     modifier onlyPoolsOrMinters() {
         require(
-            DEI.dei_pools(msg.sender) == true || hasRole(MINTER_ROLE, msg.sender),
+            IDEIStablecoin(dei_contract_address).dei_pools(msg.sender) == true || hasRole(MINTER_ROLE, msg.sender),
             "DEUS: Only dei pools or minters are allowed to do this operation"
         );
         _;
@@ -58,7 +56,7 @@ contract DEUSToken is ERC20Custom, AccessControl {
 
     modifier onlyPools() {
         require(
-            DEI.dei_pools(msg.sender) == true,
+            IDEIStablecoin(dei_contract_address).dei_pools(msg.sender) == true,
             "DEUS: Only dei pools are allowed to do this operation"
         );
         _;
@@ -76,7 +74,7 @@ contract DEUSToken is ERC20Custom, AccessControl {
         string memory _symbol,
         address _creator_address,
         address _trusty_address
-    ) {
+    ) ERC20Permit(name) {
         require(_creator_address != address(0), "DEUS::constructor: zero address detected");  
         name = _name;
         symbol = _symbol;
@@ -99,7 +97,7 @@ contract DEUSToken is ERC20Custom, AccessControl {
     {
         require(dei_contract_address != address(0), "DEUS::setDEIAddress: Zero address detected");
 
-        DEI = DEIStablecoin(dei_contract_address);
+        dei_contract_address = dei_contract_address;
 
         emit DEIAddressSet(dei_contract_address);
     }

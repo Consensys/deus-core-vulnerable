@@ -25,18 +25,13 @@ pragma solidity ^0.8.0;
 // Reviewer(s) / Contributor(s)
 // Sam Sun: https://github.com/samczsun
 
-import "../Common/Context.sol";
-import "../ERC20/IERC20.sol";
-import "../ERC20/ERC20Custom.sol";
-import "../ERC20/ERC20.sol";
-import "../Staking/Owned.sol";
-import "../DEUS/DEUS.sol";
 import "./Pools/DEIPool.sol";
 import "../Oracle/Oracle.sol";
 import "../Oracle/ReserveTracker.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "../ERC20/draft-ERC20Permit.sol";
+import "../Governance/AccessControl.sol";
 
-contract DEIStablecoin is ERC20Custom, AccessControl {
+contract DEIStablecoin is ERC20Permit, AccessControl {
 	using ECDSA for bytes32;
 
 	/* ========== STATE VARIABLES ========== */
@@ -121,7 +116,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 		string memory _symbol,
 		address _creator_address,
 		address _trusty_address
-	){
+	) ERC20Permit(name) {
 		require(
 			_creator_address != address(0),
 			"DEI: zero address detected."
