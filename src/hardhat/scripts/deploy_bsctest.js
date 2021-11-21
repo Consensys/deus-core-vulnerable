@@ -22,12 +22,12 @@ async function main() {
     // Configurations
     // ---------------
     
-    const wrappedNativeTokenAddress = "0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83"; // Wrapped FTM
-    const usdcAddress = "0x04068da6c83afcfa0e13ba15a6696662335d5b75"; // USDC decimal: 6
-    const routerAddress = "0x16327E3FbDaCA3bcF7E38F5Af2599D2DDc33aE52"; // SpiritRouter
+    const wrappedNativeTokenAddress = "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd"; // Wrapped BNB
+    const usdcAddress = "0xffc38e278121b41983FFe996317bcA3D197F44A3"; // BUSD decimals: 18
+    const routerAddress = "0xD99D1c33F9fC3444f8101754aBC46c52416550D1"; // PancakeRouter
 
     const creatorAddress = process.env.MAIN_DEPLOYER;
-    const USDCPoolCeiling = "20000000000000";
+    const USDCPoolCeiling = "20000000000000000000000000";
 
     const deiGenesisSupply = BigInt(10000e18);
     const deusGenesisSupply = BigInt(166670e18);
@@ -36,7 +36,7 @@ async function main() {
     const deiInDei_Deus = BigInt(0.001e18)
     const deusInDei_Deus = BigInt(0.001e18)
     const deiInDei_USDC = BigInt(0.001e18)
-    const USDCInDei_USDC = BigInt(0.001e6)
+    const USDCInDei_USDC = BigInt(0.001e18)
     const NativeTokenInDeus_NativeToken = BigInt(0.001e18);
     const deusInDeus_NativeToken = BigInt(0.001e18);
 

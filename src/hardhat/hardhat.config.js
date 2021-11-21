@@ -165,6 +165,32 @@ module.exports = {
 			gas: "auto",
 			gasPrice: 500100000000,	//500.1 Gwei
 			gasMultiplier: 1.2
+		},
+		bsctest: {
+			url : "https://data-seed-prebsc-1-s1.binance.org:8545",
+			accounts: [
+				process.env.MAIN_DEPLOYER_PRIVATE_KEY, 
+				process.env.SECOND_DEPLOYER_PRIVATE_KEY, 
+				process.env.DEI_DEPLOYER_PRIVATE_KEY, 
+				process.env.DEUS_DEPLOYER_PRIVATE_KEY
+			],
+			chainId: 97,
+			gas: "auto",
+			gasPrice: 10e9,	// 10 Gwei
+			gasMultiplier: 1.2
+		},
+		bsc: {
+			url : "",
+			accounts: [
+				process.env.MAIN_DEPLOYER_PRIVATE_KEY, 
+				process.env.SECOND_DEPLOYER_PRIVATE_KEY, 
+				process.env.DEI_DEPLOYER_PRIVATE_KEY, 
+				process.env.DEUS_DEPLOYER_PRIVATE_KEY
+			],
+			chainId: 56,
+			gas: "auto",
+			gasPrice: 10e9,	// 10 Gwei
+			gasMultiplier: 1.2
 		}
     },
 	solidity: {
@@ -272,10 +298,10 @@ module.exports = {
 	},
 	etherscan: {
 		// apiKey: process.env.ETHERSCAN_API_KEY, // ETH Mainnet
-		apiKey: process.env.FANTOM_API_KEY, // FANTOM Mainnet
+		// apiKey: process.env.FANTOM_API_KEY, // FANTOM Mainnet
 		// apiKey: process.env.POLYGON_API_KEY, // ETH Mainnet
 		// apiKey: process.env.HECO_API_KEY, // HECO Mainnet
-		// apiKey: process.env.BSCSCAN_API_KEY // BSC
+		apiKey: process.env.BSCSCAN_API_KEY // BSC
 	},
 
 	contractSizer: {

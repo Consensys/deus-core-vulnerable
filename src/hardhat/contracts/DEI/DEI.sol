@@ -12,7 +12,7 @@ pragma solidity ^0.8.0;
 //  _|_|_|    _|_|_|_|    _|_|    _|_|_|        _|        _|  _|    _|    _|_|_|  _|    _|    _|_|_|    _|_|_|     |
 // =================================================================================================================
 // ======================= DEIStablecoin (DEI) ======================
-// ====================================================================
+// ==================================================================
 // DEUS Finance: https://github.com/DeusFinance
 
 // Primary Author(s)
@@ -40,10 +40,6 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 	using ECDSA for bytes32;
 
 	/* ========== STATE VARIABLES ========== */
-	enum PriceChoice {
-		DEI,
-		DEUS
-	}
 	address public oracle;
 	string public symbol;
 	string public name;
@@ -82,7 +78,6 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 	uint256 public DEI_bottom_band;
 
 	// Booleans
-	// bool public is_active;
 	bool public use_growth_ratio;
 	bool public DIP;
 
@@ -298,9 +293,12 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 		emit DEIMinted(msg.sender, m_address, m_amount);
 	}
 
+
+	/* ========== RESTRICTED FUNCTIONS ========== */
+
 	// Adds collateral addresses supported, such as tether and busd, must be ERC20
 	function addPool(address pool_address)
-		public
+		external
 		onlyByTrusty
 	{
 		require(pool_address != address(0), "DEI::addPool: Zero address detected");
@@ -314,7 +312,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 
 	// Remove a pool
 	function removePool(address pool_address)
-		public
+		external
 		onlyByTrusty
 	{
 		require(pool_address != address(0), "DEI::removePool: Zero address detected");
@@ -334,9 +332,15 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 
 		emit PoolRemoved(pool_address);
 	}
-	
+
+	// Change name + symbol of Token
+	function setNameAndSymbol(string memory _name, string memory _symbol) external onlyByTrusty {
+		name = _name;
+		symbol = _symbol;
+	}
+
 	function setOracle(address _oracle)
-		public
+		external
 		onlyByTrusty
 	{
 		oracle = _oracle;
@@ -345,7 +349,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 	}
 
 	function setDEIStep(uint256 _new_step)
-		public
+		external
 		onlyByTrusty
 	{
 		dei_step = _new_step;
@@ -363,7 +367,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 	}
 
 	function setRefreshCooldown(uint256 _new_cooldown)
-		public
+		external
 		onlyByTrusty
 	{
 		refresh_cooldown = _new_cooldown;
@@ -372,7 +376,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 	}
 
 	function setDEUSAddress(address _deus_address)
-		public
+		external
 		onlyByTrusty
 	{
 		require(_deus_address != address(0), "DEI::setDEUSAddress: Zero address detected");
@@ -383,7 +387,7 @@ contract DEIStablecoin is ERC20Custom, AccessControl {
 	}
 
 	function toggleCollateralRatio()
-		public
+		external
 		onlyCollateralRatioPauser 
 	{
 		collateral_ratio_paused = !collateral_ratio_paused;

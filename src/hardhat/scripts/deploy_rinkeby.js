@@ -1,5 +1,3 @@
-
-
 const hre = require("hardhat");
 const deployDei = require('./deploy_contracts/deploy_dei.js');
 const deployDeus = require('./deploy_contracts/deploy_deus.js');
@@ -24,9 +22,9 @@ async function main() {
     // Configurations
     // ---------------
     
-    const wrappedNativeTokenAddress = "0xc778417E063141139Fce010982780140Aa0cD5Ab"; // Wrapped Native Token
-    const usdcAddress = "0xbb5157A653cb798B7Ca69F1157dbE12d414DA2FE"; // USDC decimal: 6
-    const routerAddress = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'; // UniswapV2Router02
+    const wrappedNativeTokenAddress = "0xc778417E063141139Fce010982780140Aa0cD5Ab"; // Wrapped ETH
+    const usdcAddress = "0x49AC7cEDdb9464DA9274b164Cd6BA7129Da2C03E"; // USDC decimal: 6
+    const routerAddress = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"; // UniswapRouterV2
 
     const creatorAddress = process.env.MAIN_DEPLOYER;
     const USDCPoolCeiling = "20000000000000";
@@ -35,17 +33,17 @@ async function main() {
     const deusGenesisSupply = BigInt(166670e18);
 
     // Pairing
-    const deiInDei_Deus = BigInt(1500e18)
-    const deusInDei_Deus = BigInt(10e18)
-    const deiInDei_USDC = BigInt(1000e18)
-    const USDCInDei_USDC = BigInt(1000e6)
-    const NativeTokenInDeus_NativeToken = BigInt(0.02e18);
-    const deusInDeus_NativeToken = BigInt(99.75e18);
+    const deiInDei_Deus = BigInt(1000e18)
+    const deusInDei_Deus = BigInt(100e18)
+    const deiInDei_USDC = BigInt(500e18)
+    const USDCInDei_USDC = BigInt(500e6)
+    const NativeTokenInDeus_NativeToken = BigInt(0.1e18);
+    const deusInDeus_NativeToken = BigInt(10e18);
 
     // Staking
     const daoShare = BigInt(10e16); //10%
     const foundersShare = BigInt(1e16); //1%
-    const rewardPerBlock = "1000"; //1000e-18
+    const rewardPerBlock = "0"; //1000e-18
     const rewardPerBlockSetter = "0x35749cAAf96369b8927A28D1E5C9b2E8367D8aa9";
 
     // USDC Pool Parameters
