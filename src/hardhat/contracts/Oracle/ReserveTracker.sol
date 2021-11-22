@@ -33,7 +33,7 @@ import "../Governance/AccessControl.sol";
 contract ReserveTracker is AccessControl {
 
 	// Roles
-    bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
+    bytes32 public constant TRUSTY_ROLE = keccak256("TRUSTY_ROLE");
 
 	// Various precisions
 	uint256 private PRICE_PRECISION = 1e6;
@@ -50,8 +50,8 @@ contract ReserveTracker is AccessControl {
 
 	// ========== MODIFIERS ==========
 
-	modifier onlyByOwner() {
-		require(hasRole(OWNER_ROLE, msg.sender), "Caller is not owner");
+	modifier onlyTrusty() {
+		require(hasRole(TRUSTY_ROLE, msg.sender), "Caller is not trusty");
 		_;
 	}
 
@@ -64,7 +64,7 @@ contract ReserveTracker is AccessControl {
 		dei_contract_address = _dei_contract_address;
 		deus_contract_address = _deus_contract_address;
 		_setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-		_setupRole(OWNER_ROLE, msg.sender);
+		_setupRole(TRUSTY_ROLE, msg.sender);
 	}
 
 	// ========== VIEWS ==========
@@ -89,14 +89,14 @@ contract ReserveTracker is AccessControl {
 	}
 
 	// Adds collateral addresses supported, such as tether and busd, must be ERC20 
-	function addDEUSPair(address pair_address) public onlyByOwner {
+	function addDEUSPair(address pair_address) public onlyTrusty {
 		require(deus_pairs[pair_address] == false, "Address already exists");
 		deus_pairs[pair_address] = true; 
 		deus_pairs_array.push(pair_address);
 	}
 
 	// Remove a pool 
-	function removeDEUSPair(address pair_address) public onlyByOwner {
+	function removeDEUSPair(address pair_address) public onlyTrusty {
 		require(deus_pairs[pair_address] == true, "Address nonexistant");
 		
 		// Delete from the mapping

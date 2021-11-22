@@ -34,14 +34,14 @@ import "./DEIPoolLibrary.sol";
 
 contract DEIPool is AccessControl {
 
-    struct RecollateralizeDEI {
+	struct RecollateralizeDEI {
 		uint256 collateral_amount;
 		uint256 pool_collateral_price;
 		uint256[] collateral_price;
 		uint256 deus_current_price;
 		uint256 expireBlock;
 		bytes[] sigs;
-    }
+	}
 
 	/* ========== STATE VARIABLES ========== */
 
@@ -92,7 +92,7 @@ contract DEIPool is AccessControl {
 	bytes32 private constant REDEEM_PAUSER = keccak256("REDEEM_PAUSER");
 	bytes32 private constant BUYBACK_PAUSER = keccak256("BUYBACK_PAUSER");
 	bytes32 private constant RECOLLATERALIZE_PAUSER = keccak256("RECOLLATERALIZE_PAUSER");
-    bytes32 public constant TRUSTY_ROLE = keccak256("TRUSTY_ROLE");
+	bytes32 public constant TRUSTY_ROLE = keccak256("TRUSTY_ROLE");
 	bytes32 public constant DAO_SHARE_COLLECTOR = keccak256("DAO_SHARE_COLLECTOR");
 	bytes32 public constant PARAMETER_SETTER_ROLE = keccak256("PARAMETER_SETTER_ROLE");
 
@@ -104,7 +104,7 @@ contract DEIPool is AccessControl {
 
 	/* ========== MODIFIERS ========== */
 
-	modifier onlyByTrusty() {
+	modifier onlyTrusty() {
 		require(
 			hasRole(TRUSTY_ROLE, msg.sender),
 			"POOL::you are not trusty"
@@ -155,8 +155,8 @@ contract DEIPool is AccessControl {
 		_setupRole(REDEEM_PAUSER, _trusty_address);
 		_setupRole(RECOLLATERALIZE_PAUSER, _trusty_address);
 		_setupRole(BUYBACK_PAUSER, _trusty_address);
-        _setupRole(TRUSTY_ROLE, _trusty_address);
-        _setupRole(PARAMETER_SETTER_ROLE, _trusty_address);
+		_setupRole(TRUSTY_ROLE, _trusty_address);
+		_setupRole(PARAMETER_SETTER_ROLE, _trusty_address);
 	}
 
 	/* ========== VIEWS ========== */
@@ -181,12 +181,12 @@ contract DEIPool is AccessControl {
 	}
 
 	function getChainID() public view returns (uint256) {
-        uint256 id;
-        assembly {
-            id := chainid()
-        }
-        return id;
-    }
+		uint256 id;
+		assembly {
+			id := chainid()
+		}
+		return id;
+	}
 
 	/* ========== PUBLIC FUNCTIONS ========== */
 
@@ -207,7 +207,7 @@ contract DEIPool is AccessControl {
 		);
 
 		require(expireBlock >= block.number, "POOL::mint1t1DEI: signature is expired");
-        bytes32 sighash = keccak256(abi.encodePacked(collateral_address, collateral_price, expireBlock, getChainID()));
+		bytes32 sighash = keccak256(abi.encodePacked(collateral_address, collateral_price, expireBlock, getChainID()));
 		require(IDEIStablecoin(dei_contract_address).verify_price(sighash, sigs), "POOL::mint1t1DEI: invalid signatures");
 
 		uint256 collateral_amount_d18 = collateral_amount * (10**missing_decimals);
@@ -322,7 +322,7 @@ contract DEIPool is AccessControl {
 		);
 
 		require(expireBlock >= block.number, "POOL::mintAlgorithmicDEI: signature is expired.");
-        bytes32 sighash = keccak256(abi.encodePacked(collateral_address, collateral_price, expireBlock, getChainID()));
+		bytes32 sighash = keccak256(abi.encodePacked(collateral_address, collateral_price, expireBlock, getChainID()));
 		require(IDEIStablecoin(dei_contract_address).verify_price(sighash, sigs), "POOL::redeem1t1DEI: invalid signatures");
 
 		// Need to adjust for decimals of collateral
@@ -481,13 +481,13 @@ contract DEIPool is AccessControl {
 
 		require(inputs.expireBlock >= block.number, "POOL::recollateralizeDEI: signature is expired.");
 		bytes32 sighash = keccak256(abi.encodePacked(
-                                        collateral_address, 
-                                        inputs.collateral_price,
-                                        deus_contract_address, 
-                                        inputs.deus_current_price, 
-                                        inputs.expireBlock,
+										collateral_address, 
+										inputs.collateral_price,
+										deus_contract_address, 
+										inputs.deus_current_price, 
+										inputs.expireBlock,
 										getChainID()
-                                    ));
+									));
 		require(IDEIStablecoin(dei_contract_address).verify_price(sighash, inputs.sigs), "POOL::recollateralizeDEI: invalid signatures");
 
 		uint256 collateral_amount_d18 = inputs.collateral_amount * (10**missing_decimals);
@@ -567,7 +567,7 @@ contract DEIPool is AccessControl {
 		emit daoShareCollected(amount, to);
 	}
 
-	function emergencyWithdrawERC20(address token, uint amount, address to) external onlyByTrusty {
+	function emergencyWithdrawERC20(address token, uint amount, address to) external onlyTrusty {
 		IERC20(token).transfer(to, amount);
 	}
 

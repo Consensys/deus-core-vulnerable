@@ -30,7 +30,7 @@ async function main() {
     const USDCPoolCeiling = "20000000000000";  // TODO: change decimals
 
     const deiGenesisSupply = BigInt(10000e18);
-    const deusGenesisSupply = BigInt(166670e18);
+    const deusGenesisSupply = BigInt(100e18);
 
     // Pairing
     const deiInDei_Deus = BigInt(0.001e18)
@@ -165,7 +165,7 @@ async function main() {
     await dei.setReserveTracker(reserveTracker.address);
     await dei.setRefreshCooldown(1800);
     await dei.setDEUSAddress(deus.address);
-    await dei.useGrowthRatio(false);
+    await dei.setUseGrowthRatio(false);
     await dei.setPriceBands(1040000, 960000);
 
     await deus.setDEIAddress(dei.address);
@@ -275,7 +275,7 @@ async function main() {
     await USDCPool.renounceRole(USDCPool.PARAMETER_SETTER_ROLE(), deployer)
     
     await reserveTracker.renounceRole(reserveTracker.DEFAULT_ADMIN_ROLE(), deployer)
-    await reserveTracker.renounceRole(reserveTracker.OWNER_ROLE(), deployer)
+    await reserveTracker.renounceRole(reserveTracker.TRUSTY_ROLE(), deployer)
     
     await stakingDEI_DEUS.renounceRole(stakingDEI_DEUS.DEFAULT_ADMIN_ROLE(), deployer)
     await stakingDEI_DEUS.renounceRole(stakingDEI_DEUS.REWARD_PER_BLOCK_SETTER(), deployer)

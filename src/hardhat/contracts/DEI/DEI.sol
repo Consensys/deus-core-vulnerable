@@ -35,13 +35,12 @@ contract DEIStablecoin is ERC20Permit, AccessControl {
 	using ECDSA for bytes32;
 
 	/* ========== STATE VARIABLES ========== */
-	address public oracle;
 	string public symbol;
 	string public name;
 	uint8 public constant decimals = 18;
-	address public creator_address;
+	address public oracle;
 	address public deus_address;
-	uint256 public constant genesis_supply = 10000e18; // genesis supply is 10k on Mainnet. This is to help with establishing the Uniswap pools, as they need liquidity
+	uint256 public constant genesis_supply = 10000e18; // genesis supply is 10k. This is to help with establishing the Uniswap pools, as they need liquidity
 	address public reserve_tracker_address;
 
 	// The addresses in this array are added by the oracle and these contracts are able to mint DEI
@@ -59,7 +58,6 @@ contract DEIStablecoin is ERC20Permit, AccessControl {
 
 	bytes32 public constant COLLATERAL_RATIO_PAUSER = keccak256("COLLATERAL_RATIO_PAUSER");
 	bytes32 public constant TRUSTY_ROLE = keccak256("TRUSTY_ROLE");
-	bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 	bool public collateral_ratio_paused = false;
 
 
@@ -79,20 +77,6 @@ contract DEIStablecoin is ERC20Permit, AccessControl {
 
 	/* ========== MODIFIERS ========== */
 
-	modifier onlyCollateralRatioPauser() {
-		require(hasRole(COLLATERAL_RATIO_PAUSER, msg.sender), "DEI: you are not the collateral ratio pauser");
-		_;
-	}
-
-	modifier onlyPoolsOrMinters() {
-		require(
-			dei_pools[msg.sender] == true ||
-			hasRole(MINTER_ROLE, msg.sender),
-			"DEI: you are not minter"
-		);
-		_;
-	}
-
 	modifier onlyPools() {
 		require(
 			dei_pools[msg.sender] == true,
@@ -101,7 +85,7 @@ contract DEIStablecoin is ERC20Permit, AccessControl {
 		_;
 	}
 
-	modifier onlyByTrusty() {
+	modifier onlyTrusty() {
 		require(
 			hasRole(TRUSTY_ROLE, msg.sender),
 			"DEI: you are not the owner"
@@ -114,23 +98,21 @@ contract DEIStablecoin is ERC20Permit, AccessControl {
 	constructor(
 		string memory _name,
 		string memory _symbol,
-		address _creator_address,
 		address _trusty_address
 	) ERC20Permit(name) {
 		require(
-			_creator_address != address(0),
+			_trusty_address != address(0),
 			"DEI: zero address detected."
 		);
 		name = _name;
 		symbol = _symbol;
-		creator_address = _creator_address;
-		_setupRole(DEFAULT_ADMIN_ROLE, _trusty_address);
-		_mint(creator_address, genesis_supply);
-		_setupRole(COLLATERAL_RATIO_PAUSER, creator_address);
 		dei_step = 2500; // 6 decimals of precision, equal to 0.25%
 		global_collateral_ratio = 800000; // Dei system starts off fully collateralized (6 decimals of precision)
 		refresh_cooldown = 300; // Refresh cooldown period is set to 5 minutes (300 seconds) at genesis
+		_setupRole(DEFAULT_ADMIN_ROLE, _trusty_address);
+		_setupRole(COLLATERAL_RATIO_PAUSER, _trusty_address);
 		_setupRole(TRUSTY_ROLE, _trusty_address);
+		_mint(_trusty_address, genesis_supply);
 
 		// Upon genesis, if GR changes by more than 1% percent, enable change of collateral ratio
 		GR_top_band = 1000;
@@ -180,12 +162,12 @@ contract DEIStablecoin is ERC20Permit, AccessControl {
 	}
 
 	function getChainID() public view returns (uint256) {
-        uint256 id;
-        assembly {
-            id := chainid()
-        }
-        return id;
-    }
+		uint256 id;
+		assembly {
+			id := chainid()
+		}
+		return id;
+	}
 
 	/* ========== PUBLIC FUNCTIONS ========== */
 
@@ -205,8 +187,8 @@ contract DEIStablecoin is ERC20Permit, AccessControl {
 										address(this),
 										dei_price,
 										expire_block,
-                                    	getChainID()
-                                    ));
+										getChainID()
+									));
 
 		verify_price(sighash, sigs);
 
@@ -248,53 +230,49 @@ contract DEIStablecoin is ERC20Permit, AccessControl {
 
 	}
 
-	function useGrowthRatio(bool _use_growth_ratio) external onlyByTrusty {
+	function setUseGrowthRatio(bool _use_growth_ratio) external onlyTrusty {
 		use_growth_ratio = _use_growth_ratio;
 
 		emit UseGrowthRatioSet(_use_growth_ratio);
 	}
 
-	function setGrowthRatioBands(uint256 _GR_top_band, uint256 _GR_bottom_band) external onlyByTrusty {
+	function setGrowthRatioBands(uint256 _GR_top_band, uint256 _GR_bottom_band) external onlyTrusty {
 		GR_top_band = _GR_top_band;
 		GR_bottom_band = _GR_bottom_band;
 		emit GrowthRatioBandSet( _GR_top_band, _GR_bottom_band);
 	}
 
-	function setPriceBands(uint256 _top_band, uint256 _bottom_band) external onlyByTrusty {
+	function setPriceBands(uint256 _top_band, uint256 _bottom_band) external onlyTrusty {
 		DEI_top_band = _top_band;
 		DEI_bottom_band = _bottom_band;
 
 		emit PriceBandSet(_top_band, _bottom_band);
 	}
 
-	function activateDIP(bool _activate) external onlyByTrusty {
+	function activateDIP(bool _activate) external onlyTrusty {
 		DIP = _activate;
 
 		emit DIPSet(_activate);
 	}
 
 	// Used by pools when user redeems
-	function pool_burn_from(address b_address, uint256 b_amount)
-		public
-		onlyPools
-	{
+	function pool_burn_from(address b_address, uint256 b_amount) public onlyPools {
 		super._burnFrom(b_address, b_amount);
 		emit DEIBurned(b_address, msg.sender, b_amount);
 	}
 
 	// This function is what other dei pools will call to mint new DEI
-	function pool_mint(address m_address, uint256 m_amount) public onlyPoolsOrMinters {
+	function pool_mint(address m_address, uint256 m_amount) public onlyPools {
 		super._mint(m_address, m_amount);
 		emit DEIMinted(msg.sender, m_address, m_amount);
 	}
-
 
 	/* ========== RESTRICTED FUNCTIONS ========== */
 
 	// Adds collateral addresses supported, such as tether and busd, must be ERC20
 	function addPool(address pool_address)
 		external
-		onlyByTrusty
+		onlyTrusty
 	{
 		require(pool_address != address(0), "DEI::addPool: Zero address detected");
 		require(dei_pools[pool_address] == false, "DEI::addPool: Address already exists");
@@ -308,10 +286,9 @@ contract DEIStablecoin is ERC20Permit, AccessControl {
 	// Remove a pool
 	function removePool(address pool_address)
 		external
-		onlyByTrusty
+		onlyTrusty
 	{
 		require(pool_address != address(0), "DEI::removePool: Zero address detected");
-
 		require(dei_pools[pool_address] == true, "DEI::removePool: Address nonexistant");
 
 		// Delete from the mapping
@@ -328,52 +305,38 @@ contract DEIStablecoin is ERC20Permit, AccessControl {
 		emit PoolRemoved(pool_address);
 	}
 
-	// Change name + symbol of Token
-	function setNameAndSymbol(string memory _name, string memory _symbol) external onlyByTrusty {
+	function setNameAndSymbol(string memory _name, string memory _symbol) external onlyTrusty {
 		name = _name;
 		symbol = _symbol;
+
+		emit NameAndSymbolSet(name, symbol);
 	}
 
-	function setOracle(address _oracle)
-		external
-		onlyByTrusty
-	{
+	function setOracle(address _oracle) external onlyTrusty {
 		oracle = _oracle;
 
 		emit OracleSet(_oracle);
 	}
 
-	function setDEIStep(uint256 _new_step)
-		external
-		onlyByTrusty
-	{
+	function setDEIStep(uint256 _new_step) external onlyTrusty {
 		dei_step = _new_step;
 
 		emit DEIStepSet(_new_step);
 	}
 
-	function setReserveTracker(address _reserve_tracker_address)
-		external
-		onlyByTrusty
-	{		
+	function setReserveTracker(address _reserve_tracker_address) external onlyTrusty {
 		reserve_tracker_address = _reserve_tracker_address;
 
 		emit ReserveTrackerSet(_reserve_tracker_address);
 	}
 
-	function setRefreshCooldown(uint256 _new_cooldown)
-		external
-		onlyByTrusty
-	{
+	function setRefreshCooldown(uint256 _new_cooldown) external onlyTrusty {
 		refresh_cooldown = _new_cooldown;
 
 		emit RefreshCooldownSet(_new_cooldown);
 	}
 
-	function setDEUSAddress(address _deus_address)
-		external
-		onlyByTrusty
-	{
+	function setDEUSAddress(address _deus_address) external onlyTrusty {
 		require(_deus_address != address(0), "DEI::setDEUSAddress: Zero address detected");
 
 		deus_address = _deus_address;
@@ -381,10 +344,8 @@ contract DEIStablecoin is ERC20Permit, AccessControl {
 		emit DEUSAddressSet(_deus_address);
 	}
 
-	function toggleCollateralRatio()
-		external
-		onlyCollateralRatioPauser 
-	{
+	function toggleCollateralRatio() external {
+		require(hasRole(COLLATERAL_RATIO_PAUSER, msg.sender), "DEI: you are not the collateral ratio pauser");
 		collateral_ratio_paused = !collateral_ratio_paused;
 
 		emit CollateralRatioToggled(collateral_ratio_paused);
@@ -409,6 +370,7 @@ contract DEIStablecoin is ERC20Permit, AccessControl {
 	event UseGrowthRatioSet( bool use_growth_ratio);
 	event DIPSet(bool activate);
 	event GrowthRatioBandSet(uint256 GR_top_band, uint256 GR_bottom_band);
+	event NameAndSymbolSet(string name, string symbol);
 }
 
 //Dar panah khoda

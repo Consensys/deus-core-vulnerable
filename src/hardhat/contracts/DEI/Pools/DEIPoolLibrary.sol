@@ -37,7 +37,6 @@ contract DEIPoolLibrary {
         return (deus_amount_d18 * deus_price_usd) / (1e6);
     }
 
-    // Must be internal because of the struct
     function calcMintFractionalDEI(MintFD_Params memory params) public pure returns (uint256, uint256) {
         // Since solidity truncates division, every division operation must be the last operation in the equation to ensure minimum error
         // The contract must check the proper ratio was sent to mint DEI. We do this by seeing the minimum mintable DEI based on each amount 
@@ -63,7 +62,6 @@ contract DEIPoolLibrary {
         return (DEI_amount * (1e6)) / col_price_usd;
     }
 
-    // Must be internal because of the struct
     function calcBuyBackDEUS(BuybackDEUS_Params memory params) public pure returns (uint256) {
         // If the total collateral value is higher than the amount required at the current collateral ratio then buy back up to the possible DEUS with the desired collateral
         require(params.excess_collateral_dollar_value_d18 > 0, "No excess collateral to buy back!");
@@ -86,7 +84,6 @@ contract DEIPoolLibrary {
         uint256 target_collat_value = (total_supply * global_collateral_ratio) / (1e6); // We want 18 decimals of precision so divide by 1e6; total_supply is 1e18 and global_collateral_ratio is 1e6
         // Subtract the current value of collateral from the target value needed, if higher than 0 then system needs to recollateralize
         return target_collat_value - global_collat_value; // If recollateralization is not needed, throws a subtraction underflow
-        // return(recollateralization_left);
     }
 
     function calcRecollateralizeDEIInner(

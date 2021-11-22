@@ -44,7 +44,7 @@ contract Oracle is AccessControl {
 	{
 		require(
 			hasRole(TRUSTY_ROLE, msg.sender),
-			"ORACLE::setMinimumRequiredSignature: You are not a setter"
+			"ORACLE::setMinimumRequiredSignature: You are not trusty"
 		);
 		minimumRequiredSignature = _minimumRequiredSignature;
 
