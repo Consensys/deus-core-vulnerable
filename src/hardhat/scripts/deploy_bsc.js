@@ -171,7 +171,7 @@ async function main() {
     await deus.setDEIAddress(dei.address);
     await deus.grantRole(deus.MINTER_ROLE(), stakingDEI_DEUS.address);
     await deus.grantRole(deus.MINTER_ROLE(), stakingDEI_USDC.address);
-    await deus.toggleVotes();
+    // await deus.toggleVotes();
 
     await reserveTracker.addDEUSPair(dei_deusAddress);
 
