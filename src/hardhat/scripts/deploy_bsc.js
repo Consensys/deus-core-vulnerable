@@ -23,11 +23,11 @@ async function main() {
     // ---------------
     
     const wrappedNativeTokenAddress = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"; // Wrapped BNB
-    const usdcAddress = "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56"; // USDC decimal: 6  // TODO: change decimals
+    const usdcAddress = "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d"; // USDC decimal: 18
     const routerAddress = "0x10ED43C718714eb63d5aA57B78B54704E256024E"; // PancakeRouter
 
     const creatorAddress = process.env.MAIN_DEPLOYER;
-    const USDCPoolCeiling = "20000000000000";  // TODO: change decimals
+    const USDCPoolCeiling = "20000000000000000000000000";
 
     const deiGenesisSupply = BigInt(10000e18);
     const deusGenesisSupply = BigInt(100e18);
@@ -36,7 +36,7 @@ async function main() {
     const deiInDei_Deus = BigInt(0.001e18)
     const deusInDei_Deus = BigInt(0.001e18)
     const deiInDei_USDC = BigInt(0.001e18)
-    const USDCInDei_USDC = BigInt(0.001e6)  // TODO: change decimals
+    const USDCInDei_USDC = BigInt(0.001e18)
     const NativeTokenInDeus_NativeToken = BigInt(0.001e18);
     const deusInDeus_NativeToken = BigInt(0.001e18);
 
@@ -57,7 +57,8 @@ async function main() {
     // Oracle
     const oracleServerAddress = "0xCaFf370042F1F9617c2a53d1E2c95C6f8ceEfa98";
 
-    const AdminAddress = '0xE5227F141575DcE74721f4A9bE2D7D636F923044';
+    const LPRemoverAddress = "0xE5227F141575DcE74721f4A9bE2D7D636F923044"
+    const AdminAddress = '0xbA2b70651A24e9E2E4824b275e39c890C7DdFFCd';
     const deployer = process.env.MAIN_DEPLOYER;
 
     // Role Of Pool
@@ -86,11 +87,12 @@ async function main() {
     assert(BigInt(await usdc.balanceOf(deployer)) >= USDCInDei_USDC, 
         "There is not enough USDC in deployer for DEI-USDC");
 
-    const dei= await deployDei();
+    // const dei= await deployDei();
 
-    const deus = await deployDeus();
+    // const deus = await deployDeus();
 
     const oracle = await deployOracle()
+    await new Promise((resolve) => setTimeout(resolve, 60000));
 
     const deiPoolLibrary = await deployDeiPoolLibrary();
 
@@ -196,8 +198,8 @@ async function main() {
     await dei.transfer(AdminAddress, await dei.balanceOf(deployer));
     await deus.transfer(AdminAddress, BigInt(await deus.balanceOf(deployer)) - deusInDeus_NativeToken);
     await usdc.transfer(AdminAddress, await usdc.balanceOf(deployer));
-    await deiDeus.transfer(AdminAddress, await deiDeus.balanceOf(deployer));
-    await deiUsdc.transfer(AdminAddress, await deiUsdc.balanceOf(deployer));
+    await deiDeus.transfer(LPRemoverAddress, await deiDeus.balanceOf(deployer));
+    await deiUsdc.transfer(LPRemoverAddress, await deiUsdc.balanceOf(deployer));
 
     // ---------------------------------- //
     // | Skip 4 nonce in other networks | //
@@ -246,7 +248,7 @@ async function main() {
     await stakingDEUS_NativeToken.grantRole(stakingDEUS_NativeToken.DEFAULT_ADMIN_ROLE(), AdminAddress);
 
     const deus_NativeToken = await erc20Instance.attach(deus_NativeTokenAddress);
-    await deus_NativeToken.transfer(AdminAddress, await deus_NativeToken.balanceOf(deployer));
+    await deus_NativeToken.transfer(LPRemoverAddress, await deus_NativeToken.balanceOf(deployer));
 
     // ---------------------------------- //
     // | Skip 2 nonce in other networks | //

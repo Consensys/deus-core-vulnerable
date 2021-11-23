@@ -34,7 +34,7 @@ async function main() {
 
     // Pairing
     const deiInDei_Deus = BigInt(1000e18)
-    const deusInDei_Deus = BigInt(100e18)
+    const deusInDei_Deus = BigInt(10e18)
     const deiInDei_USDC = BigInt(500e18)
     const USDCInDei_USDC = BigInt(500e6)
     const NativeTokenInDeus_NativeToken = BigInt(0.1e18);

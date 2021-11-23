@@ -154,7 +154,7 @@ module.exports = {
 			gasMultiplier: 1.2
 		},
 		fantom: {
-			url : "https://rpcapi.fantom.network/",
+			url : "https://rpc.ftm.tools/",
 			accounts: [
 				process.env.MAIN_DEPLOYER_PRIVATE_KEY, 
 				process.env.SECOND_DEPLOYER_PRIVATE_KEY, 
@@ -163,7 +163,7 @@ module.exports = {
 			],
 			chainId: 250,
 			gas: "auto",
-			gasPrice: 500100000000,	//500.1 Gwei
+			gasPrice: 300100000000,	//500.1 Gwei
 			gasMultiplier: 1.2
 		},
 		bsctest: {
@@ -180,7 +180,7 @@ module.exports = {
 			gasMultiplier: 1.2
 		},
 		bsc: {
-			url : "",
+			url : "https://bsc-dataseed1.ninicoin.io/",
 			accounts: [
 				process.env.MAIN_DEPLOYER_PRIVATE_KEY, 
 				process.env.SECOND_DEPLOYER_PRIVATE_KEY, 
@@ -303,8 +303,8 @@ module.exports = {
 		// apiKey: process.env.HECO_API_KEY, // HECO Mainnet
 		apiKey: process.env.BSCSCAN_API_KEY // BSC
 	},
-
 	contractSizer: {
+
 		alphaSort: true,
 		runOnCompile: true,
 		disambiguatePaths: false,

@@ -37,7 +37,7 @@ contract DEUSToken is ERC20Permit, AccessControl {
 	string public name;
 	uint8 public constant decimals = 18;
 
-	uint256 public constant genesis_supply = 10; // genesis supply has been minted on ETH & Polygon
+	uint256 public constant genesis_supply = 100e18; // genesis supply has been minted on ETH & Polygon
 
 	address public dei_contract_address;
 

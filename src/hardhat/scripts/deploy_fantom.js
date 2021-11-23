@@ -57,7 +57,9 @@ async function main() {
     // Oracle
     const oracleServerAddress = "0xCaFf370042F1F9617c2a53d1E2c95C6f8ceEfa98";
 
-    const AdminAddress = '0xE5227F141575DcE74721f4A9bE2D7D636F923044';
+    const AdminAddress = '0xEf6b0872CfDF881Cf9Fe0918D3FA979c616AF983';
+    const LPRemoverAddress = "0xE5227F141575DcE74721f4A9bE2D7D636F923044";
+
     const deployer = process.env.MAIN_DEPLOYER;
 
     // Role Of Pool
@@ -163,12 +165,18 @@ async function main() {
     await dei.setOracle(oracle.address);
     await dei.setDEIStep(1000);
     await dei.setReserveTracker(reserveTracker.address);
+
+    await new Promise((resolve) => setTimeout(resolve, 10000));
+
     await dei.setRefreshCooldown(1800);
     await dei.setDEUSAddress(deus.address);
     await dei.setUseGrowthRatio(false);
     await dei.setPriceBands(1040000, 960000);
 
     await deus.setDEIAddress(dei.address);
+
+    await new Promise((resolve) => setTimeout(resolve, 10000));
+
     await deus.grantRole(deus.MINTER_ROLE(), stakingDEI_DEUS.address);
     await deus.grantRole(deus.MINTER_ROLE(), stakingDEI_USDC.address);
     // await deus.toggleVotes();  // Note: we dont support onchain voting now
@@ -187,17 +195,27 @@ async function main() {
 
     await dei.grantRole(dei.DEFAULT_ADMIN_ROLE(), AdminAddress);
     await deus.grantRole(deus.DEFAULT_ADMIN_ROLE(), AdminAddress);
+
+    await new Promise((resolve) => setTimeout(resolve, 10000));
+
     await oracle.grantRole(oracle.DEFAULT_ADMIN_ROLE(), AdminAddress);
     await USDCPool.grantRole(USDCPool.DEFAULT_ADMIN_ROLE(), AdminAddress);
     await reserveTracker.grantRole(reserveTracker.DEFAULT_ADMIN_ROLE(), AdminAddress);
+
+    await new Promise((resolve) => setTimeout(resolve, 10000));
+
     await stakingDEI_DEUS.grantRole(stakingDEI_DEUS.DEFAULT_ADMIN_ROLE(), AdminAddress);
     await stakingDEI_USDC.grantRole(stakingDEI_USDC.DEFAULT_ADMIN_ROLE(), AdminAddress);
     
+    await new Promise((resolve) => setTimeout(resolve, 10000));
+
     await dei.transfer(AdminAddress, await dei.balanceOf(deployer));
     await deus.transfer(AdminAddress, BigInt(await deus.balanceOf(deployer)) - deusInDeus_NativeToken);
     await usdc.transfer(AdminAddress, await usdc.balanceOf(deployer));
-    await deiDeus.transfer(AdminAddress, await deiDeus.balanceOf(deployer));
-    await deiUsdc.transfer(AdminAddress, await deiUsdc.balanceOf(deployer));
+    
+    // TODO: Change AdminAddress
+    await deiDeus.transfer(LPRemoverAddress, await deiDeus.balanceOf(deployer));
+    await deiUsdc.transfer(LPRemoverAddress, await deiUsdc.balanceOf(deployer));
 
     // ---------------------------------- //
     // | Skip 4 nonce in other networks | //
@@ -246,7 +264,8 @@ async function main() {
     await stakingDEUS_NativeToken.grantRole(stakingDEUS_NativeToken.DEFAULT_ADMIN_ROLE(), AdminAddress);
 
     const deus_NativeToken = await erc20Instance.attach(deus_NativeTokenAddress);
-    await deus_NativeToken.transfer(AdminAddress, await deus_NativeToken.balanceOf(deployer));
+
+    await deus_NativeToken.transfer(LPRemoverAddress, await deus_NativeToken.balanceOf(deployer));
 
     // ---------------------------------- //
     // | Skip 2 nonce in other networks | //
