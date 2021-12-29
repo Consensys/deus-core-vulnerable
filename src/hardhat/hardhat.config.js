@@ -14,11 +14,11 @@ require('@openzeppelin/hardhat-upgrades');
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
 task("accounts", "Prints the list of accounts", async () => {
-  const accounts = await ethers.getSigners();
+	const accounts = await ethers.getSigners();
 
-  for (const account of accounts) {
-    console.log(account.address);
-  }
+	for (const account of accounts) {
+		console.log(account.address);
+	}
 });
 
 // You need to export an object to set up your config
@@ -28,8 +28,8 @@ task("accounts", "Prints the list of accounts", async () => {
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-    defaultNetwork: "hardhat",
-    networks: {
+	defaultNetwork: "hardhat",
+	networks: {
 		// hardhat: {
 		// 	forking: {
 		// 		url: `https://mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
@@ -61,26 +61,26 @@ module.exports = {
 		// 	gasMultiplier: 1.2
 		// },
 		ropsten: {
-			url:`https://ropsten.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
+			url: `https://ropsten.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
 			accounts: [
-				process.env.MAIN_DEPLOYER_PRIVATE_KEY, 
-				process.env.SECOND_DEPLOYER_PRIVATE_KEY, 
-				process.env.DEI_DEPLOYER_PRIVATE_KEY, 
+				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
+				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
+				process.env.DEI_DEPLOYER_PRIVATE_KEY,
 				process.env.DEUS_DEPLOYER_PRIVATE_KEY
 			],
 			chainId: 3,
 			gas: "auto",
 			minGasPrice: 1000000000,
-			initialBaseFeePerGas: 360000000,   
-			gasPrice: "auto", 
+			initialBaseFeePerGas: 360000000,
+			gasPrice: "auto",
 			gasMultiplier: 1.2
 		},
 		rinkeby: {
-			url:`https://rinkeby.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
+			url: `https://rinkeby.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
 			accounts: [
-				process.env.MAIN_DEPLOYER_PRIVATE_KEY, 
-				process.env.SECOND_DEPLOYER_PRIVATE_KEY, 
-				process.env.DEI_DEPLOYER_PRIVATE_KEY, 
+				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
+				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
+				process.env.DEI_DEPLOYER_PRIVATE_KEY,
 				process.env.DEUS_DEPLOYER_PRIVATE_KEY
 			],
 			chainId: 4,
@@ -89,11 +89,11 @@ module.exports = {
 			gasMultiplier: 1.2
 		},
 		mainnet: {
-			url:`https://mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
+			url: `https://mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
 			accounts: [
-				process.env.MAIN_DEPLOYER_PRIVATE_KEY, 
-				process.env.SECOND_DEPLOYER_PRIVATE_KEY, 
-				process.env.DEI_DEPLOYER_PRIVATE_KEY, 
+				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
+				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
+				process.env.DEI_DEPLOYER_PRIVATE_KEY,
 				process.env.DEUS_DEPLOYER_PRIVATE_KEY
 			],
 			chainId: 1,
@@ -102,11 +102,11 @@ module.exports = {
 			gasMultiplier: 1.2
 		},
 		heco: {
-			url : "https://http-mainnet.hecochain.com",
+			url: "https://http-mainnet.hecochain.com",
 			accounts: [
-				process.env.MAIN_DEPLOYER_PRIVATE_KEY, 
-				process.env.SECOND_DEPLOYER_PRIVATE_KEY, 
-				process.env.DEI_DEPLOYER_PRIVATE_KEY, 
+				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
+				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
+				process.env.DEI_DEPLOYER_PRIVATE_KEY,
 				process.env.DEUS_DEPLOYER_PRIVATE_KEY
 			],
 			chainId: 128,
@@ -115,11 +115,11 @@ module.exports = {
 			gasMultiplier: 1.2
 		},
 		avalanche: {
-			url : "https://api.avax.network/ext/bc/C/rpc",
+			url: "https://api.avax.network/ext/bc/C/rpc",
 			accounts: [
-				process.env.MAIN_DEPLOYER_PRIVATE_KEY, 
-				process.env.SECOND_DEPLOYER_PRIVATE_KEY, 
-				process.env.DEI_DEPLOYER_PRIVATE_KEY, 
+				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
+				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
+				process.env.DEI_DEPLOYER_PRIVATE_KEY,
 				process.env.DEUS_DEPLOYER_PRIVATE_KEY
 			],
 			chainId: 43114,
@@ -128,11 +128,11 @@ module.exports = {
 			gasMultiplier: 1.2
 		},
 		fuji: {
-			url : "https://api.avax-test.network/ext/bc/C/rpc",
+			url: "https://api.avax-test.network/ext/bc/C/rpc",
 			accounts: [
-				process.env.MAIN_DEPLOYER_PRIVATE_KEY, 
-				process.env.SECOND_DEPLOYER_PRIVATE_KEY, 
-				process.env.DEI_DEPLOYER_PRIVATE_KEY, 
+				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
+				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
+				process.env.DEI_DEPLOYER_PRIVATE_KEY,
 				process.env.DEUS_DEPLOYER_PRIVATE_KEY
 			],
 			chainId: 43113,
@@ -141,11 +141,11 @@ module.exports = {
 			gasMultiplier: 1.2
 		},
 		polygon: {
-			url : "https://polygon-rpc.com/",
+			url: "https://polygon-rpc.com/",
 			accounts: [
-				process.env.MAIN_DEPLOYER_PRIVATE_KEY, 
-				process.env.SECOND_DEPLOYER_PRIVATE_KEY, 
-				process.env.DEI_DEPLOYER_PRIVATE_KEY, 
+				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
+				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
+				process.env.DEI_DEPLOYER_PRIVATE_KEY,
 				process.env.DEUS_DEPLOYER_PRIVATE_KEY
 			],
 			chainId: 137,
@@ -154,11 +154,11 @@ module.exports = {
 			gasMultiplier: 1.2
 		},
 		fantom: {
-			url : "https://rpc.ftm.tools/",
+			url: "https://rpc.ftm.tools/",
 			accounts: [
-				process.env.MAIN_DEPLOYER_PRIVATE_KEY, 
-				process.env.SECOND_DEPLOYER_PRIVATE_KEY, 
-				process.env.DEI_DEPLOYER_PRIVATE_KEY, 
+				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
+				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
+				process.env.DEI_DEPLOYER_PRIVATE_KEY,
 				process.env.DEUS_DEPLOYER_PRIVATE_KEY
 			],
 			chainId: 250,
@@ -167,11 +167,11 @@ module.exports = {
 			gasMultiplier: 1.2
 		},
 		bsctest: {
-			url : "https://data-seed-prebsc-1-s1.binance.org:8545",
+			url: "https://data-seed-prebsc-1-s1.binance.org:8545",
 			accounts: [
-				process.env.MAIN_DEPLOYER_PRIVATE_KEY, 
-				process.env.SECOND_DEPLOYER_PRIVATE_KEY, 
-				process.env.DEI_DEPLOYER_PRIVATE_KEY, 
+				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
+				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
+				process.env.DEI_DEPLOYER_PRIVATE_KEY,
 				process.env.DEUS_DEPLOYER_PRIVATE_KEY
 			],
 			chainId: 97,
@@ -180,19 +180,32 @@ module.exports = {
 			gasMultiplier: 1.2
 		},
 		bsc: {
-			url : "https://bsc-dataseed1.ninicoin.io/",
+			url: "https://bsc-dataseed1.ninicoin.io/",
 			accounts: [
-				process.env.MAIN_DEPLOYER_PRIVATE_KEY, 
-				process.env.SECOND_DEPLOYER_PRIVATE_KEY, 
-				process.env.DEI_DEPLOYER_PRIVATE_KEY, 
+				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
+				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
+				process.env.DEI_DEPLOYER_PRIVATE_KEY,
 				process.env.DEUS_DEPLOYER_PRIVATE_KEY
 			],
 			chainId: 56,
 			gas: "auto",
 			gasPrice: 10e9,	// 10 Gwei
 			gasMultiplier: 1.2
+		},
+		metis: {
+			url: "https://andromeda.metis.io/?owner=1088",
+			accounts: [
+				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
+				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
+				process.env.DEI_DEPLOYER_PRIVATE_KEY,
+				process.env.DEUS_DEPLOYER_PRIVATE_KEY
+			],
+			chainId: 1088,
+			gas: "auto",
+			gasPrice: 23e9,	// 23 Gwei
+			gasMultiplier: 1.2
 		}
-    },
+	},
 	solidity: {
 		compilers: [
 			{
@@ -287,14 +300,14 @@ module.exports = {
 			}
 		],
 	},
-    paths: {
-      sources: "./contracts",
-      tests: "./test",
-      cache: "./cache",
-      artifacts: "./artifacts"
-    },
-    mocha: {
-      timeout: 360000
+	paths: {
+		sources: "./contracts",
+		tests: "./test",
+		cache: "./cache",
+		artifacts: "./artifacts"
+	},
+	mocha: {
+		timeout: 360000
 	},
 	etherscan: {
 		// apiKey: process.env.ETHERSCAN_API_KEY, // ETH Mainnet
@@ -309,8 +322,8 @@ module.exports = {
 		runOnCompile: true,
 		disambiguatePaths: false,
 	},
-    vyper: {
+	vyper: {
 		version: "0.2.12"
-    },
+	},
 };
 
