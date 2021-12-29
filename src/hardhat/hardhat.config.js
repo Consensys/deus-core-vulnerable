@@ -204,6 +204,19 @@ module.exports = {
 			gas: "auto",
 			gasPrice: 23e9,	// 23 Gwei
 			gasMultiplier: 1.2
+		},
+		arbitrum: {
+			url: "https://arb1.arbitrum.io/rpc",
+			accounts: [
+				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
+				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
+				process.env.DEI_DEPLOYER_PRIVATE_KEY,
+				process.env.DEUS_DEPLOYER_PRIVATE_KEY
+			],
+			chainId: 42161,
+			gas: "auto",
+			gasPrice: 'auto',
+			gasMultiplier: 1.2
 		}
 	},
 	solidity: {
@@ -314,7 +327,8 @@ module.exports = {
 		// apiKey: process.env.FANTOM_API_KEY, // FANTOM Mainnet
 		// apiKey: process.env.POLYGON_API_KEY, // ETH Mainnet
 		// apiKey: process.env.HECO_API_KEY, // HECO Mainnet
-		apiKey: process.env.BSCSCAN_API_KEY // BSC
+		// apiKey: process.env.BSCSCAN_API_KEY // BSC
+		apiKey: process.env.ARBISCAN_API_KEY, // Arbitrum
 	},
 	contractSizer: {
 
