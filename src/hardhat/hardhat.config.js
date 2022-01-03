@@ -217,6 +217,24 @@ module.exports = {
 			gas: "auto",
 			gasPrice: 'auto',
 			gasMultiplier: 1.2
+		},
+		localhostOptimism: {
+			url: 'http://127.0.0.1:8547/',
+			accounts: [
+				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
+				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
+				process.env.DEI_DEPLOYER_PRIVATE_KEY,
+				process.env.DEUS_DEPLOYER_PRIVATE_KEY
+			],
+		},
+		localhostMainnet: {
+			url: 'http://127.0.0.1:8545/',
+			accounts: [
+				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
+				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
+				process.env.DEI_DEPLOYER_PRIVATE_KEY,
+				process.env.DEUS_DEPLOYER_PRIVATE_KEY
+			],
 		}
 	},
 	solidity: {
@@ -323,12 +341,12 @@ module.exports = {
 		timeout: 360000
 	},
 	etherscan: {
-		// apiKey: process.env.ETHERSCAN_API_KEY, // ETH Mainnet
+		apiKey: process.env.ETHERSCAN_API_KEY, // ETH Mainnet
 		// apiKey: process.env.FANTOM_API_KEY, // FANTOM Mainnet
 		// apiKey: process.env.POLYGON_API_KEY, // ETH Mainnet
 		// apiKey: process.env.HECO_API_KEY, // HECO Mainnet
 		// apiKey: process.env.BSCSCAN_API_KEY // BSC
-		apiKey: process.env.ARBISCAN_API_KEY, // Arbitrum
+		// apiKey: process.env.ARBISCAN_API_KEY, // Arbitrum
 	},
 	contractSizer: {
 
