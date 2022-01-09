@@ -1,0 +1,61 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "MigrationHelper",
+  "sourceName": "contracts/Utils/MigrationHelper.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_owner",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "gov_to_timelock_eta",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_eta",
+          "type": "uint256"
+        }
+      ],
+      "name": "setGovToTimeLockETA",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608060405234801561001057600080fd5b506040516101b93803806101b983398101604081905261002f91610054565b600080546001600160a01b0319166001600160a01b0392909216919091179055610084565b60006020828403121561006657600080fd5b81516001600160a01b038116811461007d57600080fd5b9392505050565b610126806100936000396000f3fe6080604052348015600f57600080fd5b5060043610603c5760003560e01c806324403c991460415780638da5cb5b146052578063b179bafc14609b575b600080fd5b6050604c36600460d8565b60b0565b005b60005460719073ffffffffffffffffffffffffffffffffffffffff1681565b60405173ffffffffffffffffffffffffffffffffffffffff90911681526020015b60405180910390f35b60a360015481565b6040519081526020016092565b60005473ffffffffffffffffffffffffffffffffffffffff1633141560d55760018190555b50565b60006020828403121560e957600080fd5b503591905056fea26469706673582212203e14453934514a861ac871b60aece10346ec9bd3cc40fd38965fc20ad8de0f0164736f6c634300080a0033",
+  "deployedBytecode": "0x6080604052348015600f57600080fd5b5060043610603c5760003560e01c806324403c991460415780638da5cb5b146052578063b179bafc14609b575b600080fd5b6050604c36600460d8565b60b0565b005b60005460719073ffffffffffffffffffffffffffffffffffffffff1681565b60405173ffffffffffffffffffffffffffffffffffffffff90911681526020015b60405180910390f35b60a360015481565b6040519081526020016092565b60005473ffffffffffffffffffffffffffffffffffffffff1633141560d55760018190555b50565b60006020828403121560e957600080fd5b503591905056fea26469706673582212203e14453934514a861ac871b60aece10346ec9bd3cc40fd38965fc20ad8de0f0164736f6c634300080a0033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
