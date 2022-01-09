@@ -1,0 +1,3194 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Uniswap/UniswapV2Router02.sol": {
+      "lastModificationDate": 1640014911544,
+      "contentHash": "8ab71bf788d291841b890f8b13ce5938",
+      "sourceName": "contracts/Uniswap/UniswapV2Router02.sol",
+      "solcConfig": {
+        "version": "0.6.6",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "=0.6.6"
+      ],
+      "artifacts": [
+        "IERC20",
+        "IUniswapV2Factory",
+        "IUniswapV2Pair",
+        "IUniswapV2Router01",
+        "IUniswapV2Router02",
+        "IWETH",
+        "SafeMath",
+        "TransferHelper",
+        "UniswapV2Library",
+        "UniswapV2Router02"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Common/Ownable.sol": {
+      "lastModificationDate": 1640014911518,
+      "contentHash": "e99ab2bc369b55fcbfcaddccf87c7d6f",
+      "sourceName": "contracts/Common/Ownable.sol",
+      "solcConfig": {
+        "version": "0.6.11",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./Context.sol"
+      ],
+      "versionPragmas": [
+        "0.6.11"
+      ],
+      "artifacts": [
+        "Ownable"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/ERC20/WETH.sol": {
+      "lastModificationDate": 1640014911529,
+      "contentHash": "66a759a8a26069b6eb28acfd89a44cb0",
+      "sourceName": "contracts/ERC20/WETH.sol",
+      "solcConfig": {
+        "version": "0.6.11",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./IWETH.sol"
+      ],
+      "versionPragmas": [
+        "0.6.11"
+      ],
+      "artifacts": [
+        "WETH"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Utils/StringHelpers.sol": {
+      "lastModificationDate": 1640014911547,
+      "contentHash": "86993d314fb9a292a2e71ab73ad32240",
+      "sourceName": "contracts/Utils/StringHelpers.sol",
+      "solcConfig": {
+        "version": "0.6.11",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.6.11"
+      ],
+      "artifacts": [
+        "StringHelpers"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Common/Context.sol": {
+      "lastModificationDate": 1640014911518,
+      "contentHash": "34c90732395e322a3d55bde02731b25a",
+      "sourceName": "contracts/Common/Context.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "Context"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/ERC20/IERC20_Detailed.sol": {
+      "lastModificationDate": 1640014911527,
+      "contentHash": "9aa2129505ed3c3d818d6802eaf858e8",
+      "sourceName": "contracts/ERC20/IERC20_Detailed.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "../Common/Context.sol",
+        "../Math/SafeMath.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "IERC20_Detailed"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Math/SafeMath.sol": {
+      "lastModificationDate": 1640014911536,
+      "contentHash": "14c0abfa84c66c5928c26566691a82c8",
+      "sourceName": "contracts/Math/SafeMath.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "SafeMath"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Uniswap/UniswapV2Library.sol": {
+      "lastModificationDate": 1640014911543,
+      "contentHash": "c7be692e40c7407fd5e6374005066aac",
+      "sourceName": "contracts/Uniswap/UniswapV2Library.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./Interfaces/IUniswapV2Pair.sol",
+        "./Interfaces/IUniswapV2Factory.sol",
+        "../Math/SafeMath.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "UniswapV2Library"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Uniswap/Interfaces/IUniswapV2Pair.sol": {
+      "lastModificationDate": 1640014911542,
+      "contentHash": "8c44bdfcb7d99247042cb4f5c00aa29a",
+      "sourceName": "contracts/Uniswap/Interfaces/IUniswapV2Pair.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "IUniswapV2Pair"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Uniswap/Interfaces/IUniswapV2Factory.sol": {
+      "lastModificationDate": 1640014911541,
+      "contentHash": "dfd684aaf67b5e3d7632f934e1384820",
+      "sourceName": "contracts/Uniswap/Interfaces/IUniswapV2Factory.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "IUniswapV2Factory"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Uniswap/UniswapV2Pair.sol": {
+      "lastModificationDate": 1640014911543,
+      "contentHash": "ca066fb5c42a2e1405290908ed0d3a3f",
+      "sourceName": "contracts/Uniswap/UniswapV2Pair.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./Interfaces/IUniswapV2Pair.sol",
+        "./UniswapV2ERC20.sol",
+        "../Math/Math.sol",
+        "../Math/UQ112x112.sol",
+        "../ERC20/IERC20.sol",
+        "./Interfaces/IUniswapV2Factory.sol",
+        "./Interfaces/IUniswapV2Callee.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "UniswapV2Pair"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Uniswap/UniswapV2ERC20.sol": {
+      "lastModificationDate": 1640014911543,
+      "contentHash": "7e4c3ec7348c564cfdab75e66af751dc",
+      "sourceName": "contracts/Uniswap/UniswapV2ERC20.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./Interfaces/IUniswapV2ERC20.sol",
+        "../Math/SafeMath.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "UniswapV2ERC20"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Math/Math.sol": {
+      "lastModificationDate": 1640014911535,
+      "contentHash": "4b105df2bb6cc4d411b7676532b4504a",
+      "sourceName": "contracts/Math/Math.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "Math"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Math/UQ112x112.sol": {
+      "lastModificationDate": 1640014911536,
+      "contentHash": "0eec991ff90b1ee30fc12a573f01632e",
+      "sourceName": "contracts/Math/UQ112x112.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "UQ112x112"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/ERC20/IERC20.sol": {
+      "lastModificationDate": 1640014911527,
+      "contentHash": "abecc523da5d600a7fd745ac00993fe6",
+      "sourceName": "contracts/ERC20/IERC20.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "../Common/Context.sol",
+        "../Math/SafeMath.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "IERC20"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Uniswap/Interfaces/IUniswapV2Callee.sol": {
+      "lastModificationDate": 1640014911541,
+      "contentHash": "5ac3e9618e2c9868e438ab0b9bf130a6",
+      "sourceName": "contracts/Uniswap/Interfaces/IUniswapV2Callee.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "IUniswapV2Callee"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Uniswap/Interfaces/IUniswapV2ERC20.sol": {
+      "lastModificationDate": 1640014911541,
+      "contentHash": "e9672a8ae046701ca14a154b0a489c9b",
+      "sourceName": "contracts/Uniswap/Interfaces/IUniswapV2ERC20.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "IUniswapV2ERC20"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/ERC20/SafeERC20.sol": {
+      "lastModificationDate": 1640014911528,
+      "contentHash": "3abff10bbbfdf7c6aa0b76e8788885d3",
+      "sourceName": "contracts/ERC20/SafeERC20.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./IERC20.sol",
+        "../Math/SafeMath.sol",
+        "../Utils/Address.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "SafeERC20"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Utils/Address.sol": {
+      "lastModificationDate": 1640014911545,
+      "contentHash": "efeb3c899f5d998dc6ed2d60d175e441",
+      "sourceName": "contracts/Utils/Address.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.11 <0.9.0"
+      ],
+      "artifacts": [
+        "Address"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/ERC20/ERC20Custom.sol": {
+      "lastModificationDate": 1640014911526,
+      "contentHash": "f8f442f2d65545ee52ab7486188efc72",
+      "sourceName": "contracts/ERC20/ERC20Custom.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "../Common/Context.sol",
+        "./IERC20.sol",
+        "../Math/SafeMath.sol",
+        "../Utils/Address.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "ERC20Custom"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/ERC20/draft-ERC20Permit.sol": {
+      "lastModificationDate": 1640014911530,
+      "contentHash": "bfa6b9f8ec2c897c3d1bacb3619768b8",
+      "sourceName": "contracts/ERC20/draft-ERC20Permit.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./ERC20Custom.sol",
+        "@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol",
+        "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol",
+        "@openzeppelin/contracts/utils/cryptography/ECDSA.sol",
+        "@openzeppelin/contracts/utils/Counters.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ERC20Permit"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/node_modules/@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol": {
+      "lastModificationDate": 1627342576346,
+      "contentHash": "0266cd0875ab6ce1b05e87cce62120c0",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC20Permit"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/node_modules/@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol": {
+      "lastModificationDate": 1627342576340,
+      "contentHash": "549712dc273f006b866af22f6fb3cadc",
+      "sourceName": "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./ECDSA.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "EIP712"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/node_modules/@openzeppelin/contracts/utils/cryptography/ECDSA.sol": {
+      "lastModificationDate": 1627342576351,
+      "contentHash": "87ad64d143162461c01c2c9ef4020f5d",
+      "sourceName": "@openzeppelin/contracts/utils/cryptography/ECDSA.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ECDSA"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/node_modules/@openzeppelin/contracts/utils/Counters.sol": {
+      "lastModificationDate": 1627342576303,
+      "contentHash": "b7811964d33f23b2d45ed3ebb76a4548",
+      "sourceName": "@openzeppelin/contracts/utils/Counters.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Counters"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/DEUS/DEUS.sol": {
+      "lastModificationDate": 1640014911523,
+      "contentHash": "d22df71df24b2100733357b48aa21944",
+      "sourceName": "contracts/DEUS/DEUS.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "../DEI/IDEI.sol",
+        "../ERC20/draft-ERC20Permit.sol",
+        "../Governance/AccessControl.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.10"
+      ],
+      "artifacts": [
+        "DEUSToken"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/DEI/IDEI.sol": {
+      "lastModificationDate": 1640014911520,
+      "contentHash": "8f371fdc9f6242c81263dbfcef4521bf",
+      "sourceName": "contracts/DEI/IDEI.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [],
+      "artifacts": [
+        "IDEIStablecoin"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Governance/AccessControl.sol": {
+      "lastModificationDate": 1640014911534,
+      "contentHash": "9ead00edfcad727f6e9afaf01055a6ed",
+      "sourceName": "contracts/Governance/AccessControl.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "../Utils/EnumerableSet.sol",
+        "../Utils/Address.sol",
+        "../Common/Context.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "AccessControl"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Utils/EnumerableSet.sol": {
+      "lastModificationDate": 1640014911546,
+      "contentHash": "a28193f7f21d96ca03459b652542a1af",
+      "sourceName": "contracts/Utils/EnumerableSet.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "EnumerableSet"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Staking/Staking.sol": {
+      "lastModificationDate": 1640014911540,
+      "contentHash": "a085a8741a7ab0cc5888bba070a5f26c",
+      "sourceName": "contracts/Staking/Staking.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "../Governance/AccessControl.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.9"
+      ],
+      "artifacts": [
+        "DEUSToken",
+        "IERC20",
+        "Staking"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Oracle/ReserveTracker.sol": {
+      "lastModificationDate": 1640014911539,
+      "contentHash": "cb7a9832a5507faddb2f901df245e548",
+      "sourceName": "contracts/Oracle/ReserveTracker.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "../Math/SafeMath.sol",
+        "../Math/Math.sol",
+        "../Uniswap/Interfaces/IUniswapV2Pair.sol",
+        "../Governance/AccessControl.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.7"
+      ],
+      "artifacts": [
+        "ReserveTracker"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/DEI/DEI.sol": {
+      "lastModificationDate": 1640014911519,
+      "contentHash": "a0bce61238469e47277e002810f0b869",
+      "sourceName": "contracts/DEI/DEI.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./Pools/DEIPool.sol",
+        "../Oracle/Oracle.sol",
+        "../Oracle/ReserveTracker.sol",
+        "../ERC20/draft-ERC20Permit.sol",
+        "../Governance/AccessControl.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "DEIStablecoin"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/DEI/Pools/DEIPool.sol": {
+      "lastModificationDate": 1640014911520,
+      "contentHash": "ae2397d3cb5e1a9ed6bc481b23edb2b5",
+      "sourceName": "contracts/DEI/Pools/DEIPool.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "../../Uniswap/TransferHelper.sol",
+        "../../DEUS/IDEUS.sol",
+        "../../DEI/IDEI.sol",
+        "../../ERC20/ERC20.sol",
+        "../../Governance/AccessControl.sol",
+        "./DEIPoolLibrary.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "DEIPool"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Oracle/Oracle.sol": {
+      "lastModificationDate": 1640014911537,
+      "contentHash": "0197eaa7a4a15f22bc52542b9d3eac33",
+      "sourceName": "contracts/Oracle/Oracle.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "../Governance/AccessControl.sol",
+        "@openzeppelin/contracts/utils/cryptography/ECDSA.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.12"
+      ],
+      "artifacts": [
+        "Oracle"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Uniswap/TransferHelper.sol": {
+      "lastModificationDate": 1640014911542,
+      "contentHash": "b01ec314a5111e09abe723b667a47a55",
+      "sourceName": "contracts/Uniswap/TransferHelper.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "TransferHelper"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/DEUS/IDEUS.sol": {
+      "lastModificationDate": 1640014911524,
+      "contentHash": "e5755c257c0f206edd1722a40b00819c",
+      "sourceName": "contracts/DEUS/IDEUS.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [],
+      "artifacts": [
+        "IDEUSToken"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/ERC20/ERC20.sol": {
+      "lastModificationDate": 1640014911525,
+      "contentHash": "752f8ed6456f902b47ca36b00fdb2c62",
+      "sourceName": "contracts/ERC20/ERC20.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "../Common/Context.sol",
+        "./IERC20.sol",
+        "../Math/SafeMath.sol",
+        "../Utils/Address.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "ERC20"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/DEI/Pools/DEIPoolLibrary.sol": {
+      "lastModificationDate": 1640014911521,
+      "contentHash": "3e0df8871a905747fc7098249d2c957a",
+      "sourceName": "contracts/DEI/Pools/DEIPoolLibrary.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.8.0"
+      ],
+      "artifacts": [
+        "DEIPoolLibrary"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/DEI/Pools/Pool_USDC.sol": {
+      "lastModificationDate": 1640014911523,
+      "contentHash": "13210e5a8c30da32123dfc18aa29e421",
+      "sourceName": "contracts/DEI/Pools/Pool_USDC.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./DEIPool.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "Pool_USDC"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/DEI/Pools/Pool_HUSD.sol": {
+      "lastModificationDate": 1640014911523,
+      "contentHash": "7459384abc5a13b3d9761bfee6c9024b",
+      "sourceName": "contracts/DEI/Pools/Pool_HUSD.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./DEIPool.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "Pool_HUSD"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/DEI/Pools/Pool_DAI.sol": {
+      "lastModificationDate": 1640014911522,
+      "contentHash": "d0f51a95300e5611a19328165faaa638",
+      "sourceName": "contracts/DEI/Pools/Pool_DAI.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./DEIPool.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "Pool_DAI"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Uniswap/UniswapV2Factory.sol": {
+      "lastModificationDate": 1640014911543,
+      "contentHash": "dc0287460751a56f6bdaa90765e14452",
+      "sourceName": "contracts/Uniswap/UniswapV2Factory.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./Interfaces/IUniswapV2Factory.sol",
+        "./UniswapV2Pair.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "UniswapV2Factory"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Math/SafeDecimalMath.sol": {
+      "lastModificationDate": 1640014911536,
+      "contentHash": "f07d9f64b493e6df2fc2a9d9d43c5351",
+      "sourceName": "contracts/Math/SafeDecimalMath.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./SafeMath.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "SafeDecimalMath"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/DEI/Pools/DEIPoolV2.sol": {
+      "lastModificationDate": 1640014911522,
+      "contentHash": "618f904c26e7f0f7886fb78d27b6b422",
+      "sourceName": "contracts/DEI/Pools/DEIPoolV2.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.9"
+      ],
+      "artifacts": [
+        "DEIPoolV2"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/DEI/Pools/IDEIPool.sol": {
+      "lastModificationDate": 1640014911522,
+      "contentHash": "fa207f16dfc261ef1aa2880956d5e081",
+      "sourceName": "contracts/DEI/Pools/IDEIPool.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "IDEIPool"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/ERC165/ERC165.sol": {
+      "lastModificationDate": 1640014911524,
+      "contentHash": "d31c046f86708c5f9d34448168d8bf82",
+      "sourceName": "contracts/ERC165/ERC165.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./IERC165.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ERC165"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/ERC165/IERC165.sol": {
+      "lastModificationDate": 1640014911525,
+      "contentHash": "8575e4b7d617deb2b7adbfa42a2bd325",
+      "sourceName": "contracts/ERC165/IERC165.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "IERC165"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/ERC721/ERC721.sol": {
+      "lastModificationDate": 1640014911530,
+      "contentHash": "b0f921afbedafcdf83113a35b40ad3f8",
+      "sourceName": "contracts/ERC721/ERC721.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./V8_0_0/Common/Context.sol",
+        "./IERC721.sol",
+        "./IERC721Metadata.sol",
+        "./IERC721Enumerable.sol",
+        "./IERC721Receiver.sol",
+        "../ERC165/ERC165.sol",
+        "./V8_0_0/Utils/Address.sol",
+        "./V8_0_0/Utils/EnumerableSet.sol",
+        "./V8_0_0/Utils/EnumerableMap.sol",
+        "./V8_0_0/Utils/Strings.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ERC721"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/ERC721/V8_0_0/Common/Context.sol": {
+      "lastModificationDate": 1640014911532,
+      "contentHash": "d8f46c03b92451f7686b76adcd0c6e4e",
+      "sourceName": "contracts/ERC721/V8_0_0/Common/Context.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Context"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/ERC721/IERC721.sol": {
+      "lastModificationDate": 1640014911530,
+      "contentHash": "2e5548b4210ef04056a6af053cd5b9e2",
+      "sourceName": "contracts/ERC721/IERC721.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "../ERC165/IERC165.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "IERC721"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/ERC721/IERC721Metadata.sol": {
+      "lastModificationDate": 1640014911531,
+      "contentHash": "874acaff1053ccf163c6b9c5e6e113dd",
+      "sourceName": "contracts/ERC721/IERC721Metadata.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./IERC721.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC721Metadata"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/ERC721/IERC721Enumerable.sol": {
+      "lastModificationDate": 1640014911531,
+      "contentHash": "1af6c7fa7b957bffc0030c4cb2a55ca0",
+      "sourceName": "contracts/ERC721/IERC721Enumerable.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./IERC721.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC721Enumerable"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/ERC721/IERC721Receiver.sol": {
+      "lastModificationDate": 1640014911531,
+      "contentHash": "2d92cd688336c0373fdf1f11d81fc2fc",
+      "sourceName": "contracts/ERC721/IERC721Receiver.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC721Receiver"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/ERC721/V8_0_0/Utils/Address.sol": {
+      "lastModificationDate": 1640014911533,
+      "contentHash": "814be9319f446615e8525705ee270db5",
+      "sourceName": "contracts/ERC721/V8_0_0/Utils/Address.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Address"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/ERC721/V8_0_0/Utils/EnumerableSet.sol": {
+      "lastModificationDate": 1640014911533,
+      "contentHash": "0d6f4cf9842327ec4f643acba0204932",
+      "sourceName": "contracts/ERC721/V8_0_0/Utils/EnumerableSet.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "EnumerableSet"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/ERC721/V8_0_0/Utils/EnumerableMap.sol": {
+      "lastModificationDate": 1640014911533,
+      "contentHash": "71173ed5dad67b2400394d0e798d7e59",
+      "sourceName": "contracts/ERC721/V8_0_0/Utils/EnumerableMap.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "EnumerableMap"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/ERC721/V8_0_0/Utils/Strings.sol": {
+      "lastModificationDate": 1640014911534,
+      "contentHash": "0c921ced37a8cce7ac5071f9dd2e8f45",
+      "sourceName": "contracts/ERC721/V8_0_0/Utils/Strings.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Strings"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/ERC721/V8_0_0/Governance/AccessControl.sol": {
+      "lastModificationDate": 1640014911532,
+      "contentHash": "99cd20b16e44027e1ea35b32e13ecd39",
+      "sourceName": "contracts/ERC721/V8_0_0/Governance/AccessControl.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "../Utils/EnumerableSet.sol",
+        "../Utils/Address.sol",
+        "../Common/Context.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "AccessControl"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/ERC20/IWETH.sol": {
+      "lastModificationDate": 1640014911527,
+      "contentHash": "cf2c7f0b143316760b8afc019135d722",
+      "sourceName": "contracts/ERC20/IWETH.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "IWETH"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/ERC721/V8_0_0/Math/SafeMath.sol": {
+      "lastModificationDate": 1640014911532,
+      "contentHash": "4898799a296bf39f9f099f34fb92083a",
+      "sourceName": "contracts/ERC721/V8_0_0/Math/SafeMath.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "SafeMath"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Math/Babylonian.sol": {
+      "lastModificationDate": 1640014911535,
+      "contentHash": "896cc42d4dd5f44f1da035f70de8119c",
+      "sourceName": "contracts/Math/Babylonian.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "Babylonian"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Math/FixedPoint.sol": {
+      "lastModificationDate": 1640014911535,
+      "contentHash": "5b88e06aa64de059991487fe7d51e8b2",
+      "sourceName": "contracts/Math/FixedPoint.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./Babylonian.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "FixedPoint"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Math/MagnitudesAndPowers.sol": {
+      "lastModificationDate": 1640014911535,
+      "contentHash": "bd481d96855b1305e20d019d05a04b2b",
+      "sourceName": "contracts/Math/MagnitudesAndPowers.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "MagnitudesAndPowers"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Math/SignedSafeMath.sol": {
+      "lastModificationDate": 1640014911536,
+      "contentHash": "e0c366a9aaaba1ce24a292477b035aa8",
+      "sourceName": "contracts/Math/SignedSafeMath.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "SignedSafeMath"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Staking/Owned.sol": {
+      "lastModificationDate": 1640014911539,
+      "contentHash": "84edb0a8cfd0ffe98a4e9a638b7f2581",
+      "sourceName": "contracts/Staking/Owned.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "Owned"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Uniswap/Interfaces/IUniswapV2Router01.sol": {
+      "lastModificationDate": 1640014911542,
+      "contentHash": "420c4502c714b054e6530e6f3c5f0ef0",
+      "sourceName": "contracts/Uniswap/Interfaces/IUniswapV2Router01.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "IUniswapV2Router01"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Uniswap/Interfaces/IUniswapV2Router02.sol": {
+      "lastModificationDate": 1640014911542,
+      "contentHash": "8225b93654ee37ce105f693e10c57ef1",
+      "sourceName": "contracts/Uniswap/Interfaces/IUniswapV2Router02.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./IUniswapV2Router01.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "IUniswapV2Router02"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Utils/BlockMiner.sol": {
+      "lastModificationDate": 1640014911545,
+      "contentHash": "a118156b211afab788fc2b4b6378c790",
+      "sourceName": "contracts/Utils/BlockMiner.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "BlockMiner"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Utils/BundleUtils.sol": {
+      "lastModificationDate": 1640014911546,
+      "contentHash": "7ca476f5fc1f79776213e3d2786e41fb",
+      "sourceName": "contracts/Utils/BundleUtils.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "BundleUtils"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Utils/MigrationHelper.sol": {
+      "lastModificationDate": 1640014911546,
+      "contentHash": "4a29c54591012a27f2aa9ed503a5eac4",
+      "sourceName": "contracts/Utils/MigrationHelper.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "MigrationHelper"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Utils/Migrations.sol": {
+      "lastModificationDate": 1640014911546,
+      "contentHash": "54d68fc2ce1bea11dde142670827a0bd",
+      "sourceName": "contracts/Utils/Migrations.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "Migrations"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Utils/ReentrancyGuard.sol": {
+      "lastModificationDate": 1640014911546,
+      "contentHash": "61bfd302c31459378cb8e01583c8746c",
+      "sourceName": "contracts/Utils/ReentrancyGuard.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.11"
+      ],
+      "artifacts": [
+        "ReentrancyGuard"
+      ]
+    },
+    "/Users/apple/Documents/Projects/DEUS/DEI-solidity/src/hardhat/contracts/Utils/StorageSlot.sol": {
+      "lastModificationDate": 1640014911547,
+      "contentHash": "e1ee3f453f5153fb79e128ee469cc19c",
+      "sourceName": "contracts/Utils/StorageSlot.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "StorageSlot"
+      ]
+    }
+  }
+}

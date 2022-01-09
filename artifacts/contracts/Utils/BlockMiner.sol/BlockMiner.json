@@ -1,0 +1,49 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "BlockMiner",
+  "sourceName": "contracts/Utils/BlockMiner.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "blockTime",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "blocksMined",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "mine",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608060405234801561001057600080fd5b506000805560f0806100236000396000f3fe6080604052348015600f57600080fd5b5060043610603c5760003560e01c806348b151661460415780638c4afaf614605557806399f4b25114605d575b600080fd5b425b60405190815260200160405180910390f35b604360005481565b60636065565b005b600160008082825460759190607c565b9091555050565b6000821982111560b5577f4e487b7100000000000000000000000000000000000000000000000000000000600052601160045260246000fd5b50019056fea26469706673582212205d62149ee9071faf10f1c0291af1db38c0f14ad8bfa0b0e3ba123769b06bf38664736f6c634300080a0033",
+  "deployedBytecode": "0x6080604052348015600f57600080fd5b5060043610603c5760003560e01c806348b151661460415780638c4afaf614605557806399f4b25114605d575b600080fd5b425b60405190815260200160405180910390f35b604360005481565b60636065565b005b600160008082825460759190607c565b9091555050565b6000821982111560b5577f4e487b7100000000000000000000000000000000000000000000000000000000600052601160045260246000fd5b50019056fea26469706673582212205d62149ee9071faf10f1c0291af1db38c0f14ad8bfa0b0e3ba123769b06bf38664736f6c634300080a0033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
