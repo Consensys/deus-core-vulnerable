@@ -37,6 +37,10 @@ feedback, join us on [Discord](https://discord.gg/NWfzTqeV).
 
 For security concerns, please email [admin@deus.finance](mailto:admin@deus.finance).
 
-## License
+## Licensing
 
-[LGPL v3](./LICENSE.md) © Mainframe Group Inc.
+The primary license is the [LGPL v3](./LICENSE.md) © Mainframe Group Inc.
+
+### Exceptions
+
+- `contracts/Staking` is licensed under `MIT` (as indicated in its SPDX header), see [`MIT`](./LICENSE_MIT)
