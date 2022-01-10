@@ -1,0 +1,2241 @@
+{
+  "id": "c711a20ba259c6a2d94e00a1efe2a0cb",
+  "_format": "hh-sol-build-info-1",
+  "solcVersion": "0.8.10",
+  "solcLongVersion": "0.8.10+commit.fc410830",
+  "input": {
+    "language": "Solidity",
+    "sources": {
+      "contracts/DEI/Pools/IDEIPool.sol": {
+        "content": "// Be name Khoda\n// Bime Abolfazl\n\n// SPDX-License-Identifier: GPL-2.0-or-later\npragma solidity >=0.6.11;\n\ninterface IDEIPool {\n    function minting_fee() external returns (uint256);\n    function redemption_fee() external returns (uint256);\n    function buyback_fee() external returns (uint256);\n    function recollat_fee() external returns (uint256);\n    function collatDollarBalance() external returns (uint256);\n    function availableExcessCollatDV() external returns (uint256);\n    function getCollateralPrice() external returns (uint256);\n    function setCollatETHOracle(address _collateral_weth_oracle_address, address _weth_address) external;\n    function mint1t1DEI(uint256 collateral_amount, uint256 DEI_out_min) external;\n    function mintAlgorithmicDEI(uint256 deus_amount_d18, uint256 DEI_out_min) external;\n    function mintFractionalDEI(uint256 collateral_amount, uint256 deus_amount, uint256 DEI_out_min) external;\n    function redeem1t1DEI(uint256 DEI_amount, uint256 COLLATERAL_out_min) external;\n    function redeemFractionalDEI(uint256 DEI_amount, uint256 DEUS_out_min, uint256 COLLATERAL_out_min) external;\n    function redeemAlgorithmicDEI(uint256 DEI_amount, uint256 DEUS_out_min) external;\n    function collectRedemption() external;\n    function recollateralizeDEI(uint256 collateral_amount, uint256 DEUS_out_min) external;\n    function buyBackDEUS(uint256 DEUS_amount, uint256 COLLATERAL_out_min) external;\n    function toggleMinting() external;\n    function toggleRedeeming() external;\n    function toggleRecollateralize() external;\n    function toggleBuyBack() external;\n    function toggleCollateralPrice(uint256 _new_price) external;\n    function setPoolParameters(uint256 new_ceiling, uint256 new_bonus_rate, uint256 new_redemption_delay, uint256 new_mint_fee, uint256 new_redeem_fee, uint256 new_buyback_fee, uint256 new_recollat_fee) external;\n    function setTimelock(address new_timelock) external;\n    function setOwner(address _owner_address) external;\n}\n\n//Dar panah khoda"
+      }
+    },
+    "settings": {
+      "optimizer": {
+        "enabled": true,
+        "runs": 100000
+      },
+      "outputSelection": {
+        "*": {
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata",
+            "devdoc",
+            "userdoc",
+            "storageLayout",
+            "evm.gasEstimates"
+          ],
+          "": [
+            "ast"
+          ]
+        }
+      },
+      "metadata": {
+        "useLiteralContent": true
+      }
+    }
+  },
+  "output": {
+    "contracts": {
+      "contracts/DEI/Pools/IDEIPool.sol": {
+        "IDEIPool": {
+          "abi": [
+            {
+              "inputs": [],
+              "name": "availableExcessCollatDV",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "DEUS_amount",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "COLLATERAL_out_min",
+                  "type": "uint256"
+                }
+              ],
+              "name": "buyBackDEUS",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "buyback_fee",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "collatDollarBalance",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "collectRedemption",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "getCollateralPrice",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "collateral_amount",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "DEI_out_min",
+                  "type": "uint256"
+                }
+              ],
+              "name": "mint1t1DEI",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "deus_amount_d18",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "DEI_out_min",
+                  "type": "uint256"
+                }
+              ],
+              "name": "mintAlgorithmicDEI",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "collateral_amount",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "deus_amount",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "DEI_out_min",
+                  "type": "uint256"
+                }
+              ],
+              "name": "mintFractionalDEI",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "minting_fee",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "recollat_fee",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "collateral_amount",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "DEUS_out_min",
+                  "type": "uint256"
+                }
+              ],
+              "name": "recollateralizeDEI",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "DEI_amount",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "COLLATERAL_out_min",
+                  "type": "uint256"
+                }
+              ],
+              "name": "redeem1t1DEI",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "DEI_amount",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "DEUS_out_min",
+                  "type": "uint256"
+                }
+              ],
+              "name": "redeemAlgorithmicDEI",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "DEI_amount",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "DEUS_out_min",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "COLLATERAL_out_min",
+                  "type": "uint256"
+                }
+              ],
+              "name": "redeemFractionalDEI",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "redemption_fee",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_collateral_weth_oracle_address",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_weth_address",
+                  "type": "address"
+                }
+              ],
+              "name": "setCollatETHOracle",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_owner_address",
+                  "type": "address"
+                }
+              ],
+              "name": "setOwner",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "new_ceiling",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "new_bonus_rate",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "new_redemption_delay",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "new_mint_fee",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "new_redeem_fee",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "new_buyback_fee",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "new_recollat_fee",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setPoolParameters",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "new_timelock",
+                  "type": "address"
+                }
+              ],
+              "name": "setTimelock",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "toggleBuyBack",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "_new_price",
+                  "type": "uint256"
+                }
+              ],
+              "name": "toggleCollateralPrice",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "toggleMinting",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "toggleRecollateralize",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "toggleRedeeming",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ],
+          "devdoc": {
+            "kind": "dev",
+            "methods": {},
+            "version": 1
+          },
+          "evm": {
+            "bytecode": {
+              "functionDebugData": {},
+              "generatedSources": [],
+              "linkReferences": {},
+              "object": "",
+              "opcodes": "",
+              "sourceMap": ""
+            },
+            "deployedBytecode": {
+              "functionDebugData": {},
+              "generatedSources": [],
+              "immutableReferences": {},
+              "linkReferences": {},
+              "object": "",
+              "opcodes": "",
+              "sourceMap": ""
+            },
+            "gasEstimates": null,
+            "methodIdentifiers": {
+              "availableExcessCollatDV()": "f61adab2",
+              "buyBackDEUS(uint256,uint256)": "1725ebdd",
+              "buyback_fee()": "101197c7",
+              "collatDollarBalance()": "17284c94",
+              "collectRedemption()": "12ace5a2",
+              "getCollateralPrice()": "f7683bbc",
+              "mint1t1DEI(uint256,uint256)": "f81358c4",
+              "mintAlgorithmicDEI(uint256,uint256)": "828e73f8",
+              "mintFractionalDEI(uint256,uint256,uint256)": "bc4701dc",
+              "minting_fee()": "c3355b8d",
+              "recollat_fee()": "fede5c9c",
+              "recollateralizeDEI(uint256,uint256)": "50291fd1",
+              "redeem1t1DEI(uint256,uint256)": "cbf97cf7",
+              "redeemAlgorithmicDEI(uint256,uint256)": "206a5d99",
+              "redeemFractionalDEI(uint256,uint256,uint256)": "a20fccde",
+              "redemption_fee()": "cb73999f",
+              "setCollatETHOracle(address,address)": "88d42cf2",
+              "setOwner(address)": "13af4035",
+              "setPoolParameters(uint256,uint256,uint256,uint256,uint256,uint256,uint256)": "4ebbe762",
+              "setTimelock(address)": "bdacb303",
+              "toggleBuyBack()": "50c9ecd9",
+              "toggleCollateralPrice(uint256)": "7ad1f61b",
+              "toggleMinting()": "7d55094d",
+              "toggleRecollateralize()": "42d15aec",
+              "toggleRedeeming()": "daa50485"
+            }
+          },
+          "metadata": "{\"compiler\":{\"version\":\"0.8.10+commit.fc410830\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"availableExcessCollatDV\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"DEUS_amount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"COLLATERAL_out_min\",\"type\":\"uint256\"}],\"name\":\"buyBackDEUS\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"buyback_fee\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"collatDollarBalance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"collectRedemption\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getCollateralPrice\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"collateral_amount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"DEI_out_min\",\"type\":\"uint256\"}],\"name\":\"mint1t1DEI\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"deus_amount_d18\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"DEI_out_min\",\"type\":\"uint256\"}],\"name\":\"mintAlgorithmicDEI\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"collateral_amount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"deus_amount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"DEI_out_min\",\"type\":\"uint256\"}],\"name\":\"mintFractionalDEI\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"minting_fee\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"recollat_fee\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"collateral_amount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"DEUS_out_min\",\"type\":\"uint256\"}],\"name\":\"recollateralizeDEI\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"DEI_amount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"COLLATERAL_out_min\",\"type\":\"uint256\"}],\"name\":\"redeem1t1DEI\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"DEI_amount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"DEUS_out_min\",\"type\":\"uint256\"}],\"name\":\"redeemAlgorithmicDEI\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"DEI_amount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"DEUS_out_min\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"COLLATERAL_out_min\",\"type\":\"uint256\"}],\"name\":\"redeemFractionalDEI\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"redemption_fee\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_collateral_weth_oracle_address\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_weth_address\",\"type\":\"address\"}],\"name\":\"setCollatETHOracle\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner_address\",\"type\":\"address\"}],\"name\":\"setOwner\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"new_ceiling\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"new_bonus_rate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"new_redemption_delay\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"new_mint_fee\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"new_redeem_fee\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"new_buyback_fee\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"new_recollat_fee\",\"type\":\"uint256\"}],\"name\":\"setPoolParameters\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"new_timelock\",\"type\":\"address\"}],\"name\":\"setTimelock\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"toggleBuyBack\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_new_price\",\"type\":\"uint256\"}],\"name\":\"toggleCollateralPrice\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"toggleMinting\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"toggleRecollateralize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"toggleRedeeming\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/DEI/Pools/IDEIPool.sol\":\"IDEIPool\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":100000},\"remappings\":[]},\"sources\":{\"contracts/DEI/Pools/IDEIPool.sol\":{\"content\":\"// Be name Khoda\\n// Bime Abolfazl\\n\\n// SPDX-License-Identifier: GPL-2.0-or-later\\npragma solidity >=0.6.11;\\n\\ninterface IDEIPool {\\n    function minting_fee() external returns (uint256);\\n    function redemption_fee() external returns (uint256);\\n    function buyback_fee() external returns (uint256);\\n    function recollat_fee() external returns (uint256);\\n    function collatDollarBalance() external returns (uint256);\\n    function availableExcessCollatDV() external returns (uint256);\\n    function getCollateralPrice() external returns (uint256);\\n    function setCollatETHOracle(address _collateral_weth_oracle_address, address _weth_address) external;\\n    function mint1t1DEI(uint256 collateral_amount, uint256 DEI_out_min) external;\\n    function mintAlgorithmicDEI(uint256 deus_amount_d18, uint256 DEI_out_min) external;\\n    function mintFractionalDEI(uint256 collateral_amount, uint256 deus_amount, uint256 DEI_out_min) external;\\n    function redeem1t1DEI(uint256 DEI_amount, uint256 COLLATERAL_out_min) external;\\n    function redeemFractionalDEI(uint256 DEI_amount, uint256 DEUS_out_min, uint256 COLLATERAL_out_min) external;\\n    function redeemAlgorithmicDEI(uint256 DEI_amount, uint256 DEUS_out_min) external;\\n    function collectRedemption() external;\\n    function recollateralizeDEI(uint256 collateral_amount, uint256 DEUS_out_min) external;\\n    function buyBackDEUS(uint256 DEUS_amount, uint256 COLLATERAL_out_min) external;\\n    function toggleMinting() external;\\n    function toggleRedeeming() external;\\n    function toggleRecollateralize() external;\\n    function toggleBuyBack() external;\\n    function toggleCollateralPrice(uint256 _new_price) external;\\n    function setPoolParameters(uint256 new_ceiling, uint256 new_bonus_rate, uint256 new_redemption_delay, uint256 new_mint_fee, uint256 new_redeem_fee, uint256 new_buyback_fee, uint256 new_recollat_fee) external;\\n    function setTimelock(address new_timelock) external;\\n    function setOwner(address _owner_address) external;\\n}\\n\\n//Dar panah khoda\",\"keccak256\":\"0x6627b96f8de970f6f745af0a3b3126e62bc743d9bbfbd15599051dc56627a8bc\",\"license\":\"GPL-2.0-or-later\"}},\"version\":1}",
+          "storageLayout": {
+            "storage": [],
+            "types": null
+          },
+          "userdoc": {
+            "kind": "user",
+            "methods": {},
+            "version": 1
+          }
+        }
+      }
+    },
+    "sources": {
+      "contracts/DEI/Pools/IDEIPool.sol": {
+        "ast": {
+          "absolutePath": "contracts/DEI/Pools/IDEIPool.sol",
+          "exportedSymbols": {
+            "IDEIPool": [
+              151
+            ]
+          },
+          "id": 152,
+          "license": "GPL-2.0-or-later",
+          "nodeType": "SourceUnit",
+          "nodes": [
+            {
+              "id": 1,
+              "literals": [
+                "solidity",
+                ">=",
+                "0.6",
+                ".11"
+              ],
+              "nodeType": "PragmaDirective",
+              "src": "80:25:0"
+            },
+            {
+              "abstract": false,
+              "baseContracts": [],
+              "canonicalName": "IDEIPool",
+              "contractDependencies": [],
+              "contractKind": "interface",
+              "fullyImplemented": false,
+              "id": 151,
+              "linearizedBaseContracts": [
+                151
+              ],
+              "name": "IDEIPool",
+              "nameLocation": "117:8:0",
+              "nodeType": "ContractDefinition",
+              "nodes": [
+                {
+                  "functionSelector": "c3355b8d",
+                  "id": 6,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "minting_fee",
+                  "nameLocation": "141:11:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 2,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "152:2:0"
+                  },
+                  "returnParameters": {
+                    "id": 5,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 4,
+                        "mutability": "mutable",
+                        "name": "",
+                        "nameLocation": "-1:-1:-1",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 6,
+                        "src": "173:7:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 3,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "173:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "172:9:0"
+                  },
+                  "scope": 151,
+                  "src": "132:50:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "cb73999f",
+                  "id": 11,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "redemption_fee",
+                  "nameLocation": "196:14:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 7,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "210:2:0"
+                  },
+                  "returnParameters": {
+                    "id": 10,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 9,
+                        "mutability": "mutable",
+                        "name": "",
+                        "nameLocation": "-1:-1:-1",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 11,
+                        "src": "231:7:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 8,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "231:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "230:9:0"
+                  },
+                  "scope": 151,
+                  "src": "187:53:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "101197c7",
+                  "id": 16,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "buyback_fee",
+                  "nameLocation": "254:11:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 12,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "265:2:0"
+                  },
+                  "returnParameters": {
+                    "id": 15,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 14,
+                        "mutability": "mutable",
+                        "name": "",
+                        "nameLocation": "-1:-1:-1",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 16,
+                        "src": "286:7:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 13,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "286:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "285:9:0"
+                  },
+                  "scope": 151,
+                  "src": "245:50:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "fede5c9c",
+                  "id": 21,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "recollat_fee",
+                  "nameLocation": "309:12:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 17,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "321:2:0"
+                  },
+                  "returnParameters": {
+                    "id": 20,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 19,
+                        "mutability": "mutable",
+                        "name": "",
+                        "nameLocation": "-1:-1:-1",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 21,
+                        "src": "342:7:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 18,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "342:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "341:9:0"
+                  },
+                  "scope": 151,
+                  "src": "300:51:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "17284c94",
+                  "id": 26,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "collatDollarBalance",
+                  "nameLocation": "365:19:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 22,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "384:2:0"
+                  },
+                  "returnParameters": {
+                    "id": 25,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 24,
+                        "mutability": "mutable",
+                        "name": "",
+                        "nameLocation": "-1:-1:-1",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 26,
+                        "src": "405:7:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 23,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "405:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "404:9:0"
+                  },
+                  "scope": 151,
+                  "src": "356:58:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "f61adab2",
+                  "id": 31,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "availableExcessCollatDV",
+                  "nameLocation": "428:23:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 27,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "451:2:0"
+                  },
+                  "returnParameters": {
+                    "id": 30,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 29,
+                        "mutability": "mutable",
+                        "name": "",
+                        "nameLocation": "-1:-1:-1",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 31,
+                        "src": "472:7:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 28,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "472:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "471:9:0"
+                  },
+                  "scope": 151,
+                  "src": "419:62:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "f7683bbc",
+                  "id": 36,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "getCollateralPrice",
+                  "nameLocation": "495:18:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 32,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "513:2:0"
+                  },
+                  "returnParameters": {
+                    "id": 35,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 34,
+                        "mutability": "mutable",
+                        "name": "",
+                        "nameLocation": "-1:-1:-1",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 36,
+                        "src": "534:7:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 33,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "534:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "533:9:0"
+                  },
+                  "scope": 151,
+                  "src": "486:57:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "88d42cf2",
+                  "id": 43,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "setCollatETHOracle",
+                  "nameLocation": "557:18:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 41,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 38,
+                        "mutability": "mutable",
+                        "name": "_collateral_weth_oracle_address",
+                        "nameLocation": "584:31:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 43,
+                        "src": "576:39:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "typeName": {
+                          "id": 37,
+                          "name": "address",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "576:7:0",
+                          "stateMutability": "nonpayable",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 40,
+                        "mutability": "mutable",
+                        "name": "_weth_address",
+                        "nameLocation": "625:13:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 43,
+                        "src": "617:21:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "typeName": {
+                          "id": 39,
+                          "name": "address",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "617:7:0",
+                          "stateMutability": "nonpayable",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "575:64:0"
+                  },
+                  "returnParameters": {
+                    "id": 42,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "648:0:0"
+                  },
+                  "scope": 151,
+                  "src": "548:101:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "f81358c4",
+                  "id": 50,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "mint1t1DEI",
+                  "nameLocation": "663:10:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 48,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 45,
+                        "mutability": "mutable",
+                        "name": "collateral_amount",
+                        "nameLocation": "682:17:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 50,
+                        "src": "674:25:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 44,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "674:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 47,
+                        "mutability": "mutable",
+                        "name": "DEI_out_min",
+                        "nameLocation": "709:11:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 50,
+                        "src": "701:19:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 46,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "701:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "673:48:0"
+                  },
+                  "returnParameters": {
+                    "id": 49,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "730:0:0"
+                  },
+                  "scope": 151,
+                  "src": "654:77:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "828e73f8",
+                  "id": 57,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "mintAlgorithmicDEI",
+                  "nameLocation": "745:18:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 55,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 52,
+                        "mutability": "mutable",
+                        "name": "deus_amount_d18",
+                        "nameLocation": "772:15:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 57,
+                        "src": "764:23:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 51,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "764:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 54,
+                        "mutability": "mutable",
+                        "name": "DEI_out_min",
+                        "nameLocation": "797:11:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 57,
+                        "src": "789:19:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 53,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "789:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "763:46:0"
+                  },
+                  "returnParameters": {
+                    "id": 56,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "818:0:0"
+                  },
+                  "scope": 151,
+                  "src": "736:83:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "bc4701dc",
+                  "id": 66,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "mintFractionalDEI",
+                  "nameLocation": "833:17:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 64,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 59,
+                        "mutability": "mutable",
+                        "name": "collateral_amount",
+                        "nameLocation": "859:17:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 66,
+                        "src": "851:25:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 58,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "851:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 61,
+                        "mutability": "mutable",
+                        "name": "deus_amount",
+                        "nameLocation": "886:11:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 66,
+                        "src": "878:19:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 60,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "878:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 63,
+                        "mutability": "mutable",
+                        "name": "DEI_out_min",
+                        "nameLocation": "907:11:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 66,
+                        "src": "899:19:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 62,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "899:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "850:69:0"
+                  },
+                  "returnParameters": {
+                    "id": 65,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "928:0:0"
+                  },
+                  "scope": 151,
+                  "src": "824:105:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "cbf97cf7",
+                  "id": 73,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "redeem1t1DEI",
+                  "nameLocation": "943:12:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 71,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 68,
+                        "mutability": "mutable",
+                        "name": "DEI_amount",
+                        "nameLocation": "964:10:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 73,
+                        "src": "956:18:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 67,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "956:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 70,
+                        "mutability": "mutable",
+                        "name": "COLLATERAL_out_min",
+                        "nameLocation": "984:18:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 73,
+                        "src": "976:26:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 69,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "976:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "955:48:0"
+                  },
+                  "returnParameters": {
+                    "id": 72,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "1012:0:0"
+                  },
+                  "scope": 151,
+                  "src": "934:79:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "a20fccde",
+                  "id": 82,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "redeemFractionalDEI",
+                  "nameLocation": "1027:19:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 80,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 75,
+                        "mutability": "mutable",
+                        "name": "DEI_amount",
+                        "nameLocation": "1055:10:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 82,
+                        "src": "1047:18:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 74,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1047:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 77,
+                        "mutability": "mutable",
+                        "name": "DEUS_out_min",
+                        "nameLocation": "1075:12:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 82,
+                        "src": "1067:20:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 76,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1067:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 79,
+                        "mutability": "mutable",
+                        "name": "COLLATERAL_out_min",
+                        "nameLocation": "1097:18:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 82,
+                        "src": "1089:26:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 78,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1089:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "1046:70:0"
+                  },
+                  "returnParameters": {
+                    "id": 81,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "1125:0:0"
+                  },
+                  "scope": 151,
+                  "src": "1018:108:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "206a5d99",
+                  "id": 89,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "redeemAlgorithmicDEI",
+                  "nameLocation": "1140:20:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 87,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 84,
+                        "mutability": "mutable",
+                        "name": "DEI_amount",
+                        "nameLocation": "1169:10:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 89,
+                        "src": "1161:18:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 83,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1161:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 86,
+                        "mutability": "mutable",
+                        "name": "DEUS_out_min",
+                        "nameLocation": "1189:12:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 89,
+                        "src": "1181:20:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 85,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1181:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "1160:42:0"
+                  },
+                  "returnParameters": {
+                    "id": 88,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "1211:0:0"
+                  },
+                  "scope": 151,
+                  "src": "1131:81:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "12ace5a2",
+                  "id": 92,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "collectRedemption",
+                  "nameLocation": "1226:17:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 90,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "1243:2:0"
+                  },
+                  "returnParameters": {
+                    "id": 91,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "1254:0:0"
+                  },
+                  "scope": 151,
+                  "src": "1217:38:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "50291fd1",
+                  "id": 99,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "recollateralizeDEI",
+                  "nameLocation": "1269:18:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 97,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 94,
+                        "mutability": "mutable",
+                        "name": "collateral_amount",
+                        "nameLocation": "1296:17:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 99,
+                        "src": "1288:25:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 93,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1288:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 96,
+                        "mutability": "mutable",
+                        "name": "DEUS_out_min",
+                        "nameLocation": "1323:12:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 99,
+                        "src": "1315:20:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 95,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1315:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "1287:49:0"
+                  },
+                  "returnParameters": {
+                    "id": 98,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "1345:0:0"
+                  },
+                  "scope": 151,
+                  "src": "1260:86:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "1725ebdd",
+                  "id": 106,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "buyBackDEUS",
+                  "nameLocation": "1360:11:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 104,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 101,
+                        "mutability": "mutable",
+                        "name": "DEUS_amount",
+                        "nameLocation": "1380:11:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 106,
+                        "src": "1372:19:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 100,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1372:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 103,
+                        "mutability": "mutable",
+                        "name": "COLLATERAL_out_min",
+                        "nameLocation": "1401:18:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 106,
+                        "src": "1393:26:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 102,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1393:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "1371:49:0"
+                  },
+                  "returnParameters": {
+                    "id": 105,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "1429:0:0"
+                  },
+                  "scope": 151,
+                  "src": "1351:79:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "7d55094d",
+                  "id": 109,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "toggleMinting",
+                  "nameLocation": "1444:13:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 107,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "1457:2:0"
+                  },
+                  "returnParameters": {
+                    "id": 108,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "1468:0:0"
+                  },
+                  "scope": 151,
+                  "src": "1435:34:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "daa50485",
+                  "id": 112,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "toggleRedeeming",
+                  "nameLocation": "1483:15:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 110,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "1498:2:0"
+                  },
+                  "returnParameters": {
+                    "id": 111,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "1509:0:0"
+                  },
+                  "scope": 151,
+                  "src": "1474:36:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "42d15aec",
+                  "id": 115,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "toggleRecollateralize",
+                  "nameLocation": "1524:21:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 113,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "1545:2:0"
+                  },
+                  "returnParameters": {
+                    "id": 114,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "1556:0:0"
+                  },
+                  "scope": 151,
+                  "src": "1515:42:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "50c9ecd9",
+                  "id": 118,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "toggleBuyBack",
+                  "nameLocation": "1571:13:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 116,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "1584:2:0"
+                  },
+                  "returnParameters": {
+                    "id": 117,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "1595:0:0"
+                  },
+                  "scope": 151,
+                  "src": "1562:34:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "7ad1f61b",
+                  "id": 123,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "toggleCollateralPrice",
+                  "nameLocation": "1610:21:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 121,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 120,
+                        "mutability": "mutable",
+                        "name": "_new_price",
+                        "nameLocation": "1640:10:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 123,
+                        "src": "1632:18:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 119,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1632:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "1631:20:0"
+                  },
+                  "returnParameters": {
+                    "id": 122,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "1660:0:0"
+                  },
+                  "scope": 151,
+                  "src": "1601:60:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "4ebbe762",
+                  "id": 140,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "setPoolParameters",
+                  "nameLocation": "1675:17:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 138,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 125,
+                        "mutability": "mutable",
+                        "name": "new_ceiling",
+                        "nameLocation": "1701:11:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 140,
+                        "src": "1693:19:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 124,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1693:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 127,
+                        "mutability": "mutable",
+                        "name": "new_bonus_rate",
+                        "nameLocation": "1722:14:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 140,
+                        "src": "1714:22:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 126,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1714:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 129,
+                        "mutability": "mutable",
+                        "name": "new_redemption_delay",
+                        "nameLocation": "1746:20:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 140,
+                        "src": "1738:28:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 128,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1738:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 131,
+                        "mutability": "mutable",
+                        "name": "new_mint_fee",
+                        "nameLocation": "1776:12:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 140,
+                        "src": "1768:20:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 130,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1768:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 133,
+                        "mutability": "mutable",
+                        "name": "new_redeem_fee",
+                        "nameLocation": "1798:14:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 140,
+                        "src": "1790:22:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 132,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1790:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 135,
+                        "mutability": "mutable",
+                        "name": "new_buyback_fee",
+                        "nameLocation": "1822:15:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 140,
+                        "src": "1814:23:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 134,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1814:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 137,
+                        "mutability": "mutable",
+                        "name": "new_recollat_fee",
+                        "nameLocation": "1847:16:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 140,
+                        "src": "1839:24:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 136,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1839:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "1692:172:0"
+                  },
+                  "returnParameters": {
+                    "id": 139,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "1873:0:0"
+                  },
+                  "scope": 151,
+                  "src": "1666:208:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "bdacb303",
+                  "id": 145,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "setTimelock",
+                  "nameLocation": "1888:11:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 143,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 142,
+                        "mutability": "mutable",
+                        "name": "new_timelock",
+                        "nameLocation": "1908:12:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 145,
+                        "src": "1900:20:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "typeName": {
+                          "id": 141,
+                          "name": "address",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1900:7:0",
+                          "stateMutability": "nonpayable",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "1899:22:0"
+                  },
+                  "returnParameters": {
+                    "id": 144,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "1930:0:0"
+                  },
+                  "scope": 151,
+                  "src": "1879:52:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "13af4035",
+                  "id": 150,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "setOwner",
+                  "nameLocation": "1945:8:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 148,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 147,
+                        "mutability": "mutable",
+                        "name": "_owner_address",
+                        "nameLocation": "1962:14:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 150,
+                        "src": "1954:22:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "typeName": {
+                          "id": 146,
+                          "name": "address",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1954:7:0",
+                          "stateMutability": "nonpayable",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "1953:24:0"
+                  },
+                  "returnParameters": {
+                    "id": 149,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "1986:0:0"
+                  },
+                  "scope": 151,
+                  "src": "1936:51:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                }
+              ],
+              "scope": 152,
+              "src": "107:1882:0",
+              "usedErrors": []
+            }
+          ],
+          "src": "80:1928:0"
+        },
+        "id": 0
+      }
+    }
+  }
+}
