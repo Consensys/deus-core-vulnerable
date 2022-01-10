@@ -47,3 +47,7 @@ yarn-error.log*
 
 # Pem files
 *.pem
+
+# IDE files
+.idea/
+.code/
