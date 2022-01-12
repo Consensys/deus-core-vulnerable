@@ -1,5 +1,10 @@
 # DEUS core smart contracts  [![license: LGPL3.0](https://img.shields.io/badge/license-LGPL3.0-yellow.svg)](https://opensource.org/licenses/lgpl-3.0) [![npm version](https://img.shields.io/npm/v/@uniswap/v3-core/latest.svg)](https://www.npmjs.com/package/@uniswap/v3-core/v/latest) 
 
+<p align="center">
+  <img width="200" height="200" src="https://app.deus.finance/tokens/deus.svg">
+  <img width="200" height="200" src="https://app.deus.finance/tokens/dei.svg">
+</p>
+
 DEUS Finance Evolution is a marketplace of decentralized financial services. We provide the infrastructure for others to build financial instruments, such as synthetic stock trading platforms, options and futures trading, and more.
 
 ### Pre Requisites
