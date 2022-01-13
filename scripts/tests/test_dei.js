@@ -26,12 +26,6 @@ async function main() {
   const USDCPoolCeiling = String(20e6 * 1e6);
   const USDCInDei_USDC = BigInt(4000e6);
 
-
-  // ----------------
-  // Start Deploying
-  // ----------------
-
-  // ERC20
   const erc20Instance = await hre.ethers.getContractFactory("ERC20");
   const usdc = await erc20Instance.attach(usdcAddress);
 
@@ -57,9 +51,6 @@ async function main() {
     deiPoolLibraryAddress: deiPoolLibrary.address
   });
 
-  // ---------------------
-  // Restricted Functions
-  // ---------------------
   const randomAddress = getRandomAddress();
   await dei.addPool(randomAddress);
   addTestCase(testCases, (await dei.dei_pools_array(0)).toLowerCase() == randomAddress.toLowerCase() 

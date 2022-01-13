@@ -4,14 +4,13 @@
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 
-const { deploy } = require('../helpers/deploy_contract');
 const { setBalance } = require('../helpers/modify_chain');
-const { assert, getRandomAddress, printSuccess, ZERO_ADDRESS} = require('./utils');
+const {printSuccess, addTestCase, printTestCasesResults} = require('./utils');
 const deployDeus = require('../deploy_contracts/deploy_deus');
 const deployDei = require('../deploy_contracts/deploy_dei');
-const { log } = require('console');
 
 async function main() {
+  testCases = [];
 
   const mainDeployer = process.env.MAIN_DEPLOYER;
   const deus_deployer = process.env.DEUS_DEPLOYER;
@@ -32,27 +31,28 @@ async function main() {
   // ---------------------
 
   await deus.setNameAndSymbol('Deus Contract', 'Deus');
-  assert(await deus.name() == 'Deus Contract' && await deus.symbol() == 'Deus', "setNameAndSymbol doesn't work properly");
+  addTestCase(testCases, await deus.name() == 'Deus Contract' && await deus.symbol() == 'Deus', "setNameAndSymbol");
 
   await deus.setDEIAddress(dei.address);
-  assert(dei.address.toLowerCase() == (await deus.dei_contract_address()).toLowerCase(), "setDEIAddress doesn't work properly");
+  addTestCase(testCases, dei.address.toLowerCase() == (await deus.dei_contract_address()).toLowerCase(), "setDEIAddress");
   
   await deus.grantRole("0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6", mainDeployer);
 
   let balanceOfMainDeployer = await deus.balanceOf(mainDeployer);
   await deus.mint(mainDeployer, BigInt(10e18));
-  assert((await deus.balanceOf(mainDeployer)).gt(balanceOfMainDeployer));
+  addTestCase(testCases, (await deus.balanceOf(mainDeployer)).gt(balanceOfMainDeployer), "mint");
 
   await dei.addPool(mainDeployer);
 
   balanceOfMainDeployer = await deus.balanceOf(mainDeployer);
   await deus.pool_mint(mainDeployer, BigInt(100e18));
-  assert((await deus.balanceOf(mainDeployer)).gt(balanceOfMainDeployer), "pool_mint doesn't work properly");
+  addTestCase(testCases, (await deus.balanceOf(mainDeployer)).gt(balanceOfMainDeployer), "pool_mint");
   
   await deus.approve(mainDeployer, BigInt(100e18));
   await deus.pool_burn_from(mainDeployer, BigInt(100e18)); 
-  assert(balanceOfMainDeployer.eq(await deus.balanceOf(mainDeployer)), "pool_burn_from doesn't work properly");
+  addTestCase(testCases, balanceOfMainDeployer.eq(await deus.balanceOf(mainDeployer)), "pool_burn_from");
 
+  printTestCasesResults(testCases);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
