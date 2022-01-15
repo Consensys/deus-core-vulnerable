@@ -23,7 +23,8 @@ module.exports = {
 				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
 				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
 				process.env.DEI_DEPLOYER_PRIVATE_KEY,
-				process.env.DEUS_DEPLOYER_PRIVATE_KEY
+				process.env.DEUS_DEPLOYER_PRIVATE_KEY,
+				process.env.veDEUS_DEPLOYER_PRIVATE_KEY
 			],
 			chainId: 3,
 			gas: "auto",
@@ -38,7 +39,8 @@ module.exports = {
 				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
 				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
 				process.env.DEI_DEPLOYER_PRIVATE_KEY,
-				process.env.DEUS_DEPLOYER_PRIVATE_KEY
+				process.env.DEUS_DEPLOYER_PRIVATE_KEY,
+				process.env.veDEUS_DEPLOYER_PRIVATE_KEY
 			],
 			chainId: 4,
 			gas: "auto",
@@ -51,7 +53,8 @@ module.exports = {
 				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
 				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
 				process.env.DEI_DEPLOYER_PRIVATE_KEY,
-				process.env.DEUS_DEPLOYER_PRIVATE_KEY
+				process.env.DEUS_DEPLOYER_PRIVATE_KEY,
+				process.env.veDEUS_DEPLOYER_PRIVATE_KEY
 			],
 			chainId: 1,
 			gas: "auto",
@@ -64,7 +67,8 @@ module.exports = {
 				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
 				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
 				process.env.DEI_DEPLOYER_PRIVATE_KEY,
-				process.env.DEUS_DEPLOYER_PRIVATE_KEY
+				process.env.DEUS_DEPLOYER_PRIVATE_KEY,
+				process.env.veDEUS_DEPLOYER_PRIVATE_KEY
 			],
 			chainId: 128,
 			gas: "auto",
@@ -77,7 +81,8 @@ module.exports = {
 				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
 				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
 				process.env.DEI_DEPLOYER_PRIVATE_KEY,
-				process.env.DEUS_DEPLOYER_PRIVATE_KEY
+				process.env.DEUS_DEPLOYER_PRIVATE_KEY,
+				process.env.veDEUS_DEPLOYER_PRIVATE_KEY
 			],
 			chainId: 43114,
 			gas: "auto",
@@ -90,7 +95,8 @@ module.exports = {
 				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
 				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
 				process.env.DEI_DEPLOYER_PRIVATE_KEY,
-				process.env.DEUS_DEPLOYER_PRIVATE_KEY
+				process.env.DEUS_DEPLOYER_PRIVATE_KEY,
+				process.env.veDEUS_DEPLOYER_PRIVATE_KEY
 			],
 			chainId: 43113,
 			gas: "auto",
@@ -103,7 +109,8 @@ module.exports = {
 				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
 				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
 				process.env.DEI_DEPLOYER_PRIVATE_KEY,
-				process.env.DEUS_DEPLOYER_PRIVATE_KEY
+				process.env.DEUS_DEPLOYER_PRIVATE_KEY,
+				process.env.veDEUS_DEPLOYER_PRIVATE_KEY
 			],
 			chainId: 137,
 			gas: "auto",
@@ -116,7 +123,8 @@ module.exports = {
 				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
 				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
 				process.env.DEI_DEPLOYER_PRIVATE_KEY,
-				process.env.DEUS_DEPLOYER_PRIVATE_KEY
+				process.env.DEUS_DEPLOYER_PRIVATE_KEY,
+				process.env.veDEUS_DEPLOYER_PRIVATE_KEY
 			],
 			chainId: 250,
 			gas: "auto",
@@ -129,7 +137,8 @@ module.exports = {
 				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
 				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
 				process.env.DEI_DEPLOYER_PRIVATE_KEY,
-				process.env.DEUS_DEPLOYER_PRIVATE_KEY
+				process.env.DEUS_DEPLOYER_PRIVATE_KEY,
+				process.env.veDEUS_DEPLOYER_PRIVATE_KEY
 			],
 			chainId: 97,
 			gas: "auto",
@@ -142,7 +151,8 @@ module.exports = {
 				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
 				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
 				process.env.DEI_DEPLOYER_PRIVATE_KEY,
-				process.env.DEUS_DEPLOYER_PRIVATE_KEY
+				process.env.DEUS_DEPLOYER_PRIVATE_KEY,
+				process.env.veDEUS_DEPLOYER_PRIVATE_KEY
 			],
 			chainId: 56,
 			gas: "auto",
@@ -155,7 +165,8 @@ module.exports = {
 				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
 				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
 				process.env.DEI_DEPLOYER_PRIVATE_KEY,
-				process.env.DEUS_DEPLOYER_PRIVATE_KEY
+				process.env.DEUS_DEPLOYER_PRIVATE_KEY,
+				process.env.veDEUS_DEPLOYER_PRIVATE_KEY
 			],
 			chainId: 1088,
 			gas: "auto",
@@ -168,7 +179,8 @@ module.exports = {
 				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
 				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
 				process.env.DEI_DEPLOYER_PRIVATE_KEY,
-				process.env.DEUS_DEPLOYER_PRIVATE_KEY
+				process.env.DEUS_DEPLOYER_PRIVATE_KEY,
+				process.env.veDEUS_DEPLOYER_PRIVATE_KEY
 			],
 			chainId: 42161,
 			gas: "auto",
@@ -181,7 +193,8 @@ module.exports = {
 				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
 				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
 				process.env.DEI_DEPLOYER_PRIVATE_KEY,
-				process.env.DEUS_DEPLOYER_PRIVATE_KEY
+				process.env.DEUS_DEPLOYER_PRIVATE_KEY,
+				process.env.veDEUS_DEPLOYER_PRIVATE_KEY
 			],
 		},
 		localhostMainnet: {
@@ -190,7 +203,8 @@ module.exports = {
 				process.env.MAIN_DEPLOYER_PRIVATE_KEY,
 				process.env.SECOND_DEPLOYER_PRIVATE_KEY,
 				process.env.DEI_DEPLOYER_PRIVATE_KEY,
-				process.env.DEUS_DEPLOYER_PRIVATE_KEY
+				process.env.DEUS_DEPLOYER_PRIVATE_KEY,
+				process.env.veDEUS_DEPLOYER_PRIVATE_KEY
 			],
 		}
 	},
@@ -312,7 +326,7 @@ module.exports = {
 		disambiguatePaths: false,
 	},
 	vyper: {
-		version: "0.2.12"
+		version: "0.3.1"
 	},
 };
 
