@@ -1,5 +1,5 @@
 const path = require('path');
-const envPath = path.join(__dirname, '../../.env');
+const envPath = path.join(__dirname, './.env');
 require('dotenv').config({ path: envPath });
 
 require('hardhat-deploy');
@@ -9,20 +9,7 @@ require("@nomiclabs/hardhat-truffle5");
 require("@nomiclabs/hardhat-web3");
 require("@nomiclabs/hardhat-etherscan");
 require('@openzeppelin/hardhat-upgrades');
-// require("@nomiclabs/hardhat-vyper");
-
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-task("accounts", "Prints the list of accounts", async () => {
-	const accounts = await ethers.getSigners();
-
-	for (const account of accounts) {
-		console.log(account.address);
-	}
-});
-
-// You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
+require("@nomiclabs/hardhat-vyper");
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -30,36 +17,6 @@ task("accounts", "Prints the list of accounts", async () => {
 module.exports = {
 	defaultNetwork: "hardhat",
 	networks: {
-		// hardhat: {
-		// 	forking: {
-		// 		url: `https://mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
-		// 		// url: `https://apis.ankr.com/${process.env.ANKR_STRING}`
-		// 		// url: 'https://bsc-dataseed.binance.org/'
-		// 	},
-		// 	accounts: {
-		// 		mnemonic: process.env.ROPSTEN_HARDHAT_PHRASE
-		// 	},
-		// },
-		// mainnet: {
-		// 	url:`https://mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
-		// 	accounts: {
-		// 		mnemonic: process.env.MNEMONIC_PHRASE
-		// 	},
-		// 	chainId: 1,
-		// 	gas: "auto",
-		// 	gasPrice: 40000000000,
-		// 	gasMultiplier: 1.2
-		// },
-		// bsc_mainnet: {
-		// 	url: `https://bsc-dataseed.binance.org/`,
-		// 	accounts: {
-		// 		mnemonic: process.env.BSC_MNEMONIC_PHRASE
-		// 	},
-		// 	chainId: 56,
-		// 	gas: "auto",
-		// 	gasPrice: 15000000000,
-		// 	gasMultiplier: 1.2
-		// },
 		ropsten: {
 			url: `https://ropsten.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
 			accounts: [
