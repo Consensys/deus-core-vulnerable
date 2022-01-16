@@ -7,7 +7,7 @@ async function main() {
 
     // * deployment
     const veDeus = await deployVeDeus({
-        deusContractAddress: deusAddress
+        deusAddress: deusAddress
     });
 
     console.log("version: ", await veDeus.version());

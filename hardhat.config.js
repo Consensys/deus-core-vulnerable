@@ -312,9 +312,9 @@ module.exports = {
 		timeout: 360000
 	},
 	etherscan: {
-		apiKey: process.env.ETHERSCAN_API_KEY, // ETH Mainnet
+		// apiKey: process.env.ETHERSCAN_API_KEY, // ETH Mainnet
 		// apiKey: process.env.FANTOM_API_KEY, // FANTOM Mainnet
-		// apiKey: process.env.POLYGON_API_KEY, // ETH Mainnet
+		apiKey: process.env.POLYGON_API_KEY, // Polygon
 		// apiKey: process.env.HECO_API_KEY, // HECO Mainnet
 		// apiKey: process.env.BSCSCAN_API_KEY // BSC
 		// apiKey: process.env.ARBISCAN_API_KEY, // Arbitrum
@@ -326,7 +326,7 @@ module.exports = {
 		disambiguatePaths: false,
 	},
 	vyper: {
-		version: "0.3.1"
+		version: "0.2.12"
 	},
 };
 
