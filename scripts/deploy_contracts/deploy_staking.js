@@ -4,7 +4,7 @@ module.exports = async ({ stakeTokenAddress, rewardTokenAddress, rewardPerBlock,
     const deployer = process.env.MAIN_DEPLOYER;
     const daoAddress = process.env.MAIN_DEPLOYER;
     const foundersAddress = process.env.MAIN_DEPLOYER;
-
+    console.log('***************');
     return deploy({
         deployer: deployer,
         contractName: 'Staking',

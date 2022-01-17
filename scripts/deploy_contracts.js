@@ -14,14 +14,7 @@ const skipNonce = require('./helpers/skip_nonce.js');
 const { setBalance } = require("./helpers/modify_chain.js");
 const { sleep } = require("./tests/utils.js");
 
-function assert(condition, message) {
-    if (!condition) {
-        throw message || "Assertion failed";
-    }
-}
-
-async function main() {
-    
+async function deployContracts(verbose=false) {
     // ---------------
     // Configurations
     // ---------------
@@ -63,9 +56,10 @@ async function main() {
 
     const AdminAddress = '0xE5227F141575DcE74721f4A9bE2D7D636F923044';
     const deployer = process.env.MAIN_DEPLOYER;
+    const deusDeployer = process.env.DEUS_DEPLOYER;
     
     await setBalance(deployer);
-    await setBalance('0x00c0c6558Dc28E749C3402766Cd603cec6400F91');
+    await setBalance(deusDeployer);
 
     // Role Of Pool
     const MINT_PAUSER = '0xc65532185ed70b2e999433e2e9fac124e083acb13ec183a4e05944da0792337b';
@@ -131,10 +125,12 @@ async function main() {
     await sleep(60000);
 
     const dei_deusAddress = await factory.getPair(dei.address, deus.address);
-    console.log("Dei-Deus:", dei_deusAddress);
+    if (verbose)
+        console.log("Dei-Deus:", dei_deusAddress);
 
     const dei_usdcAddress = await factory.getPair(dei.address, usdcAddress);
-    console.log("Dei-USDC:", dei_usdcAddress);
+    if (verbose)
+        console.log("Dei-USDC:", dei_usdcAddress);
 
     // ---------------------------------- //
     // | Skip 2 nonce in other networks | //
@@ -142,7 +138,8 @@ async function main() {
     // in main net we created pair in curve.finance
     await skipNonce(deployer, 2);
 
-    console.log("Deploying DEI-DEUS Staking");
+    if (verbose)
+        console.log("Deploying DEI-DEUS Staking");
     // Staking
     const stakingDEI_DEUS = await deployStaking({
         stakeTokenAddress: dei_deusAddress,
@@ -152,8 +149,8 @@ async function main() {
         foundersShare,
         rewardPerBlockSetter
     });
-
-    console.log("Deploying DEI-USDC Staking");
+    if (verbose)
+        console.log("Deploying DEI-USDC Staking");
     const stakingDEI_USDC = await deployStaking({
         stakeTokenAddress: dei_usdcAddress,
         rewardTokenAddress: deus.address,
@@ -174,6 +171,7 @@ async function main() {
     await dei.setDEUSAddress(deus.address);
     await dei.setUseGrowthRatio(false);
     await dei.setPriceBands(1040000, 960000);
+    await dei.grantRole(dei.TRUSTY_ROLE(), deployer);
 
     await deus.setDEIAddress(dei.address);
     await deus.grantRole(deus.MINTER_ROLE(), stakingDEI_DEUS.address);
@@ -185,8 +183,8 @@ async function main() {
     await USDCPool.setPoolParameters(USDCPoolCeiling, newBonusRate, newRedemptionDelay, newMintFee, newRedeemFee, newBuyBackFee, newRecollatFee);
     await USDCPool.toggleRecollateralize();
     await USDCPool.toggleBuyBack();
-
-    console.log("Setting Parameters is done");
+    if (verbose)
+        console.log("Setting Parameters is done");
 
     // ERC20
     const deiDeus = await erc20Instance.attach(dei_deusAddress);
@@ -235,9 +233,10 @@ async function main() {
     await sleep(60000);
 
     const deus_NativeTokenAddress = await factory.getPair(deus.address, wrappedNativeToken.address);
-    console.log("Deus NativeToken:", deus_NativeTokenAddress)
-
-    console.log("Deploying DEUS-NativeToken Staking");
+    if (verbose)
+        console.log("Deus NativeToken:", deus_NativeTokenAddress)
+    if (verbose)
+        console.log("Deploying DEUS-NativeToken Staking");
     // Staking
     const stakingDEUS_NativeToken = await deployStaking({
         stakeTokenAddress: deus_NativeTokenAddress,
@@ -261,8 +260,8 @@ async function main() {
     await skipNonce(deployer, 2);
 
     await reserveTracker.addDEUSPair(deus_NativeTokenAddress);
-
-    console.log("Start to renounce roles...");
+    if (verbose)
+        console.log("Start to renounce roles...");
     await dei.renounceRole(dei.DEFAULT_ADMIN_ROLE(), deployer)
     await dei.renounceRole(dei.COLLATERAL_RATIO_PAUSER(), deployer)
     await dei.renounceRole(dei.TRUSTY_ROLE(), deployer)
@@ -295,17 +294,23 @@ async function main() {
     await stakingDEUS_NativeToken.renounceRole(stakingDEUS_NativeToken.DEFAULT_ADMIN_ROLE(), deployer)
     await stakingDEUS_NativeToken.renounceRole(stakingDEUS_NativeToken.REWARD_PER_BLOCK_SETTER(), deployer)
     await stakingDEUS_NativeToken.renounceRole(stakingDEUS_NativeToken.TRUSTY_ROLE(), deployer)
-
-    console.log("Start to verify the contracts...");
+    if (verbose)
+        console.log("Start to verify the contracts...");
     await verifyAll();
+
+    return {
+        wrappedNativeToken: wrappedNativeContract,
+        usdc: usdc,
+        router: router,
+        dei: dei,
+        deus: deus,
+        oracle: oracle,
+        deiPoolLibrary: deiPoolLibrary,
+        USDCPool: USDCPool,
+        reserveTracker: reserveTracker,
+        stakingDEI_DEUS: stakingDEI_DEUS,
+        stakingDEI_USDC: stakingDEI_USDC
+    }   
 }
 
-
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main()
-    .then(() => process.exit(0))
-    .catch(error => {
-        console.error(error);
-        process.exit(1);
-    });
+module.exports = {deployContracts}
