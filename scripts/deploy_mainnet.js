@@ -11,6 +11,8 @@ const deployStaking = require('./deploy_contracts/deploy_staking.js');
 
 const { verifyAll } = require('./helpers/deploy_contract.js');
 const skipNonce = require('./helpers/skip_nonce.js');
+const { setBalance } = require("./helpers/modify_chain.js");
+const { sleep } = require("./tests/utils.js");
 
 function assert(condition, message) {
     if (!condition) {
@@ -31,13 +33,16 @@ async function main() {
     const creatorAddress = process.env.MAIN_DEPLOYER;
     const USDCPoolCeiling = "20000000000000";
 
+    const deiGenesisSupply = BigInt(10000e18);
+    const deusGenesisSupply = BigInt(100e18);
+
     // Pairing
     const deiInDei_Deus = BigInt(1500e18)
     const deusInDei_Deus = BigInt(10e18)
     const deiInDei_USDC = BigInt(1000e18)
     const USDCInDei_USDC = BigInt(1000e6)
     const NativeTokenInDeus_NativeToken = BigInt(2e18);
-    const deusInDeus_NativeToken = BigInt(99.75e18);
+    const deusInDeus_NativeToken = BigInt(1e18);
 
     // Staking
     const daoShare = BigInt(10e16); //10%
@@ -58,6 +63,9 @@ async function main() {
 
     const AdminAddress = '0xE5227F141575DcE74721f4A9bE2D7D636F923044';
     const deployer = process.env.MAIN_DEPLOYER;
+    
+    await setBalance(deployer);
+    await setBalance('0x00c0c6558Dc28E749C3402766Cd603cec6400F91');
 
     // Role Of Pool
     const MINT_PAUSER = '0xc65532185ed70b2e999433e2e9fac124e083acb13ec183a4e05944da0792337b';
@@ -113,14 +121,14 @@ async function main() {
     // Creating Pairs
     await dei.approve(routerAddress, deiInDei_Deus * BigInt(1000));
     await deus.approve(routerAddress, deusInDei_Deus * BigInt(1000));
-    await new Promise((resolve) => setTimeout(resolve, 30000));
+    await sleep(30000);
 
     await router.addLiquidity(dei.address, deus.address, deiInDei_Deus, deusInDei_Deus, deiInDei_Deus, deusInDei_Deus, creatorAddress, (Date.now() + 10000));
     await usdc.approve(routerAddress, USDCInDei_USDC * BigInt(1000))
-    await new Promise((resolve) => setTimeout(resolve, 30000));
+    await sleep(30000);
 
     await router.addLiquidity(dei.address, usdcAddress, deiInDei_USDC, USDCInDei_USDC, deiInDei_USDC, USDCInDei_USDC, creatorAddress, (Date.now() + 10000));
-    await new Promise((resolve) => setTimeout(resolve, 60000));
+    await sleep(60000);
 
     const dei_deusAddress = await factory.getPair(dei.address, deus.address);
     console.log("Dei-Deus:", dei_deusAddress);
@@ -164,13 +172,13 @@ async function main() {
     await dei.setReserveTracker(reserveTracker.address);
     await dei.setRefreshCooldown(1800);
     await dei.setDEUSAddress(deus.address);
-    await dei.useGrowthRatio(false);
+    await dei.setUseGrowthRatio(false);
     await dei.setPriceBands(1040000, 960000);
 
     await deus.setDEIAddress(dei.address);
     await deus.grantRole(deus.MINTER_ROLE(), stakingDEI_DEUS.address);
     await deus.grantRole(deus.MINTER_ROLE(), stakingDEI_USDC.address);
-    await deus.toggleVotes();
+    // await deus.toggleVotes();
 
     await reserveTracker.addDEUSPair(dei_deusAddress);
 
@@ -212,7 +220,7 @@ async function main() {
     // Creating Pairs
     await wrappedNativeToken.approve(routerAddress, NativeTokenInDeus_NativeToken * BigInt(1000));
     await deus.approve(routerAddress, deusInDeus_NativeToken * BigInt(1000));
-    await new Promise((resolve) => setTimeout(resolve, 30000));
+    await sleep(30000);
 
     await router.addLiquidity(
         deus.address,
@@ -224,7 +232,7 @@ async function main() {
         creatorAddress,
         (Date.now() + 10000)
     );
-    await new Promise((resolve) => setTimeout(resolve, 60000));
+    await sleep(60000);
 
     const deus_NativeTokenAddress = await factory.getPair(deus.address, wrappedNativeToken.address);
     console.log("Deus NativeToken:", deus_NativeTokenAddress)
@@ -274,7 +282,7 @@ async function main() {
     await USDCPool.renounceRole(USDCPool.PARAMETER_SETTER_ROLE(), deployer)
     
     await reserveTracker.renounceRole(reserveTracker.DEFAULT_ADMIN_ROLE(), deployer)
-    await reserveTracker.renounceRole(reserveTracker.OWNER_ROLE(), deployer)
+    await reserveTracker.renounceRole(reserveTracker.TRUSTY_ROLE(), deployer)
     
     await stakingDEI_DEUS.renounceRole(stakingDEI_DEUS.DEFAULT_ADMIN_ROLE(), deployer)
     await stakingDEI_DEUS.renounceRole(stakingDEI_DEUS.REWARD_PER_BLOCK_SETTER(), deployer)

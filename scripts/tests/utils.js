@@ -42,7 +42,9 @@ function printTestCasesResults(testCases) {
 }
 
 function addTestCase(testCases, condition, func, assertion=false) {
-    assert(condition, func + " doesn't work properly")
+    if (assertion) {
+        assert(condition, func + " doesn't work properly");
+    }
     testCases.push({'condition': condition, 'function': func});
 
 }

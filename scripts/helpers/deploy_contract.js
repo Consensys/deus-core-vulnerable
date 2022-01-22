@@ -8,7 +8,7 @@ module.exports = {
 
         const contract = await contractInstance.deploy(...constructorArguments);
         await contract.deployed();
-        console.log(contractName, "deployed to:", contract.address);
+        console.log("\x1b[33m" + contractName + "deployed to: " + contract.address + "\x1b[0m");
 
         deployedContracts.push({
             address: contract.address,
@@ -18,12 +18,14 @@ module.exports = {
         return contract
     },
     verifyAll: async () => {
-        console.log(deployedContracts);
-        for(let i = 0;i < deployedContracts.length;i++){
-            let contract = deployedContracts[i];
-            console.log("verifing", contract['address']);
-            await hre.run('verify:verify', contract);
+        if (!process.env.LOCAL) {
+            console.log(deployedContracts);
+            for(let i = 0;i < deployedContracts.length;i++){
+                let contract = deployedContracts[i];
+                console.log("verifing", contract['address']);
+                await hre.run('verify:verify', contract);
+            }
+            deployedContracts = [];
         }
-        deployedContracts = [];
     }
 }

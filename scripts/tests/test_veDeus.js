@@ -6,17 +6,24 @@
 
 
 const { assert, getRandomAddress, printSuccess, ZERO_ADDRESS} = require('./utils');
-const { verifyAll } = require('./helpers/deploy_contract.js');
-const deployVeDeus = require('./deploy_contracts/deploy_veDeus.js');
-const deployDeus = require('./deploy_contracts/deploy_deus.js');
+const { setBalance } = require('../helpers/modify_chain');
+const { verifyAll } = require('../helpers/deploy_contract.js');
+const deployVeDeus = require('../deploy_contracts/deploy_veDeus.js');
+const deployDeus = require('../deploy_contracts/deploy_deus.js');
 const { log } = require('console');
 
 async function main() {
 
+    const deusDeployer = process.env.DEUS_DEPLOYER;
+    const veDeusDeployer = process.env.veDEUS_DEPLOYER;
+    
+//    setBalance(deusDeployer);
+//    setBalance(veDeusDeployer);
+
     const deus = await deployDeus();
     printSuccess('deus deployed successfully');
     await deployVeDeus({
-        deusContractAddress: deus.address
+        deusAddress: deus.address
     });
     printSuccess('veDEUS deployed successfully');
 
