@@ -30,8 +30,8 @@ interface IERC20 {
 	function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
 }
 
-interface DEUSToken {
-	function pool_mint(address m_address, uint256 m_amount) external;
+interface IDEUSToken {
+	function mint(address to, uint256 amount) external;
 }
 
 contract Staking is AccessControl {
@@ -46,6 +46,7 @@ contract Staking is AccessControl {
 	uint256 public rewardTillNowPerToken = 0;
 	uint256 public lastUpdatedBlock;
 	uint256 public rewardPerBlock;
+	uint256 public startBlock;
 	uint256 public scale = 1e18;
 
 	uint256 public particleCollector = 0;
@@ -78,7 +79,7 @@ contract Staking is AccessControl {
 			_rewardToken != address(0) &&
 			_daoWallet != address(0) &&
 			_earlyFoundersWallet != address(0),
-			"STAKING::constructor: Zero address detected"
+			"STAKING: Zero address detected"
 		);
 		_setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
 		_setupRole(REWARD_PER_BLOCK_SETTER, _rewardPerBlockSetter);
@@ -95,7 +96,7 @@ contract Staking is AccessControl {
 
 
 	modifier onlyTrusty() {
-		require(hasRole(TRUSTY_ROLE, msg.sender), "STAKING:: Caller is not a trusty");
+		require(hasRole(TRUSTY_ROLE, msg.sender), "STAKING: Caller is not a trusty");
 		_;
 	}
 
@@ -132,6 +133,7 @@ contract Staking is AccessControl {
 	}
 
 	function depositFor(address _user, uint256 amount) public {
+		require(block.number >= startBlock, "STAKING: It has not started yet");
 		User storage user = users[_user];
 		update();
 
@@ -150,7 +152,7 @@ contract Staking is AccessControl {
 
 	function withdraw(uint256 amount) external {
 		User storage user = users[msg.sender];
-		require(user.depositAmount >= amount, "STAKING::withdraw: withdraw amount exceeds deposited amount");
+		require(user.depositAmount >= amount, "STAKING: withdraw amount exceeds deposited amount");
 		update();
 
 		uint256 _pendingReward = (user.depositAmount * rewardTillNowPerToken / scale) - user.paidReward;
@@ -171,10 +173,10 @@ contract Staking is AccessControl {
 
 	function withdrawParticleCollector() public {
 		uint256 _daoShare = particleCollector * daoShare / (daoShare + earlyFoundersShare);
-		DEUSToken(rewardToken).pool_mint(daoWallet, _daoShare);
+		IDEUSToken(rewardToken).mint(daoWallet, _daoShare);
 
 		uint256 _earlyFoundersShare = particleCollector * earlyFoundersShare / (daoShare + earlyFoundersShare);
-		DEUSToken(rewardToken).pool_mint(earlyFoundersWallet, _earlyFoundersShare);
+		IDEUSToken(rewardToken).mint(earlyFoundersWallet, _earlyFoundersShare);
 
 		particleCollector = 0;
 
@@ -195,9 +197,7 @@ contract Staking is AccessControl {
 	}
 
 	function sendReward(address user, uint256 amount) internal {
-		// uint256 _daoShareAndEarlyFoundersShare = amount * (daoShare + earlyFoundersShare) / scale;
-		// DEUSToken(rewardToken).pool_mint(user, amount - _daoShareAndEarlyFoundersShare);
-		DEUSToken(rewardToken).pool_mint(user, amount);
+		IDEUSToken(rewardToken).mint(user, amount);
 		emit RewardClaimed(user, amount);
 	}
 
@@ -241,12 +241,18 @@ contract Staking is AccessControl {
 		emit SharesSet(_daoShare, _earlyFoundersShare);
 	}
 
+	function setStartBlock(uint256 startBlock_) external onlyTrusty {
+		emit StartBlockSet(startBlock, startBlock_);
+		startBlock = startBlock_;
+	}
+
 	function setRewardPerBlock(uint256 _rewardPerBlock) external {
-		require(hasRole(REWARD_PER_BLOCK_SETTER, msg.sender), "STAKING::setRewardPerBlock: Caller is not a rewardPerBlockSetter");
+		require(hasRole(REWARD_PER_BLOCK_SETTER, msg.sender), "STAKING: Caller is not a rewardPerBlockSetter");
 		update();
 		emit RewardPerBlockChanged(rewardPerBlock, _rewardPerBlock);
 		rewardPerBlock = _rewardPerBlock;
 	}
+
 
 
 	/* ========== EVENTS ========== */
@@ -261,6 +267,7 @@ contract Staking is AccessControl {
 	event EmergencyWithdraw(address user, uint256 amount);
 	event RewardClaimed(address user, uint256 amount);
 	event RewardPerBlockChanged(uint256 oldValue, uint256 newValue);
+	event StartBlockSet(uint256 oldBlock, uint256 newBlock);
 }
 
 //Dar panah khoda
