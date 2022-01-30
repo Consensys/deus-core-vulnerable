@@ -8,6 +8,10 @@
         "stablecoin",
         "defi"
     ],
+    "repository": {
+        "type": "git",
+        "url": "github:deusfinance/deus-core"
+    },
     "license": "MIT",
     "dependencies": {
         "@babel/core": "^7.14.6",
