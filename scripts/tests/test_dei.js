@@ -117,6 +117,8 @@ async function main() {
   let deiPrice = 1050000;
   const deusPrice = 32000000;
   const expireBlock = BigInt(1e18);
+
+  // Note that hardhat node chainId should be set to 1
   let signature = await oracleServerSign(deus.address, deusPrice, dei.address, deiPrice, expireBlock, 1);
   await dei.refreshCollateralRatio(deusPrice, deiPrice, expireBlock, [signature]);
   try {
