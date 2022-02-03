@@ -24,7 +24,7 @@ function getRandomAddress() {
 
 async function oracleServerSign(deusAddress, deusPrice, deiAddress, deiPrice, expireBlock, chainId) {
     let encodedAbi = hre.web3.eth.abi.encodeParameters(
-        ['address', 'uint256', 'address', 'uint256', 'uint256', 'uint256'],
+    ['address', 'uint256', 'address', 'uint256', 'uint256', 'uint256'],
         [deusAddress, deusPrice, deiAddress, deiPrice, expireBlock, chainId]
     );
 

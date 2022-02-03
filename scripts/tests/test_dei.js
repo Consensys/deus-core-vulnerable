@@ -24,14 +24,7 @@ async function main() {
   await setBalance(deus_deployer);
 
   const USDCPoolCeiling = String(20e6 * 1e6);
-  const USDCInDei_USDC = BigInt(4000e6);
 
-  const erc20Instance = await hre.ethers.getContractFactory("ERC20");
-  const usdc = await erc20Instance.attach(usdcAddress);
-
-  assert(BigInt(await usdc.balanceOf(dei_deployer)) >= USDCInDei_USDC,
-      "There is not enough USDC in deployer for DEI-USDC");
-      
   const dei = await deployDei();
   printSuccess('dei deployed successfully');
   const deus = await deployDeus();
@@ -117,6 +110,8 @@ async function main() {
   let deiPrice = 1050000;
   const deusPrice = 32000000;
   const expireBlock = BigInt(1e18);
+
+  // Note that hardhat node chainId should be set to 1
   let signature = await oracleServerSign(deus.address, deusPrice, dei.address, deiPrice, expireBlock, 1);
   await dei.refreshCollateralRatio(deusPrice, deiPrice, expireBlock, [signature]);
   try {

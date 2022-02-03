@@ -206,6 +206,7 @@ module.exports = {
 				process.env.DEUS_DEPLOYER_PRIVATE_KEY,
 				process.env.veDEUS_DEPLOYER_PRIVATE_KEY
 			],
+			gas: 30000000
 		}
 	},
 	solidity: {
