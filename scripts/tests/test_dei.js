@@ -24,14 +24,7 @@ async function main() {
   await setBalance(deus_deployer);
 
   const USDCPoolCeiling = String(20e6 * 1e6);
-  const USDCInDei_USDC = BigInt(4000e6);
 
-  const erc20Instance = await hre.ethers.getContractFactory("ERC20");
-  const usdc = await erc20Instance.attach(usdcAddress);
-
-  assert(BigInt(await usdc.balanceOf(dei_deployer)) >= USDCInDei_USDC,
-      "There is not enough USDC in deployer for DEI-USDC");
-      
   const dei = await deployDei();
   printSuccess('dei deployed successfully');
   const deus = await deployDeus();

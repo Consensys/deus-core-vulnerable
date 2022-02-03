@@ -32,7 +32,7 @@ async function main() {
 	});
 	printSuccess('veDEUS deployed successfully');
 	const dei = await deploy_dei();
-  printSuccess('dei deployed successfully');
+    printSuccess('dei deployed successfully');
 
 
 	await deus.setDEIAddress(dei.address);
