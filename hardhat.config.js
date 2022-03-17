@@ -9,7 +9,7 @@ require("@nomiclabs/hardhat-truffle5");
 require("@nomiclabs/hardhat-web3");
 require("@nomiclabs/hardhat-etherscan");
 require('@openzeppelin/hardhat-upgrades');
-require("@nomiclabs/hardhat-vyper");
+// require("@nomiclabs/hardhat-vyper");
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -292,7 +292,7 @@ module.exports = {
 				}
 			},
 			{
-				version: "0.8.10",
+				version: "0.8.11",
 				settings: {
 					optimizer: {
 						enabled: true,
@@ -313,8 +313,8 @@ module.exports = {
 	},
 	etherscan: {
 		// apiKey: process.env.ETHERSCAN_API_KEY, // ETH Mainnet
-		// apiKey: process.env.FANTOM_API_KEY, // FANTOM Mainnet
-		apiKey: process.env.POLYGON_API_KEY, // Polygon
+		apiKey: process.env.FANTOM_API_KEY, // FANTOM Mainnet
+		// apiKey: process.env.POLYGON_API_KEY, // Polygon
 		// apiKey: process.env.HECO_API_KEY, // HECO Mainnet
 		// apiKey: process.env.BSCSCAN_API_KEY // BSC
 		// apiKey: process.env.ARBISCAN_API_KEY, // Arbitrum
