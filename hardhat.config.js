@@ -9,7 +9,7 @@ require("@nomiclabs/hardhat-truffle5");
 require("@nomiclabs/hardhat-web3");
 require("@nomiclabs/hardhat-etherscan");
 require('@openzeppelin/hardhat-upgrades');
-require("@nomiclabs/hardhat-vyper");
+// require("@nomiclabs/hardhat-vyper");
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -128,7 +128,7 @@ module.exports = {
 			],
 			chainId: 250,
 			gas: "auto",
-			gasPrice: 900100000000,	//500.1 Gwei
+			gasPrice: 600100000000,	//500.1 Gwei
 			gasMultiplier: 1.2
 		},
 		bsctest: {
@@ -293,7 +293,16 @@ module.exports = {
 				}
 			},
 			{
-				version: "0.8.10",
+				version: "0.8.11",
+				settings: {
+					optimizer: {
+						enabled: true,
+						runs: 100000
+					}
+				}
+			},
+			{
+				version: "0.8.13",
 				settings: {
 					optimizer: {
 						enabled: true,

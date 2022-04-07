@@ -10,7 +10,7 @@ async function main() {
         deusAddress: deusAddress
     });
 
-    console.log("version: ", await veDeus.version());
+    console.log("name: ", await veDeus.name());
 
     await new Promise((resolve) => setTimeout(resolve, 60000));
 

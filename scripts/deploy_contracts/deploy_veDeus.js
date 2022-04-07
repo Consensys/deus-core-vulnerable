@@ -5,9 +5,9 @@ module.exports = async ({ deusAddress }) => {
 
     const deployedVeDeus = await deploy({
         deployer: deployer,
-        contractName: 'veDEUS',
-        constructorArguments: [deusAddress, "Vote-Escrowed DEUS", "veDEUS", "veDEUS_1.0.0"]
+        contractName: 've',
+        constructorArguments: [deusAddress]
     })
-    const veDeusInstance = await hre.ethers.getContractFactory("veDEUS");
+    const veDeusInstance = await hre.ethers.getContractFactory("ve");
     return veDeusInstance.attach(deployedVeDeus.address);
 }
