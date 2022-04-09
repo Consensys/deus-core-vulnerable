@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-interface IDEI {
+interface IDEIStablecoin {
     function name() external view returns (string memory);
     function symbol() external view returns (string memory);
     function totalSupply() external view returns (uint256);
