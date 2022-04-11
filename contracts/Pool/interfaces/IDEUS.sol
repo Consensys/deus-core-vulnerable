@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-interface IDEUSToken {
+interface IDEUS {
     function name() external view returns (string memory);
     function symbol() external view returns (string memory);
     function pool_burn_from(address b_address, uint256 b_amount) external;
