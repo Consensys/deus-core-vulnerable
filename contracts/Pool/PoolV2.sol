@@ -18,11 +18,11 @@ pragma abicoder v2;
 // Primary Author(s)
 // Vahid: https://github.com/vahid-dev
 
-import "../Governance/AccessControl.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 import "../Uniswap/TransferHelper.sol";
-import "../ERC20/ERC20.sol";
 import "./interfaces/IPoolLibrary.sol";
 import "./interfaces/IMuonV02.sol";
+import "./interfaces/IERC20.sol";
 import "./interfaces/IDEUS.sol";
 import "./interfaces/IDEI.sol";
 
@@ -32,27 +32,32 @@ import "./interfaces/IDEI.sol";
 /// @dev Uses twap and vwap for DEUS price in DEI redemption by using muon oracles
 ///      Usable for stablecoins as collateral
 contract DEIPool is AccessControl {
-    struct RecollateralizeDEI {
-        uint256 collateral_amount;
-        uint256 pool_collateral_price;
-        uint256[] collateral_price;
-        uint256 deus_current_price;
+    struct RecollateralizeDeiParams {
+        uint256 collateralAmount;
+        uint256 poolCollateralPrice;
+        uint256[] collateralPrice;
+        uint256 deusPrice;
         uint256 expireBlock;
         bytes[] sigs;
     }
 
-    struct MintFD_Params {
-        uint256 deus_price_usd;
-        uint256 col_price_usd;
-        uint256 collateral_amount;
-        uint256 col_ratio;
+    struct MintFractionalDeiParams {
+        uint256 deusPrice;
+        uint256 collateralPrice;
+        uint256 collateralAmount;
+        uint256 collateralRatio;
     }
 
-    struct BuybackDEUS_Params {
-        uint256 excess_collateral_dollar_value_d18;
-        uint256 deus_price_usd;
-        uint256 col_price_usd;
-        uint256 DEUS_amount;
+    struct BuybackDeusParams {
+        uint256 excessCollateralValueD18;
+        uint256 deusPrice;
+        uint256 collateralPrice;
+        uint256 deusAmount;
+    }
+
+    struct RedeemPosition {
+        uint256 amount;
+        uint256 timestamp;
     }
 
     /* ========== STATE VARIABLES ========== */
@@ -65,10 +70,16 @@ contract DEIPool is AccessControl {
     uint256 public buybackFee;
     uint256 public recollatFee;
 
-    mapping(address => uint256) public redeemDEUSBalances;
     mapping(address => uint256) public redeemCollateralBalances;
     uint256 public unclaimedPoolCollateral;
-    mapping(address => uint256) public lastRedeemed;
+    mapping(address => uint256) public lastCollateralRedeemed;
+
+    // position data
+    mapping(address => RedeemPosition[]) public redeemPositions;
+    mapping(address => uint256) public lastRedeemedId;
+
+    uint256 public collateralRedemptionDelay = 30 seconds;
+    uint256 public deusRedemptionDelay = 8 hours;
 
     // Constants for various precisions
     uint256 private constant PRICE_PRECISION = 1e6;
@@ -82,12 +93,16 @@ contract DEIPool is AccessControl {
     // Pool_ceiling is the total units of collateral that a pool contract can hold
     uint256 public poolCeiling = 0;
 
-    // Bonus rate on DEUS minted during recollateralizeDEI(); 6 decimals of precision, set to 0.75% on genesis
+    // Bonus rate on DEUS minted during RecollateralizeDei(); 6 decimals of precision, set to 0.75% on genesis
     uint256 public bonusRate = 7500;
 
     uint256 public daoShare = 0; // fees goes to daoWallet
 
-    address public poolLibrary;
+    address public poolLibrary; // Pool library contract
+
+    address public muon;
+    uint32 public appId;
+    uint256 minimumRequiredSignatures;
 
     // AccessControl Roles
     bytes32 public constant PARAMETER_SETTER_ROLE =
@@ -105,12 +120,12 @@ contract DEIPool is AccessControl {
 
     /* ========== MODIFIERS ========== */
     modifier notRedeemPaused() {
-        require(redeemPaused == false, "POOL::Redeeming is paused");
+        require(redeemPaused == false, "DEIPool: REDEEM_PAUSED");
         _;
     }
 
     modifier notMintPaused() {
-        require(mintPaused == false, "POOL::Minting is paused");
+        require(mintPaused == false, "DEIPool: MINTING_PAUSED");
         _;
     }
 
@@ -145,7 +160,7 @@ contract DEIPool is AccessControl {
     /* ========== VIEWS ========== */
 
     // Returns dollar value of collateral held in this DEI pool
-    function collatDollarBalance(uint256 collat_usd_price)
+    function collatDollarBalance(uint256 collateralPrice)
         public
         view
         returns (uint256 balance)
@@ -153,35 +168,33 @@ contract DEIPool is AccessControl {
         balance =
             ((IERC20(collateral).balanceOf(address(this)) -
                 unclaimedPoolCollateral) *
-                (10**missing_decimals) *
-                collat_usd_price) /
+                (10**missingDecimals) *
+                collateralPrice) /
             (PRICE_PRECISION);
     }
 
-    // TODO: refactor
     // Returns the value of excess collateral held in this DEI pool, compared to what is needed to maintain the global collateral ratio
-    function availableExcessCollatDV(uint256[] memory collat_usd_price)
+    function availableExcessCollatDV(uint256[] memory collateralPrice)
         public
         view
         returns (uint256)
     {
-        uint256 total_supply = IDEIStablecoin(dei_contract_address)
-            .totalSupply();
-        uint256 global_collateral_ratio = IDEIStablecoin(dei_contract_address)
-            .global_collateral_ratio();
-        uint256 global_collat_value = IDEIStablecoin(dei_contract_address)
-            .globalCollateralValue(collat_usd_price);
+        uint256 totalSupply = IDEI(dei).totalSupply();
+        uint256 globalCollateralRatio = IDEI(dei).global_collateral_ratio();
+        uint256 globalCollateralValue = IDEI(dei).globalCollateralValue(
+            collateralPrice
+        );
 
-        if (global_collateral_ratio > COLLATERAL_RATIO_PRECISION)
-            global_collateral_ratio = COLLATERAL_RATIO_PRECISION; // Handles an overcollateralized contract with CR > 1
-        uint256 required_collat_dollar_value_d18 = (total_supply *
-            global_collateral_ratio) / (COLLATERAL_RATIO_PRECISION); // Calculates collateral needed to back each 1 DEI with $1 of collateral at current collat ratio
-        if (global_collat_value > required_collat_dollar_value_d18)
-            return global_collat_value - required_collat_dollar_value_d18;
+        if (globalCollateralRatio > COLLATERAL_RATIO_PRECISION)
+            globalCollateralRatio = COLLATERAL_RATIO_PRECISION; // Handles an overcollateralized contract with CR > 1
+        uint256 requiredCollateralDollarValued18 = (totalSupply *
+            globalCollateralRatio) / (COLLATERAL_RATIO_PRECISION); // Calculates collateral needed to back each 1 DEI with $1 of collateral at current collat ratio
+        if (globalCollateralValue > requiredCollateralDollarValued18)
+            return globalCollateralValue - requiredCollateralDollarValued18;
         else return 0;
     }
 
-    function _getChainID() internal view returns (uint256 id) {
+    function _getChainId() internal view returns (uint256 id) {
         assembly {
             id := chainid()
         }
@@ -196,8 +209,7 @@ contract DEIPool is AccessControl {
         returns (uint256 deiAmount)
     {
         require(
-            IDEI(dei_contract_address).global_collateral_ratio() >=
-                COLLATERAL_RATIO_MAX,
+            IDEI(dei).global_collateral_ratio() >= COLLATERAL_RATIO_MAX,
             "DEIPool: INVALID_COLLATERAL_RATIO"
         );
         require(
@@ -205,7 +217,7 @@ contract DEIPool is AccessControl {
                 unclaimedPoolCollateral +
                 collateralAmount <=
                 poolCeiling,
-            "[Pool's Closed]: Ceiling reached"
+            "DEIPool: CEILING_REACHED"
         );
 
         uint256 collateralAmountD18 = collateralAmount * (10**missingDecimals);
@@ -240,7 +252,7 @@ contract DEIPool is AccessControl {
         );
         require(expireBlock >= block.number, "DEIPool: EXPIRED_SIGNATURE");
         bytes32 sighash = keccak256(
-            abi.encodePacked(deus, deusPrice, expireBlock, _getChainID())
+            abi.encodePacked(deus, deusPrice, expireBlock, _getChainId())
         );
         require(
             IDEI(dei).verify_price(sighash, sigs),
@@ -284,19 +296,20 @@ contract DEIPool is AccessControl {
 
         require(expireBlock >= block.number, "DEIPool: EXPIRED_SIGNATURE");
         bytes32 sighash = keccak256(
-            abi.encodePacked(deus, deusPrice, expireBlock, _getChainID())
+            abi.encodePacked(deus, deusPrice, expireBlock, _getChainId())
         );
         require(
             IDEI(dei).verify_price(sighash, sigs),
             "DEIPool: UNVERIFIED_SIGNATURE"
         );
 
-        MintFD_Params memory inputParams;
+        MintFractionalDeiParams memory inputParams;
 
         // Blocking is just for solving stack depth problem
         {
-            uint256 collateralAmountD18 = collateralAmount * (10**missingDecimals);
-            inputParams = IPoolLibrary(poolLibrary).MintFD_Params(
+            uint256 collateralAmountD18 = collateralAmount *
+                (10**missingDecimals);
+            inputParams = MintFractionalDeiParams(
                 deusPrice,
                 COLLATERAL_PRICE,
                 collateralAmountD18,
@@ -305,20 +318,16 @@ contract DEIPool is AccessControl {
         }
 
         uint256 deusNeeded;
-        (mintAmount, deusNeeded) = IPoolLibrary(poolLibrary).calcMintFractionalDEI(
-            inputParams
-        );
+        (mintAmount, deusNeeded) = IPoolLibrary(poolLibrary)
+            .calcMintFractionalDEI(inputParams);
         require(deusNeeded <= deusAmount, "INSUFFICIENT_DEUS_INPUTTED");
 
         mintAmount = (mintAmount * (uint256(1e6) - mintingFee)) / (1e6);
 
-        IDEUS(deus).pool_burn_from(
-            msg.sender,
-            deusNeeded
-        );
+        IDEUS(deus).pool_burn_from(msg.sender, deusNeeded);
 
         TransferHelper.safeTransferFrom(
-			collateral,
+            collateral,
             msg.sender,
             address(this),
             collateralAmount
@@ -336,333 +345,285 @@ contract DEIPool is AccessControl {
         );
 
         // Need to adjust for decimals of collateral
-        uint256 deiAmountPrecision = deiAmount / (10 ** missingDecimals);
+        uint256 deiAmountPrecision = deiAmount / (10**missingDecimals);
         uint256 collateralNeeded = IPoolLibrary(poolLibrary).calcRedeem1t1DEI(
             COLLATERAL_PRICE,
             deiAmountPrecision
         );
 
-        collateralNeeded = (collateralNeeded * (uint256(1e6) - redemptionFee)) / (1e6);
+        collateralNeeded =
+            (collateralNeeded * (uint256(1e6) - redemptionFee)) /
+            (1e6);
         require(
-            collateralNeeded <= IERC20(collateral).balanceOf(address(this)) - unclaimedPoolCollateral,
+            collateralNeeded <=
+                IERC20(collateral).balanceOf(address(this)) -
+                    unclaimedPoolCollateral,
             "DEIPool: INSUFFICIENT_COLLATERAL_BALANCE"
         );
 
-		// TODO: need to change redemption part
-		/*
         redeemCollateralBalances[msg.sender] =
             redeemCollateralBalances[msg.sender] +
-            collateral_needed;
-        unclaimedPoolCollateral = unclaimedPoolCollateral + collateral_needed;
-        lastRedeemed[msg.sender] = block.number;
-		*/
+            collateralNeeded;
+        unclaimedPoolCollateral = unclaimedPoolCollateral + collateralNeeded;
+        lastCollateralRedeemed[msg.sender] = block.number;
 
         daoShare += (deiAmount * redemptionFee) / 1e6;
         // Move all external functions to the end
-        IDEI(dei).pool_burn_from(
-            msg.sender,
-            deiAmount
-        );
+        IDEI(dei).pool_burn_from(msg.sender, deiAmount);
     }
 
     // Will fail if fully collateralized or algorithmic
     // Redeem DEI for collateral and DEUS. > 0% and < 100% collateral-backed
-    function redeemFractionalDEI(uint256 DEI_amount) external notRedeemPaused {
-        uint256 global_collateral_ratio = IDEIStablecoin(dei_contract_address)
-            .global_collateral_ratio();
+    function redeemFractionalDEI(uint256 deiAmount) external notRedeemPaused {
+        uint256 globalCollateralRatio = IDEI(dei).global_collateral_ratio();
         require(
-            global_collateral_ratio < COLLATERAL_RATIO_MAX &&
-                global_collateral_ratio > 0,
-            "POOL::redeemFractionalDEI: Collateral ratio needs to be between .000001 and .999999"
+            globalCollateralRatio < COLLATERAL_RATIO_MAX &&
+                globalCollateralRatio > 0,
+            "DEIPool: INVALID_COLLATERAL_RATIO"
         );
 
         // Blocking is just for solving stack depth problem
-        uint256 collateral_amount;
-        uint256 deus_dollar_value_d18;
+        uint256 collateralAmount;
         {
-            uint256 col_price_usd = collateral_price;
-
-            uint256 DEI_amount_post_fee = (DEI_amount *
-                (uint256(1e6) - redemption_fee)) / (PRICE_PRECISION);
-
-            deus_dollar_value_d18 =
-                DEI_amount_post_fee -
-                ((DEI_amount_post_fee * global_collateral_ratio) /
-                    (PRICE_PRECISION));
-
-            // Need to adjust for decimals of collateral
-            uint256 DEI_amount_precision = DEI_amount_post_fee /
-                (10**missing_decimals);
-            uint256 collateral_dollar_value = (DEI_amount_precision *
-                global_collateral_ratio) / PRICE_PRECISION;
-            collateral_amount =
-                (collateral_dollar_value * PRICE_PRECISION) /
-                (col_price_usd);
+            uint256 deiAmountPostFee = (deiAmount *
+                (uint256(1e6) - redemptionFee)) / (PRICE_PRECISION);
+            uint256 deiAmountPrecision = deiAmountPostFee /
+                (10**missingDecimals);
+            collateralAmount =
+                (deiAmountPrecision * globalCollateralRatio) /
+                PRICE_PRECISION;
         }
         require(
-            collateral_amount <=
-                collateral_token.balanceOf(address(this)) -
+            collateralAmount <=
+                IERC20(collateral).balanceOf(address(this)) -
                     unclaimedPoolCollateral,
-            "Not enough collateral in pool"
+            "DEIPool: NOT_ENOUGH_COLLATERAL"
         );
 
-        redeemCollateralBalances[msg.sender] =
-            redeemCollateralBalances[msg.sender] +
-            collateral_amount;
-        unclaimedPoolCollateral = unclaimedPoolCollateral + collateral_amount;
+        redeemCollateralBalances[msg.sender] += collateralAmount;
+        lastCollateralRedeemed[msg.sender] = block.timestamp;
+        unclaimedPoolCollateral = unclaimedPoolCollateral + collateralAmount;
 
-        redeemDEUSBalances[msg.sender] =
-            redeemDEUSBalances[msg.sender] +
-            deus_dollar_value_d18;
+        {
+            uint256 deiAmountPostFee = (deiAmount *
+                (uint256(1e6) - redemptionFee)) / (1e6);
+            uint256 deusDollarAmount = (deiAmountPostFee *
+                (1e6 - globalCollateralRatio)) / globalCollateralRatio;
 
-        lastRedeemed[msg.sender] = block.number;
+            redeemPositions[msg.sender].push(
+                RedeemPosition({
+                    amount: deusDollarAmount,
+                    timestamp: block.timestamp
+                })
+            );
+        }
 
-        daoShare += (DEI_amount * redemption_fee) / 1e6;
-        // Move all external functions to the end
-        IDEIStablecoin(dei_contract_address).pool_burn_from(
-            msg.sender,
-            DEI_amount
-        );
-        IDEUSToken(deus_contract_address).pool_mint(address(this), deus_amount);
+        daoShare += (deiAmount * redemptionFee) / 1e6;
+
+        IDEI(dei).pool_burn_from(msg.sender, deiAmount);
     }
 
     // Redeem DEI for DEUS. 0% collateral-backed
-    function redeemAlgorithmicDEI(uint256 DEI_amount) external notRedeemPaused {
+    function redeemAlgorithmicDEI(uint256 deiAmount) external notRedeemPaused {
         require(
-            IDEIStablecoin(dei_contract_address).global_collateral_ratio() == 0,
-            "POOL::redeemAlgorithmicDEI: Collateral ratio must be 0"
+            IDEI(dei).global_collateral_ratio() == 0,
+            "DEIPool: INVALID_COLLATERAL_RATIO"
         );
 
-        require(
-            expireBlock >= block.number,
-            "DEI::redeemAlgorithmicDEI: signature is expired."
+        uint256 deusDollarAmount = (deiAmount *
+            (uint256(1e6) - redemptionFee)) / (PRICE_PRECISION);
+        redeemPositions[msg.sender].push(
+            RedeemPosition({
+                amount: deusDollarAmount,
+                timestamp: block.timestamp
+            })
         );
-        bytes32 sighash = keccak256(
-            abi.encodePacked(
-                deus_contract_address,
-                deus_current_price,
-                expireBlock,
-                getChainID()
-            )
-        );
-        require(
-            IDEIStablecoin(dei_contract_address).verify_price(sighash, sigs),
-            "POOL::redeemAlgorithmicDEI: invalid signatures"
-        );
-
-        uint256 deus_dollar_value_d18 = DEI_amount;
-
-        deus_dollar_value_d18 =
-            (deus_dollar_value_d18 * (uint256(1e6) - redemption_fee)) /
-            1e6; //apply fees
-
-        redeemDEUSBalances[msg.sender] =
-            redeemDEUSBalances[msg.sender] +
-            deus_dollar_value_d18;
-
-        lastRedeemed[msg.sender] = block.number;
-
-        daoShare += (DEI_amount * redemption_fee) / 1e6;
-        // Move all external functions to the end
-        IDEIStablecoin(dei_contract_address).pool_burn_from(
-            msg.sender,
-            DEI_amount
-        );
-        IDEUSToken(deus_contract_address).pool_mint(address(this), deus_amount);
+        daoShare += (deiAmount * redemptionFee) / 1e6;
+        IDEI(dei).pool_burn_from(msg.sender, deiAmount);
     }
 
-    function collectCollateral() external // get muon signature twap solidly
-    {
+    function collectCollateral() external {
         require(
-            (lastRedeemed[msg.sender] + usdc_redemption_delay) <= block.number,
-            "POOL::collectCollateral: Must wait for redemption_delay blocks before collecting redemption"
+            (lastCollateralRedeemed[msg.sender] + collateralRedemptionDelay) <=
+                block.timestamp,
+            "DEIPool: COLLATERAL_REDEMPTION_DELAY"
         );
-        bool sendCollateral = false;
-        uint256 CollateralAmount = 0;
 
         if (redeemCollateralBalances[msg.sender] > 0) {
-            CollateralAmount = redeemCollateralBalances[msg.sender];
+            uint256 collateralAmount = redeemCollateralBalances[msg.sender];
             redeemCollateralBalances[msg.sender] = 0;
+            TransferHelper.safeTransfer(
+                collateral,
+                msg.sender,
+                collateralAmount
+            );
             unclaimedPoolCollateral =
                 unclaimedPoolCollateral -
-                CollateralAmount;
-            sendCollateral = true;
-        }
-        if (sendCollateral) {
-            TransferHelper.safeTransfer(
-                address(collateral_token),
-                msg.sender,
-                CollateralAmount
-            );
+                collateralAmount;
         }
     }
 
-    // After a redemption happens, transfer the newly minted DEUS and owed collateral from this pool
-    // contract to the user. Redemption is split into two functions to prevent flash loans from being able
-    // to take out DEI/collateral from the system, use an AMM to trade the new price, and then mint back into the system.
     function collectDeus(
         uint256 price,
-        uint256 timestamp,
         bytes calldata _reqId,
         SchnorrSign[] calldata sigs
     ) external {
         require(
-            block.timestamp + expireTime <= timestamp,
-            "Pool: EXPIRE_SIGNATURE"
-        );
-        require(
             sigs.length >= minimumRequiredSignatures,
-            "Pool: INSUFFICIENT_SIGNATURES"
+            "DEIPool: INSUFFICIENT_SIGNATURES"
+        );
+
+        uint256 redeemId = lastRedeemedId[msg.sender]++;
+
+        require(
+            redeemPositions[msg.sender][redeemId].timestamp +
+                deusRedemptionDelay <=
+                block.timestamp,
+            "DEIPool: DEUS_REDEMPTION_DELAY"
         );
 
         {
             bytes32 hash = keccak256(
-                abi.encodePacked(appId, price, _getChainId(), timestamp)
+                abi.encodePacked(
+                    appId,
+                    msg.sender,
+                    redeemId,
+                    price,
+                    _getChainId()
+                )
             );
             require(
                 IMuonV02(muon).verify(_reqId, uint256(hash), sigs),
-                "Pool: UNVERIFIED_SIGNATURES"
+                "DEIPool: UNVERIFIED_SIGNATURES"
             );
         }
 
-        DEUSAmount = redeemDEUSBalances[msg.sender];
-        redeemDEUSBalances[msg.sender] = 0;
+        uint256 deusAmount = (redeemPositions[msg.sender][redeemId].amount *
+            1e18) / price;
 
-        TransferHelper.safeTransfer(
-            address(deus_contract_address),
-            msg.sender,
-            DEUSAmount
-        );
+        TransferHelper.safeTransfer(deus, msg.sender, deusAmount);
     }
 
     // When the protocol is recollateralizing, we need to give a discount of DEUS to hit the new CR target
     // Thus, if the target collateral ratio is higher than the actual value of collateral, minters get DEUS for adding collateral
     // This function simply rewards anyone that sends collateral to a pool with the same amount of DEUS + the bonus rate
     // Anyone can call this function to recollateralize the protocol and take the extra DEUS value from the bonus rate as an arb opportunity
-    function recollateralizeDEI(RecollateralizeDEI memory inputs) external {
+    function RecollateralizeDei(RecollateralizeDeiParams memory inputs)
+        external
+    {
         require(
             recollateralizePaused == false,
-            "POOL::recollateralizeDEI: Recollateralize is paused"
+            "DEIPool: RECOLLATERALIZE_PAUSED"
         );
 
         require(
             inputs.expireBlock >= block.number,
-            "POOL::recollateralizeDEI: signature is expired."
+            "DEIPool: EXPIRE_SIGNATURE"
         );
         bytes32 sighash = keccak256(
             abi.encodePacked(
-                collateral_address,
-                inputs.collateral_price,
-                deus_contract_address,
-                inputs.deus_current_price,
+                deus,
+                inputs.deusPrice,
                 inputs.expireBlock,
-                getChainID()
+                _getChainId()
             )
         );
         require(
-            IDEIStablecoin(dei_contract_address).verify_price(
-                sighash,
-                inputs.sigs
-            ),
-            "POOL::recollateralizeDEI: invalid signatures"
+            IDEI(dei).verify_price(sighash, inputs.sigs),
+            "DEIPool: UNVERIFIED_SIGNATURES"
         );
 
-        uint256 collateral_amount_d18 = inputs.collateral_amount *
-            (10**missing_decimals);
+        uint256 collateralAmountD18 = inputs.collateralAmount *
+            (10**missingDecimals);
 
-        uint256 dei_total_supply = IDEIStablecoin(dei_contract_address)
-            .totalSupply();
-        uint256 global_collateral_ratio = IDEIStablecoin(dei_contract_address)
-            .global_collateral_ratio();
-        uint256 global_collat_value = IDEIStablecoin(dei_contract_address)
-            .globalCollateralValue(inputs.collateral_price);
+        uint256 deiTotalSupply = IDEI(dei).totalSupply();
+        uint256 globalCollateralRatio = IDEI(dei).global_collateral_ratio();
+        uint256 globalCollateralValue = IDEI(dei).globalCollateralValue(
+            inputs.collateralPrice
+        );
 
-        (uint256 collateral_units, uint256 amount_to_recollat) = poolLibrary
-            .calcRecollateralizeDEIInner(
-                collateral_amount_d18,
-                inputs.collateral_price[inputs.collateral_price.length - 1], // pool collateral price exist in last index
-                global_collat_value,
-                dei_total_supply,
-                global_collateral_ratio
+        (uint256 collateralUnits, uint256 amountToRecollat) = IPoolLibrary(
+            poolLibrary
+        ).calcRecollateralizeDeiInner(
+                collateralAmountD18,
+                inputs.collateralPrice[inputs.collateralPrice.length - 1], // pool collateral price exist in last index
+                globalCollateralValue,
+                deiTotalSupply,
+                globalCollateralRatio
             );
 
-        uint256 collateral_units_precision = collateral_units /
-            (10**missing_decimals);
+        uint256 collateralUnitsPrecision = collateralUnits /
+            (10**missingDecimals);
 
-        uint256 deus_paid_back = (amount_to_recollat *
-            (uint256(1e6) + bonus_rate - recollat_fee)) /
-            inputs.deus_current_price;
+        uint256 deusPaidBack = (amountToRecollat *
+            (uint256(1e6) + bonusRate - recollatFee)) / inputs.deusPrice;
 
         TransferHelper.safeTransferFrom(
-            address(collateral_token),
+            collateral,
             msg.sender,
             address(this),
-            collateral_units_precision
+            collateralUnitsPrecision
         );
-        IDEUSToken(deus_contract_address).pool_mint(msg.sender, deus_paid_back);
+        IDEUS(deus).pool_mint(msg.sender, deusPaidBack);
     }
 
     // Function can be called by an DEUS holder to have the protocol buy back DEUS with excess collateral value from a desired collateral pool
     // This can also happen if the collateral ratio > 1
-    function buyBackDEUS(
-        uint256 DEUS_amount,
-        uint256[] memory collateral_price,
-        uint256 deus_current_price,
+    function buyBackDeus(
+        uint256 deusAmount,
+        uint256[] memory collateralPrice,
+        uint256 deusPrice,
         uint256 expireBlock,
         bytes[] calldata sigs
     ) external {
-        require(buyBackPaused == false, "POOL::buyBackDEUS: Buyback is paused");
-        require(
-            expireBlock >= block.number,
-            "DEI::buyBackDEUS: signature is expired."
-        );
+        require(buyBackPaused == false, "DEIPool: BUYBACK_PAUSED");
+        require(expireBlock >= block.number, "DEIPool: EXPIRED_SIGNATURE");
         bytes32 sighash = keccak256(
             abi.encodePacked(
-                collateral_address,
-                collateral_price,
-                deus_contract_address,
-                deus_current_price,
+                collateral,
+                collateralPrice,
+                deus,
+                deusPrice,
                 expireBlock,
-                getChainID()
+                _getChainId()
             )
         );
         require(
-            IDEIStablecoin(dei_contract_address).verify_price(sighash, sigs),
-            "POOL::buyBackDEUS: invalid signatures"
+            IDEI(dei).verify_price(sighash, sigs),
+            "DEIPool: UNVERIFIED_SIGNATURE"
         );
 
-        DEIPoolLibrary.BuybackDEUS_Params memory input_params = DEIPoolLibrary
-            .BuybackDEUS_Params(
-                availableExcessCollatDV(collateral_price),
-                deus_current_price,
-                collateral_price[collateral_price.length - 1], // pool collateral price exist in last index
-                DEUS_amount
-            );
+        BuybackDeusParams memory inputParams = BuybackDeusParams(
+            availableExcessCollatDV(collateralPrice),
+            deusPrice,
+            collateralPrice[collateralPrice.length - 1], // pool collateral price exist in last index
+            deusAmount
+        );
 
-        uint256 collateral_equivalent_d18 = (poolLibrary.calcBuyBackDEUS(
-            input_params
-        ) * (uint256(1e6) - buyback_fee)) / (1e6);
-        uint256 collateral_precision = collateral_equivalent_d18 /
-            (10**missing_decimals);
+        uint256 collateralEquivalentD18 = (IPoolLibrary(poolLibrary)
+            .calcBuyBackDEUS(inputParams) * (uint256(1e6) - buybackFee)) /
+            (1e6);
+        uint256 collateralPrecision = collateralEquivalentD18 /
+            (10**missingDecimals);
 
         // Give the sender their desired collateral and burn the DEUS
-        IDEUSToken(deus_contract_address).pool_burn_from(
-            msg.sender,
-            DEUS_amount
-        );
+        IDEUS(deus).pool_burn_from(msg.sender, deusAmount);
         TransferHelper.safeTransfer(
-            address(collateral_token),
+            collateral,
             msg.sender,
-            collateral_precision
+            collateralPrecision
         );
     }
 
     /* ========== RESTRICTED FUNCTIONS ========== */
 
-    function collectDaoShare(uint256 amount, address to) external onlyRole(DAO_SHARE_COLLECTOR) {
+    function collectDaoShare(uint256 amount, address to)
+        external
+        onlyRole(DAO_SHARE_COLLECTOR)
+    {
         require(amount <= daoShare, "DEIPool: INVALID_AMOUNT");
 
-		IDEI(dei).pool_mint(to, amount);
+        IDEI(dei).pool_mint(to, amount);
         daoShare -= amount;
 
         emit daoShareCollected(amount, to);
@@ -698,43 +659,59 @@ contract DEIPool is AccessControl {
 
     // Combined into one function due to 24KiB contract memory limit
     function setPoolParameters(
-        uint256 new_ceiling,
-        uint256 new_bonus_rate,
-        uint256 new_redemption_delay,
-        uint256 new_mint_fee,
-        uint256 new_redeem_fee,
-        uint256 new_buyback_fee,
-        uint256 new_recollat_fee
+        uint256 poolCeiling_,
+        uint256 bonusRate_,
+        uint256 collateralRedemptionDelay_,
+        uint256 deusRedemptionDelay_,
+        uint256 mintingFee_,
+        uint256 redemptionFee_,
+        uint256 buybackFee_,
+        uint256 recollatFee_,
+        address muon_,
+        uint32 appId_,
+        uint256 minimumRequiredSignatures_
     ) external onlyRole(PARAMETER_SETTER_ROLE) {
-        pool_ceiling = new_ceiling;
-        bonus_rate = new_bonus_rate;
-        redemption_delay = new_redemption_delay;
-        minting_fee = new_mint_fee;
-        redemption_fee = new_redeem_fee;
-        buyback_fee = new_buyback_fee;
-        recollat_fee = new_recollat_fee;
+        poolCeiling = poolCeiling_;
+        bonusRate = bonusRate_;
+        collateralRedemptionDelay = collateralRedemptionDelay_;
+        deusRedemptionDelay = deusRedemptionDelay_;
+        mintingFee = mintingFee_;
+        redemptionFee = redemptionFee_;
+        buybackFee = buybackFee_;
+        recollatFee = recollatFee_;
+        muon = muon_;
+        appId = appId_;
+        minimumRequiredSignatures = minimumRequiredSignatures_;
 
         emit PoolParametersSet(
-            new_ceiling,
-            new_bonus_rate,
-            new_redemption_delay,
-            new_mint_fee,
-            new_redeem_fee,
-            new_buyback_fee,
-            new_recollat_fee
+            poolCeiling_,
+            bonusRate_,
+            collateralRedemptionDelay_,
+            deusRedemptionDelay_,
+            mintingFee_,
+            redemptionFee_,
+            buybackFee_,
+            recollatFee_,
+            muon_,
+            appId_,
+            minimumRequiredSignatures_
         );
     }
 
     /* ========== EVENTS ========== */
 
     event PoolParametersSet(
-        uint256 new_ceiling,
-        uint256 new_bonus_rate,
-        uint256 new_redemption_delay,
-        uint256 new_mint_fee,
-        uint256 new_redeem_fee,
-        uint256 new_buyback_fee,
-        uint256 new_recollat_fee
+        uint256 poolCeiling,
+        uint256 bonusRate,
+        uint256 collateralRedemptionDelay,
+        uint256 deusRedemptionDelay,
+        uint256 mintingFee,
+        uint256 redemptionFee,
+        uint256 buybackFee,
+        uint256 recollatFee,
+        address muon,
+        uint32 appId,
+        uint256 minimumRequiredSignatures
     );
     event daoShareCollected(uint256 daoShare, address to);
     event MintingToggled(bool toggled);
