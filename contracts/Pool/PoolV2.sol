@@ -71,7 +71,7 @@ contract DEIPool is AccessControl {
     uint256 private constant PRICE_PRECISION = 1e6;
     uint256 private constant COLLATERAL_RATIO_PRECISION = 1e6;
     uint256 private constant COLLATERAL_RATIO_MAX = 1e6;
-    uint256 private constant COLLATERAL_PRICE = 1e6;
+    uint256 private constant COLLATERAL_PRICE = 1e6; // todo: percision
 
     // Number of decimals needed to get to 18
     uint256 private immutable missingDecimals;
