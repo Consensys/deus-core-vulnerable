@@ -41,20 +41,6 @@ contract DEIPool is AccessControl {
         bytes[] sigs;
     }
 
-    struct MintFractionalDeiParams {
-        uint256 deusPrice;
-        uint256 collateralPrice;
-        uint256 collateralAmount;
-        uint256 collateralRatio;
-    }
-
-    struct BuybackDeusParams {
-        uint256 excessCollateralValueD18;
-        uint256 deusPrice;
-        uint256 collateralPrice;
-        uint256 deusAmount;
-    }
-
     struct RedeemPosition {
         uint256 amount;
         uint256 timestamp;
@@ -303,13 +289,13 @@ contract DEIPool is AccessControl {
             "DEIPool: UNVERIFIED_SIGNATURE"
         );
 
-        MintFractionalDeiParams memory inputParams;
+        IPoolLibrary.MintFractionalDeiParams memory inputParams;
 
         // Blocking is just for solving stack depth problem
         {
             uint256 collateralAmountD18 = collateralAmount *
                 (10**missingDecimals);
-            inputParams = MintFractionalDeiParams(
+            inputParams = IPoolLibrary.MintFractionalDeiParams(
                 deusPrice,
                 COLLATERAL_PRICE,
                 collateralAmountD18,
@@ -542,9 +528,7 @@ contract DEIPool is AccessControl {
             inputs.collateralPrice
         );
 
-        (uint256 collateralUnits, uint256 amountToRecollat) = IPoolLibrary(
-            poolLibrary
-        ).calcRecollateralizeDeiInner(
+        (uint256 collateralUnits, uint256 amountToRecollat) = IPoolLibrary(poolLibrary).calcRecollateralizeDEIInner(
                 collateralAmountD18,
                 inputs.collateralPrice[inputs.collateralPrice.length - 1], // pool collateral price exist in last index
                 globalCollateralValue,
@@ -593,7 +577,7 @@ contract DEIPool is AccessControl {
             "DEIPool: UNVERIFIED_SIGNATURE"
         );
 
-        BuybackDeusParams memory inputParams = BuybackDeusParams(
+        IPoolLibrary.BuybackDeusParams memory inputParams = IPoolLibrary.BuybackDeusParams(
             availableExcessCollatDV(collateralPrice),
             deusPrice,
             collateralPrice[collateralPrice.length - 1], // pool collateral price exist in last index

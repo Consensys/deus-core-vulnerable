@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 interface IPoolLibrary {
-    struct MintFD_Params {
-        uint256 deus_price_usd;
-        uint256 col_price_usd;
-        uint256 collateral_amount;
-        uint256 col_ratio;
+     struct MintFractionalDeiParams {
+        uint256 deusPrice;
+        uint256 collateralPrice;
+        uint256 collateralAmount;
+        uint256 collateralRatio;
     }
 
-    struct BuybackDEUS_Params {
-        uint256 excess_collateral_dollar_value_d18;
-        uint256 deus_price_usd;
-        uint256 col_price_usd;
-        uint256 DEUS_amount;
+    struct BuybackDeusParams {
+        uint256 excessCollateralValueD18;
+        uint256 deusPrice;
+        uint256 collateralPrice;
+        uint256 deusAmount;
     }
 
     function calcMint1t1DEI(uint256 col_price, uint256 collateral_amount_d18)
@@ -25,7 +25,7 @@ interface IPoolLibrary {
         uint256 deus_amount_d18
     ) external pure returns (uint256);
 
-    function calcMintFractionalDEI(MintFD_Params memory params)
+    function calcMintFractionalDEI(MintFractionalDeiParams memory params)
         external
         pure
         returns (uint256, uint256);
@@ -35,7 +35,7 @@ interface IPoolLibrary {
         pure
         returns (uint256);
 
-    function calcBuyBackDEUS(BuybackDEUS_Params memory params)
+    function calcBuyBackDEUS(BuybackDeusParams memory params)
         external
         pure
         returns (uint256);

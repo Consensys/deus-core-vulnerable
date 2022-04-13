@@ -12,18 +12,18 @@ contract DEIPoolLibrary {
 
     // ================ Structs ================
     // Needed to lower stack size
-    struct MintFD_Params {
-        uint256 deus_price_usd;
-        uint256 col_price_usd;
-        uint256 collateral_amount;
-        uint256 col_ratio;
+      struct MintFractionalDeiParams {
+        uint256 deusPrice;
+        uint256 collateralPrice;
+        uint256 collateralAmount;
+        uint256 collateralRatio;
     }
 
-    struct BuybackDEUS_Params {
-        uint256 excess_collateral_dollar_value_d18;
-        uint256 deus_price_usd;
-        uint256 col_price_usd;
-        uint256 DEUS_amount;
+   struct BuybackDeusParams {
+        uint256 excessCollateralValueD18;
+        uint256 deusPrice;
+        uint256 collateralPrice;
+        uint256 deusAmount;
     }
 
     // ================ Functions ================
@@ -43,7 +43,7 @@ contract DEIPoolLibrary {
         return (deus_amount_d18 * deus_price_usd) / (1e6);
     }
 
-    function calcMintFractionalDEI(MintFD_Params memory params)
+    function calcMintFractionalDEI(MintFractionalDeiParams memory params)
         public
         pure
         returns (uint256, uint256)
@@ -56,14 +56,14 @@ contract DEIPoolLibrary {
         {
             // USD amounts of the collateral and the DEUS
             c_dollar_value_d18 =
-                (params.collateral_amount * params.col_price_usd) /
+                (params.collateralAmount * params.collateralPrice) /
                 (1e6);
         }
         uint256 calculated_deus_dollar_value_d18 = ((c_dollar_value_d18 *
-            (1e6)) / params.col_ratio) - c_dollar_value_d18;
+            (1e6)) / params.collateralRatio) - c_dollar_value_d18;
 
         uint256 calculated_deus_needed = (calculated_deus_dollar_value_d18 *
-            (1e6)) / params.deus_price_usd;
+            (1e6)) / params.deusPrice;
 
         return (
             c_dollar_value_d18 + calculated_deus_dollar_value_d18,
@@ -79,28 +79,28 @@ contract DEIPoolLibrary {
         return (DEI_amount * (1e6)) / col_price_usd;
     }
 
-    function calcBuyBackDEUS(BuybackDEUS_Params memory params)
+    function calcBuyBackDEUS(BuybackDeusParams memory params)
         public
         pure
         returns (uint256)
     {
         // If the total collateral value is higher than the amount required at the current collateral ratio then buy back up to the possible DEUS with the desired collateral
         require(
-            params.excess_collateral_dollar_value_d18 > 0,
+            params.excessCollateralValueD18 > 0,
             "No excess collateral to buy back!"
         );
 
         // Make sure not to take more than is available
-        uint256 deus_dollar_value_d18 = (params.DEUS_amount *
-            (params.deus_price_usd)) / (1e6);
+        uint256 deus_dollar_value_d18 = (params.deusAmount *
+            (params.deusPrice)) / (1e6);
         require(
-            deus_dollar_value_d18 <= params.excess_collateral_dollar_value_d18,
+            deus_dollar_value_d18 <= params.excessCollateralValueD18,
             "You are trying to buy back more than the excess!"
         );
 
         // Get the equivalent amount of collateral based on the market value of DEUS provided
         uint256 collateral_equivalent_d18 = (deus_dollar_value_d18 * (1e6)) /
-            params.col_price_usd;
+            params.collateralPrice;
         //collateral_equivalent_d18 = collateral_equivalent_d18.sub((collateral_equivalent_d18.mul(params.buyback_fee)).div(1e6));
 
         return collateral_equivalent_d18;
