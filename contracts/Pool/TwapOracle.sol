@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 
+import "./interfaces/IBasePairV1";
 
-pragma solidity 0.8.11;
+pragma solidity 0.8.13;
 
 contract Twap {
     BaseV1Pair oracle = BaseV1Pair(0xF42dBcf004a93ae6D5922282B304E2aEFDd50058);
@@ -36,5 +37,12 @@ contract Twap {
         return index;
     }
 
-    
+    function prices(uint256 redeemTimestamp, uint256 lockTime) public view returns(uint256) {
+        uint256 firstIndex = getFirstIndex(redeemTimestamp);
+        uint256 lastIndex = getLastIndex(redeemTimestamp, lockTime);
+        uint256[] prices;
+        for (uint256 i = firstIndex ; i < lastIndex + 1 ; i ++) {
+            prices.push(0);
+        }
+    }   
 }
