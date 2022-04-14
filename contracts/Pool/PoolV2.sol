@@ -64,20 +64,21 @@ contract DEIPool is AccessControl {
     mapping(address => RedeemPosition[]) public redeemPositions;
     mapping(address => uint256) public lastRedeemedId;
 
-    uint256 public collateralRedemptionDelay = 30 seconds;
-    uint256 public deusRedemptionDelay = 8 hours;
+    uint256 public collateralRedemptionDelay;
+    uint256 public deusRedemptionDelay;
 
     // Constants for various precisions
     uint256 private constant PRICE_PRECISION = 1e6;
     uint256 private constant COLLATERAL_RATIO_PRECISION = 1e6;
     uint256 private constant COLLATERAL_RATIO_MAX = 1e6;
-    uint256 private constant COLLATERAL_PRICE = 1e6; // todo: percision
+    uint256 private constant COLLATERAL_PRICE = 1e6;
+    uint256 private constant SCALE = 1e6;
 
     // Number of decimals needed to get to 18
     uint256 private immutable missingDecimals;
 
     // Pool_ceiling is the total units of collateral that a pool contract can hold
-    uint256 public poolCeiling = 0;
+    uint256 public poolCeiling;
 
     // Bonus rate on DEUS minted during RecollateralizeDei(); 6 decimals of precision, set to 0.75% on genesis
     uint256 public bonusRate = 7500;
@@ -121,9 +122,14 @@ contract DEIPool is AccessControl {
         address dei_,
         address deus_,
         address collateral_,
-        uint256 poolCeiling_,
+        address muon_,
         address library_,
-        address admin
+        address admin,
+        uint256 minimumRequiredSignatures_,
+        uint256 collateralRedemptionDelay_,
+        uint256 deusRedemptionDelay_,
+        uint256 poolCeiling_,
+        uint32 appId_
     ) {
         require(
             (dei_ != address(0)) &&
@@ -136,6 +142,11 @@ contract DEIPool is AccessControl {
         dei = dei_;
         deus = deus_;
         collateral = collateral_;
+        muon = muon_;
+        appId = appId_;
+        minimumRequiredSignatures = minimumRequiredSignatures_;
+        collateralRedemptionDelay = collateralRedemptionDelay_;
+        deusRedemptionDelay = deusRedemptionDelay_;
         poolCeiling = poolCeiling_;
         poolLibrary = library_;
         missingDecimals = uint256(18) - IERC20(collateral).decimals();
@@ -212,7 +223,7 @@ contract DEIPool is AccessControl {
             collateralAmountD18
         ); //1 DEI for each $1 worth of collateral
 
-        deiAmount = (deiAmount * (uint256(1e6) - mintingFee)) / 1e6; //remove precision at the end
+        deiAmount = (deiAmount * (SCALE - mintingFee)) / SCALE; //remove precision at the end
 
         TransferHelper.safeTransferFrom(
             collateral,
@@ -221,7 +232,7 @@ contract DEIPool is AccessControl {
             collateralAmount
         );
 
-        daoShare += (deiAmount * mintingFee) / 1e6;
+        daoShare += (deiAmount * mintingFee) / SCALE;
         IDEI(dei).pool_mint(msg.sender, deiAmount);
     }
 
@@ -250,8 +261,8 @@ contract DEIPool is AccessControl {
             deusAmount
         );
 
-        deiAmount = (deiAmount * (uint256(1e6) - (mintingFee))) / (1e6);
-        daoShare += (deiAmount * mintingFee) / 1e6;
+        deiAmount = (deiAmount * (SCALE - (mintingFee))) / SCALE;
+        daoShare += (deiAmount * mintingFee) / SCALE;
 
         IDEUS(deus).pool_burn_from(msg.sender, deusAmount);
         IDEI(dei).pool_mint(msg.sender, deiAmount);
@@ -308,7 +319,7 @@ contract DEIPool is AccessControl {
             .calcMintFractionalDEI(inputParams);
         require(deusNeeded <= deusAmount, "INSUFFICIENT_DEUS_INPUTTED");
 
-        mintAmount = (mintAmount * (uint256(1e6) - mintingFee)) / (1e6);
+        mintAmount = (mintAmount * (SCALE - mintingFee)) / SCALE;
 
         IDEUS(deus).pool_burn_from(msg.sender, deusNeeded);
 
@@ -319,7 +330,7 @@ contract DEIPool is AccessControl {
             collateralAmount
         );
 
-        daoShare += (mintAmount * mintingFee) / 1e6;
+        daoShare += (mintAmount * mintingFee) / SCALE;
         IDEI(dei).pool_mint(msg.sender, mintAmount);
     }
 
@@ -337,9 +348,7 @@ contract DEIPool is AccessControl {
             deiAmountPrecision
         );
 
-        collateralNeeded =
-            (collateralNeeded * (uint256(1e6) - redemptionFee)) /
-            (1e6);
+        collateralNeeded = (collateralNeeded * (SCALE - redemptionFee)) / SCALE;
         require(
             collateralNeeded <=
                 IERC20(collateral).balanceOf(address(this)) -
@@ -353,7 +362,7 @@ contract DEIPool is AccessControl {
         unclaimedPoolCollateral = unclaimedPoolCollateral + collateralNeeded;
         lastCollateralRedeemed[msg.sender] = block.number;
 
-        daoShare += (deiAmount * redemptionFee) / 1e6;
+        daoShare += (deiAmount * redemptionFee) / SCALE;
         // Move all external functions to the end
         IDEI(dei).pool_burn_from(msg.sender, deiAmount);
     }
@@ -371,8 +380,8 @@ contract DEIPool is AccessControl {
         // Blocking is just for solving stack depth problem
         uint256 collateralAmount;
         {
-            uint256 deiAmountPostFee = (deiAmount *
-                (uint256(1e6) - redemptionFee)) / (PRICE_PRECISION);
+            uint256 deiAmountPostFee = (deiAmount * (SCALE - redemptionFee)) /
+                (PRICE_PRECISION);
             uint256 deiAmountPrecision = deiAmountPostFee /
                 (10**missingDecimals);
             collateralAmount =
@@ -391,10 +400,10 @@ contract DEIPool is AccessControl {
         unclaimedPoolCollateral = unclaimedPoolCollateral + collateralAmount;
 
         {
-            uint256 deiAmountPostFee = (deiAmount *
-                (uint256(1e6) - redemptionFee)) / (1e6);
+            uint256 deiAmountPostFee = (deiAmount * (SCALE - redemptionFee)) /
+                SCALE;
             uint256 deusDollarAmount = (deiAmountPostFee *
-                (1e6 - globalCollateralRatio)) / globalCollateralRatio;
+                (SCALE - globalCollateralRatio)) / globalCollateralRatio;
 
             redeemPositions[msg.sender].push(
                 RedeemPosition({
@@ -404,7 +413,7 @@ contract DEIPool is AccessControl {
             );
         }
 
-        daoShare += (deiAmount * redemptionFee) / 1e6;
+        daoShare += (deiAmount * redemptionFee) / SCALE;
 
         IDEI(dei).pool_burn_from(msg.sender, deiAmount);
     }
@@ -416,15 +425,15 @@ contract DEIPool is AccessControl {
             "DEIPool: INVALID_COLLATERAL_RATIO"
         );
 
-        uint256 deusDollarAmount = (deiAmount *
-            (uint256(1e6) - redemptionFee)) / (PRICE_PRECISION);
+        uint256 deusDollarAmount = (deiAmount * (SCALE - redemptionFee)) /
+            (PRICE_PRECISION);
         redeemPositions[msg.sender].push(
             RedeemPosition({
                 amount: deusDollarAmount,
                 timestamp: block.timestamp
             })
         );
-        daoShare += (deiAmount * redemptionFee) / 1e6;
+        daoShare += (deiAmount * redemptionFee) / SCALE;
         IDEI(dei).pool_burn_from(msg.sender, deiAmount);
     }
 
@@ -528,7 +537,9 @@ contract DEIPool is AccessControl {
             inputs.collateralPrice
         );
 
-        (uint256 collateralUnits, uint256 amountToRecollat) = IPoolLibrary(poolLibrary).calcRecollateralizeDEIInner(
+        (uint256 collateralUnits, uint256 amountToRecollat) = IPoolLibrary(
+            poolLibrary
+        ).calcRecollateralizeDEIInner(
                 collateralAmountD18,
                 inputs.collateralPrice[inputs.collateralPrice.length - 1], // pool collateral price exist in last index
                 globalCollateralValue,
@@ -540,7 +551,7 @@ contract DEIPool is AccessControl {
             (10**missingDecimals);
 
         uint256 deusPaidBack = (amountToRecollat *
-            (uint256(1e6) + bonusRate - recollatFee)) / inputs.deusPrice;
+            (SCALE + bonusRate - recollatFee)) / inputs.deusPrice;
 
         TransferHelper.safeTransferFrom(
             collateral,
@@ -577,16 +588,16 @@ contract DEIPool is AccessControl {
             "DEIPool: UNVERIFIED_SIGNATURE"
         );
 
-        IPoolLibrary.BuybackDeusParams memory inputParams = IPoolLibrary.BuybackDeusParams(
-            availableExcessCollatDV(collateralPrice),
-            deusPrice,
-            collateralPrice[collateralPrice.length - 1], // pool collateral price exist in last index
-            deusAmount
-        );
+        IPoolLibrary.BuybackDeusParams memory inputParams = IPoolLibrary
+            .BuybackDeusParams(
+                availableExcessCollatDV(collateralPrice),
+                deusPrice,
+                collateralPrice[collateralPrice.length - 1], // pool collateral price exist in last index
+                deusAmount
+            );
 
         uint256 collateralEquivalentD18 = (IPoolLibrary(poolLibrary)
-            .calcBuyBackDEUS(inputParams) * (uint256(1e6) - buybackFee)) /
-            (1e6);
+            .calcBuyBackDEUS(inputParams) * (SCALE - buybackFee)) / SCALE;
         uint256 collateralPrecision = collateralEquivalentD18 /
             (10**missingDecimals);
 
