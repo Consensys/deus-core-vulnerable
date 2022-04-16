@@ -25,26 +25,15 @@ import "./interfaces/IMuonV02.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/IDEUS.sol";
 import "./interfaces/IDEI.sol";
+import "./interfaces/IPoolV2.sol";
 
 /// @title Minter Pool Contract V2
 /// @author DEUS Finance
 /// @notice Minter pool of DEI stablecoin
 /// @dev Uses twap and vwap for DEUS price in DEI redemption by using muon oracles
 ///      Usable for stablecoins as collateral
-contract DEIPool is AccessControl {
-    struct RecollateralizeDeiParams {
-        uint256 collateralAmount;
-        uint256 poolCollateralPrice;
-        uint256[] collateralPrice;
-        uint256 deusPrice;
-        uint256 expireBlock;
-        bytes[] sigs;
-    }
-
-    struct RedeemPosition {
-        uint256 amount;
-        uint256 timestamp;
-    }
+contract DEIPool is IDEIPool, AccessControl {
+    
 
     /* ========== STATE VARIABLES ========== */
     address public collateral;
@@ -61,7 +50,7 @@ contract DEIPool is AccessControl {
     mapping(address => uint256) public lastCollateralRedeemed;
 
     // position data
-    mapping(address => RedeemPosition[]) public redeemPositions;
+    mapping(address => IDEIPool.RedeemPosition[]) public redeemPositions;
     mapping(address => uint256) public nextRedeemId;
 
     uint256 public collateralRedemptionDelay;
@@ -192,7 +181,7 @@ contract DEIPool is AccessControl {
     }
 
     function positionsLength(address user)
-        public
+        external
         view
         returns (uint256 length)
     {
@@ -200,7 +189,7 @@ contract DEIPool is AccessControl {
     }
 
     function getAllPositions(address user)
-        public
+        external
         view
         returns (RedeemPosition[] memory positinos)
     {
@@ -208,7 +197,7 @@ contract DEIPool is AccessControl {
     }
 
     function getUnRedeemedPositions(address user)
-        public
+        external
         view
         returns (RedeemPosition[] memory positions)
     {
@@ -722,27 +711,6 @@ contract DEIPool is AccessControl {
             minimumRequiredSignatures_
         );
     }
-
-    /* ========== EVENTS ========== */
-
-    event PoolParametersSet(
-        uint256 poolCeiling,
-        uint256 bonusRate,
-        uint256 collateralRedemptionDelay,
-        uint256 deusRedemptionDelay,
-        uint256 mintingFee,
-        uint256 redemptionFee,
-        uint256 buybackFee,
-        uint256 recollatFee,
-        address muon,
-        uint32 appId,
-        uint256 minimumRequiredSignatures
-    );
-    event daoShareCollected(uint256 daoShare, address to);
-    event MintingToggled(bool toggled);
-    event RedeemingToggled(bool toggled);
-    event RecollateralizeToggled(bool toggled);
-    event BuybackToggled(bool toggled);
 }
 
 //Dar panah khoda
