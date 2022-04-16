@@ -458,16 +458,16 @@ contract DEIPool is AccessControl {
         }
     }
 
-    function positionsLength(address user) public view returns(uint256) {
-        return redeemPositions[user].length;
+    function positionsLength(address user) public view returns(uint256 length) {
+        length = redeemPositions[user].length;
     }
 
     function getAllPositions(address user) public  view returns(RedeemPosition[] memory positinos) {
         positinos = redeemPositions[user];
     }
 
-    function currentRedeemId(address user) public view returns(uint256) {
-        return lastRedeemedId[user];
+    function currentRedeemId(address user) public view returns(uint256 redeemId) {
+        redeemId = lastRedeemedId[user];
     }
 
     function getUnRedeemedPositions(address user) public view returns(
