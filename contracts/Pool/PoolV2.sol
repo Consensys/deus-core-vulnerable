@@ -21,11 +21,10 @@ pragma abicoder v2;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "../Uniswap/TransferHelper.sol";
 import "./interfaces/IPoolLibrary.sol";
-import "./interfaces/IMuonV02.sol";
+import "./interfaces/IPoolV2.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/IDEUS.sol";
 import "./interfaces/IDEI.sol";
-import "./interfaces/IPoolV2.sol";
 
 /// @title Minter Pool Contract V2
 /// @author DEUS Finance
@@ -33,8 +32,6 @@ import "./interfaces/IPoolV2.sol";
 /// @dev Uses twap and vwap for DEUS price in DEI redemption by using muon oracles
 ///      Usable for stablecoins as collateral
 contract DEIPool is IDEIPool, AccessControl {
-    
-
     /* ========== STATE VARIABLES ========== */
     address public collateral;
     address private dei;

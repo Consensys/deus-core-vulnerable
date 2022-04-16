@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: MIT
 
 // =================================================================================================================
@@ -32,12 +31,13 @@ interface IDEIPool {
         uint256 amount;
         uint256 timestamp;
     }
-/* ========== PUBLIC VIEWS ========== */
+
+    /* ========== PUBLIC VIEWS ========== */
 
     function collatDollarBalance(uint256 collateralPrice)
-    external
-    view
-    returns (uint256 balance);
+        external
+        view
+        returns (uint256 balance);
 
     function positionsLength(address user)
         external
@@ -45,25 +45,25 @@ interface IDEIPool {
         returns (uint256 length);
 
     function getAllPositions(address user)
-    external
-    view
-    returns (RedeemPosition[] memory positinos);
+        external
+        view
+        returns (RedeemPosition[] memory positinos);
 
     function getUnRedeemedPositions(address user)
-    external
-    view
-    returns (RedeemPosition[] memory positions);
+        external
+        view
+        returns (RedeemPosition[] memory positions);
 
     function mint1t1DEI(uint256 collateralAmount)
         external
         returns (uint256 deiAmount);
 
-        function mintAlgorithmicDEI(
+    function mintAlgorithmicDEI(
         uint256 deusAmount,
         uint256 deusPrice,
         uint256 expireBlock,
         bytes[] calldata sigs
-    ) external  returns (uint256 deiAmount);
+    ) external returns (uint256 deiAmount);
 
     function mintFractionalDEI(
         uint256 collateralAmount,
@@ -74,17 +74,22 @@ interface IDEIPool {
     ) external returns (uint256 mintAmount);
 
     function redeem1t1DEI(uint256 deiAmount) external;
+
     function redeemFractionalDEI(uint256 deiAmount) external;
+
     function redeemAlgorithmicDEI(uint256 deiAmount) external;
+
     function collectCollateral() external;
+
     function collectDeus(
         uint256 price,
         bytes calldata _reqId,
         SchnorrSign[] calldata sigs
     ) external;
+
     function RecollateralizeDei(RecollateralizeDeiParams memory inputs)
         external;
-    
+
     function buyBackDeus(
         uint256 deusAmount,
         uint256[] memory collateralPrice,
@@ -94,19 +99,22 @@ interface IDEIPool {
     ) external;
 
     /* ========== RESTRICTED FUNCTIONS ========== */
-function collectDaoShare(uint256 amount, address to)
-        external;
+    function collectDaoShare(uint256 amount, address to) external;
 
-function emergencyWithdrawERC20(
+    function emergencyWithdrawERC20(
         address token,
         uint256 amount,
         address to
     ) external;
 
     function toggleMinting() external;
+
     function toggleRedeeming() external;
+
     function toggleRecollateralize() external;
+
     function toggleBuyBack() external;
+
     function setPoolParameters(
         uint256 poolCeiling_,
         uint256 bonusRate_,
@@ -120,7 +128,6 @@ function emergencyWithdrawERC20(
         uint32 appId_,
         uint256 minimumRequiredSignatures_
     ) external;
-
 
     /* ========== EVENTS ========== */
 

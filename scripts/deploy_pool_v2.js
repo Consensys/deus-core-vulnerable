@@ -15,7 +15,7 @@ async function main() {
   const poolCeiling = '60000000000000000000000000'
   const appId = '20'
 
-  const library = await deployLibrary({})
+  // const library = await deployLibrary({})
 
   // * deployment
   await deployPool({
@@ -28,7 +28,7 @@ async function main() {
     collateralRedemptionDelay: collateralRedemptionDelay,
     deusRedemptionDelay: deusRedemptionDelay,
     poolCeiling: poolCeiling,
-    libraryAddress: library.address,
+    libraryAddress: '0x219E8c4d2EA039d26647B80c424b1F91B427975F',
     appId: appId,
   })
 
