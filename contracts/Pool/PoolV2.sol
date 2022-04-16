@@ -52,9 +52,9 @@ contract DEIPool is AccessControl {
     address private deus;
 
     uint256 public mintingFee;
-    uint256 public redemptionFee;
-    uint256 public buybackFee;
-    uint256 public recollatFee;
+    uint256 public redemptionFee = 10000;
+    uint256 public buybackFee = 5000;
+    uint256 public recollatFee = 5000;
 
     mapping(address => uint256) public redeemCollateralBalances;
     uint256 public unclaimedPoolCollateral;
@@ -403,7 +403,7 @@ contract DEIPool is AccessControl {
             uint256 deiAmountPostFee = (deiAmount * (SCALE - redemptionFee)) /
                 SCALE;
             uint256 deusDollarAmount = (deiAmountPostFee *
-                (SCALE - globalCollateralRatio)) / globalCollateralRatio;
+                (SCALE - globalCollateralRatio)) / SCALE;
 
             redeemPositions[msg.sender].push(
                 RedeemPosition({
@@ -496,7 +496,7 @@ contract DEIPool is AccessControl {
         uint256 deusAmount = (redeemPositions[msg.sender][redeemId].amount *
             1e18) / price;
 
-        TransferHelper.safeTransfer(deus, msg.sender, deusAmount);
+        IDEUS(deus).pool_mint(msg.sender, deusAmount);
     }
 
     // When the protocol is recollateralizing, we need to give a discount of DEUS to hit the new CR target
