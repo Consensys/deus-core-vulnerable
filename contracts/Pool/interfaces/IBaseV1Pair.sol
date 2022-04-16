@@ -6,10 +6,17 @@ struct Observation {
     uint256 reserve1Cumulative;
 }
 
-interface IBasePairV1 {
+interface IBaseV1Pair {
     function observations(uint256 index)
         external
         view
         returns (Observation calldata);
-    function observationLength() external view returns (uint256)
+
+    function observationLength() external view returns (uint256);
+
+    function token0() external view returns (address);
+
+    function token1() external view returns (address);
+
+    function stable() external view returns (bool);
 }
