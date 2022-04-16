@@ -62,7 +62,7 @@ contract DEIPool is AccessControl {
 
     // position data
     mapping(address => RedeemPosition[]) public redeemPositions;
-    mapping(address => uint256) public lastRedeemedId;
+    mapping(address => uint256) public nextRedeemId;
 
     uint256 public collateralRedemptionDelay;
     uint256 public deusRedemptionDelay;
@@ -189,6 +189,36 @@ contract DEIPool is AccessControl {
         if (globalCollateralValue > requiredCollateralDollarValued18)
             return globalCollateralValue - requiredCollateralDollarValued18;
         else return 0;
+    }
+
+    function positionsLength(address user)
+        public
+        view
+        returns (uint256 length)
+    {
+        length = redeemPositions[user].length;
+    }
+
+    function getAllPositions(address user)
+        public
+        view
+        returns (RedeemPosition[] memory positinos)
+    {
+        positinos = redeemPositions[user];
+    }
+
+    function getUnRedeemedPositions(address user)
+        public
+        view
+        returns (RedeemPosition[] memory positions)
+    {
+        uint256 totalRedeemPositions = redeemPositions[user].length;
+        uint256 redeemId = nextRedeemId[user];
+        uint256 index = 0;
+        for (uint256 i = redeemId; i < totalRedeemPositions; i++) {
+            positions[index] = redeemPositions[user][i];
+            index++;
+        }
     }
 
     function _getChainId() internal view returns (uint256 id) {
@@ -458,27 +488,6 @@ contract DEIPool is AccessControl {
         }
     }
 
-    function positionsLength(address user) public view returns(uint256 length) {
-        length = redeemPositions[user].length;
-    }
-
-    function getAllPositions(address user) public  view returns(RedeemPosition[] memory positinos) {
-        positinos = redeemPositions[user];
-    }
-
-    function currentRedeemId(address user) public view returns(uint256 redeemId) {
-        redeemId = lastRedeemedId[user];
-    }
-
-    function getUnRedeemedPositions(address user) public view returns(
-     RedeemPosition[] memory positions) {
-        uint256 totalRedeemPositions = redeemPositions[user].length;
-        uint256 redeemId = lastRedeemedId[user];
-        for (uint256 i = redeemId; i < totalRedeemPositions ; i ++) {
-            positions[i] = redeemPositions[user][i];
-        }
-    }
-
     function collectDeus(
         uint256 price,
         bytes calldata _reqId,
@@ -489,7 +498,7 @@ contract DEIPool is AccessControl {
             "DEIPool: INSUFFICIENT_SIGNATURES"
         );
 
-        uint256 redeemId = lastRedeemedId[msg.sender]++;
+        uint256 redeemId = nextRedeemId[msg.sender]++;
 
         require(
             redeemPositions[msg.sender][redeemId].timestamp +
