@@ -458,6 +458,17 @@ contract DEIPool is AccessControl {
         }
     }
 
+    
+
+    function getUnRedeemedPositions(address user) public view returns(
+     RedeemPosition[] memory positions) {
+        uint256 totalRedeemPositions = redeemPositions[user].length;
+        uint256 redeemId = lastRedeemedId[user];
+        for (uint256 i = redeemId; i < totalRedeemPositions ; i ++) {
+            positions[i] = redeemPositions[user][i];
+        }
+    }
+
     function collectDeus(
         uint256 price,
         bytes calldata _reqId,
