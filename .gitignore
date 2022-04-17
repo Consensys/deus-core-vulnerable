@@ -1,14 +1,7 @@
 # Hardhat
-src/hardhat/artifacts/*
-src/hardhat/artifacts/*/*
-src/hardhat/artifacts/*/*/*
-src/hardhat/artifacts/*/*/*/*
-src/hardhat/cache/*
-src/hardhat/cache/*/*
-src/hardhat/cache/*/*/*
-src/hardhat/cache/*/*/*/*
-src/hardhat/flatten/*
-src/hardhat/flatten
+artifacts
+cache
+flatten
 
 package-lock.json
 

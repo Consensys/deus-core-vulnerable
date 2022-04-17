@@ -9,7 +9,7 @@ pragma solidity ^0.8.7;
 //  _|    _|  _|        _|    _|  _|            _|            _|_|_|      _|_|_|  _|_|_|      _|_|_|    _|_|       |
 //  _|    _|  _|_|_|    _|    _|    _|_|        _|_|_|    _|  _|    _|  _|    _|  _|    _|  _|        _|_|_|_|     |
 //  _|    _|  _|        _|    _|        _|      _|        _|  _|    _|  _|    _|  _|    _|  _|        _|           |
-//  _|_|_|    _|_|_|_|    _|_|    _|_|_|        _|        _|  _|    _|    _|_|_|  _|    _|    _|_|_|    _|_|_|     | 
+//  _|_|_|    _|_|_|_|    _|_|    _|_|_|        _|        _|  _|    _|    _|_|_|  _|    _|    _|_|_|    _|_|_|     |
 // =================================================================================================================
 // ====================================================================
 // =========================== ReserveTracker =========================
@@ -31,85 +31,91 @@ import "../Uniswap/Interfaces/IUniswapV2Pair.sol";
 import "../Governance/AccessControl.sol";
 
 contract ReserveTracker is AccessControl {
-
-	// Roles
+    // Roles
     bytes32 public constant TRUSTY_ROLE = keccak256("TRUSTY_ROLE");
 
-	// Various precisions
-	uint256 private PRICE_PRECISION = 1e6;
+    // Various precisions
+    uint256 private PRICE_PRECISION = 1e6;
 
-	// Contract addresses
-	address private dei_contract_address;
-	address private deus_contract_address;
+    // Contract addresses
+    address private dei_contract_address;
+    address private deus_contract_address;
 
-	// Array of pairs for DEUS
-	address[] public deus_pairs_array;
+    // Array of pairs for DEUS
+    address[] public deus_pairs_array;
 
-	// Mapping is also used for faster verification
-	mapping(address => bool) public deus_pairs;
+    // Mapping is also used for faster verification
+    mapping(address => bool) public deus_pairs;
 
-	// ========== MODIFIERS ==========
+    // ========== MODIFIERS ==========
 
-	modifier onlyTrusty() {
-		require(hasRole(TRUSTY_ROLE, msg.sender), "Caller is not trusty");
-		_;
-	}
+    modifier onlyTrusty() {
+        require(hasRole(TRUSTY_ROLE, msg.sender), "Caller is not trusty");
+        _;
+    }
 
-	// ========== CONSTRUCTOR ==========
+    // ========== CONSTRUCTOR ==========
 
-	constructor(
-		address _dei_contract_address,
-		address _deus_contract_address
-	) {
-		dei_contract_address = _dei_contract_address;
-		deus_contract_address = _deus_contract_address;
-		_setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-		_setupRole(TRUSTY_ROLE, msg.sender);
-	}
+    constructor(address _dei_contract_address, address _deus_contract_address) {
+        dei_contract_address = _dei_contract_address;
+        deus_contract_address = _deus_contract_address;
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _setupRole(TRUSTY_ROLE, msg.sender);
+    }
 
-	// ========== VIEWS ==========
+    // ========== VIEWS ==========
 
-	function getDEUSReserves() public view returns (uint256) {
-		uint256 total_deus_reserves = 0;
+    function getDEUSReserves() public view returns (uint256) {
+        uint256 total_deus_reserves = 0;
 
-		for (uint i = 0; i < deus_pairs_array.length; i++){ 
-			// Exclude null addresses
-			if (deus_pairs_array[i] != address(0)){
-				if(IUniswapV2Pair(deus_pairs_array[i]).token0() == deus_contract_address) {
-					(uint reserves0, , ) = IUniswapV2Pair(deus_pairs_array[i]).getReserves();
-					total_deus_reserves = total_deus_reserves + reserves0;
-				} else if (IUniswapV2Pair(deus_pairs_array[i]).token1() == deus_contract_address) {
-					( , uint reserves1, ) = IUniswapV2Pair(deus_pairs_array[i]).getReserves();
-					total_deus_reserves = total_deus_reserves + reserves1;
-				}
-			}
-		}
+        for (uint256 i = 0; i < deus_pairs_array.length; i++) {
+            // Exclude null addresses
+            if (deus_pairs_array[i] != address(0)) {
+                if (
+                    IUniswapV2Pair(deus_pairs_array[i]).token0() ==
+                    deus_contract_address
+                ) {
+                    (uint256 reserves0, , ) = IUniswapV2Pair(
+                        deus_pairs_array[i]
+                    ).getReserves();
+                    total_deus_reserves = total_deus_reserves + reserves0;
+                } else if (
+                    IUniswapV2Pair(deus_pairs_array[i]).token1() ==
+                    deus_contract_address
+                ) {
+                    (, uint256 reserves1, ) = IUniswapV2Pair(
+                        deus_pairs_array[i]
+                    ).getReserves();
+                    total_deus_reserves = total_deus_reserves + reserves1;
+                }
+            }
+        }
 
-		return total_deus_reserves;
-	}
+        return total_deus_reserves;
+    }
 
-	// Adds collateral addresses supported, such as tether and busd, must be ERC20 
-	function addDEUSPair(address pair_address) public onlyTrusty {
-		require(deus_pairs[pair_address] == false, "Address already exists");
-		deus_pairs[pair_address] = true; 
-		deus_pairs_array.push(pair_address);
-	}
+    // Adds collateral addresses supported, such as tether and busd, must be ERC20
+    function addDEUSPair(address pair_address) public onlyTrusty {
+        require(deus_pairs[pair_address] == false, "Address already exists");
+        deus_pairs[pair_address] = true;
+        deus_pairs_array.push(pair_address);
+    }
 
-	// Remove a pool 
-	function removeDEUSPair(address pair_address) public onlyTrusty {
-		require(deus_pairs[pair_address] == true, "Address nonexistant");
-		
-		// Delete from the mapping
-		delete deus_pairs[pair_address];
+    // Remove a pool
+    function removeDEUSPair(address pair_address) public onlyTrusty {
+        require(deus_pairs[pair_address] == true, "Address nonexistant");
 
-		// 'Delete' from the array by setting the address to 0x0
-		for (uint i = 0; i < deus_pairs_array.length; i++){ 
-			if (deus_pairs_array[i] == pair_address) {
-				deus_pairs_array[i] = address(0); // This will leave a null in the array and keep the indices the same
-				break;
-			}
-		}
-	}
+        // Delete from the mapping
+        delete deus_pairs[pair_address];
+
+        // 'Delete' from the array by setting the address to 0x0
+        for (uint256 i = 0; i < deus_pairs_array.length; i++) {
+            if (deus_pairs_array[i] == pair_address) {
+                deus_pairs_array[i] = address(0); // This will leave a null in the array and keep the indices the same
+                break;
+            }
+        }
+    }
 }
 
 //Dar panah khoda
