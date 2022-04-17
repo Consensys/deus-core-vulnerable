@@ -280,12 +280,12 @@ contract DEIPool is AccessControl {
 		bytes32 sighash = keccak256(abi.encodePacked(collateral_address, collateral_price, deus_contract_address, deus_current_price, expireBlock, getChainID()));
 		require(IDEIStablecoin(dei_contract_address).verify_price(sighash, sigs), "POOL::mintFractionalDEI: invalid signatures");
 
-		DEIPoolLibrary.MintFD_Params memory input_params;
+		DEIPoolLibrary.MintFractionalDeiParams memory input_params;
 
 		// Blocking is just for solving stack depth problem
 		{
 			uint256 collateral_amount_d18 = collateral_amount * (10**missing_decimals);
-			input_params = DEIPoolLibrary.MintFD_Params(
+			input_params = DEIPoolLibrary.MintFractionalDeiParams(
 											deus_current_price,
 											collateral_price,
 											collateral_amount_d18,
@@ -537,7 +537,7 @@ contract DEIPool is AccessControl {
 										getChainID()));
 		require(IDEIStablecoin(dei_contract_address).verify_price(sighash, sigs), "POOL::buyBackDEUS: invalid signatures");
 
-		DEIPoolLibrary.BuybackDEUS_Params memory input_params = DEIPoolLibrary.BuybackDEUS_Params(
+		DEIPoolLibrary.BuybackDeusParams memory input_params = DEIPoolLibrary.BuybackDeusParams(
 													availableExcessCollatDV(collateral_price),
 													deus_current_price,
 													collateral_price[collateral_price.length - 1], // pool collateral price exist in last index
