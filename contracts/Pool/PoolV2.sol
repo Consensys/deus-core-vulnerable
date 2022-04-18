@@ -188,16 +188,18 @@ contract DEIPool is IDEIPool, AccessControl {
     function getAllPositions(address user)
         external
         view
-        returns (RedeemPosition[] memory positinos)
+        returns (RedeemPosition[] memory positions)
     {
-        positinos = redeemPositions[user];
+        positions = redeemPositions[user];
     }
 
     function getUnRedeemedPositions(address user)
         external
         view
-        returns (RedeemPosition[] memory positions)
+        returns (RedeemPosition[] memory)
     {
+        RedeemPosition[] memory positions = new RedeemPosition[](redeemPositions[user].length);
+
         uint256 totalRedeemPositions = redeemPositions[user].length;
         uint256 redeemId = nextRedeemId[user];
         uint256 index = 0;
@@ -205,6 +207,8 @@ contract DEIPool is IDEIPool, AccessControl {
             positions[index] = redeemPositions[user][i];
             index++;
         }
+
+        return positions;
     }
 
     function _getChainId() internal view returns (uint256 id) {
