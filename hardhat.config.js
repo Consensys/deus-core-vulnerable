@@ -3,17 +3,11 @@ const envPath = path.join(__dirname, './.env')
 require('dotenv').config({ path: envPath })
 
 require('hardhat-deploy')
-require('hardhat-contract-sizer')
 require('@nomiclabs/hardhat-waffle')
-require('@nomiclabs/hardhat-truffle5')
 require('@nomiclabs/hardhat-web3')
 require('@nomiclabs/hardhat-etherscan')
-require('@openzeppelin/hardhat-upgrades')
 // require("@nomiclabs/hardhat-vyper");
 
-/**
- * @type import('hardhat/config').HardhatUserConfig
- */
 module.exports = {
   defaultNetwork: 'hardhat',
   networks: {
@@ -123,7 +117,7 @@ module.exports = {
       ],
       chainId: 137,
       gas: 'auto',
-      gasPrice: 36100000000,
+      gasPrice: 45100000000,
       gasMultiplier: 1.2,
     },
     fantom: {
@@ -340,12 +334,47 @@ module.exports = {
     timeout: 360000,
   },
   etherscan: {
-    // apiKey: process.env.ETHERSCAN_API_KEY, // ETH Mainnet
-    apiKey: process.env.FANTOM_API_KEY, // FANTOM Mainnet
-    // apiKey: process.env.POLYGON_API_KEY, // Polygon
-    // apiKey: process.env.HECO_API_KEY, // HECO Mainnet
-    // apiKey: process.env.BSCSCAN_API_KEY // BSC
-    // apiKey: process.env.ARBISCAN_API_KEY, // Arbitrum
+    apiKey: {
+      mainnet: process.env.ETHERSCAN_API_KEY,
+      ropsten: process.env.ETHERSCAN_API_KEY,
+      rinkeby: process.env.ETHERSCAN_API_KEY,
+      goerli: process.env.ETHERSCAN_API_KEY,
+      kovan: process.env.ETHERSCAN_API_KEY,
+      // binance smart chain
+      bsc: process.env.BSCSCAN_API_KEY,
+      bscTestnet: process.env.BSCSCAN_API_KEY,
+      // huobi eco chain
+      heco: 'YOUR_HECOINFO_API_KEY',
+      hecoTestnet: 'YOUR_HECOINFO_API_KEY',
+      // fantom mainnet
+      opera: process.env.FANTOM_API_KEY,
+      ftmTestnet: process.env.FANTOM_API_KEY,
+      // optimism
+      optimisticEthereum: 'YOUR_OPTIMISTIC_ETHERSCAN_API_KEY',
+      optimisticKovan: 'YOUR_OPTIMISTIC_ETHERSCAN_API_KEY',
+      // polygon
+      polygon: process.env.POLYGON_API_KEY,
+      polygonMumbai: process.env.POLYGON_API_KEY,
+      // arbitrum
+      arbitrumOne: 'YOUR_ARBISCAN_API_KEY',
+      arbitrumTestnet: 'YOUR_ARBISCAN_API_KEY',
+      // avalanche
+      avalanche: 'YOUR_SNOWTRACE_API_KEY',
+      avalancheFujiTestnet: 'YOUR_SNOWTRACE_API_KEY',
+      // moonbeam
+      moonbeam: 'YOUR_MOONBEAM_MOONSCAN_API_KEY',
+      moonriver: 'YOUR_MOONRIVER_MOONSCAN_API_KEY',
+      moonbaseAlpha: 'YOUR_MOONBEAM_MOONSCAN_API_KEY',
+      // harmony
+      harmony: 'YOUR_HARMONY_API_KEY',
+      harmonyTest: 'YOUR_HARMONY_API_KEY',
+      // xdai and sokol don't need an API key, but you still need
+      // to specify one; any string placeholder will work
+      xdai: 'api-key',
+      sokol: 'api-key',
+      aurora: 'api-key',
+      auroraTestnet: 'api-key',
+    },
   },
   contractSizer: {
     alphaSort: true,
