@@ -1,4 +1,5 @@
 // Be name Khoda
+// Bime Abolfazl
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 pragma solidity 0.8.13;
@@ -198,10 +199,12 @@ contract DEIPool is IDEIPool, AccessControl {
         view
         returns (RedeemPosition[] memory)
     {
-        RedeemPosition[] memory positions = new RedeemPosition[](redeemPositions[user].length);
-
         uint256 totalRedeemPositions = redeemPositions[user].length;
         uint256 redeemId = nextRedeemId[user];
+
+        RedeemPosition[] memory positions = new RedeemPosition[](
+            totalRedeemPositions - redeemId + 1
+        );
         uint256 index = 0;
         for (uint256 i = redeemId; i < totalRedeemPositions; i++) {
             positions[index] = redeemPositions[user][i];
