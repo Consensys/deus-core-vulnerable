@@ -61,7 +61,7 @@ module.exports = {
       ],
       chainId: 1,
       gas: 'auto',
-      gasPrice: 77100000000,
+      gasPrice: 22000000000,
       gasMultiplier: 1.2,
     },
     heco: {
@@ -356,8 +356,8 @@ module.exports = {
       polygon: process.env.POLYGON_API_KEY,
       polygonMumbai: process.env.POLYGON_API_KEY,
       // arbitrum
-      arbitrumOne: 'YOUR_ARBISCAN_API_KEY',
-      arbitrumTestnet: 'YOUR_ARBISCAN_API_KEY',
+      arbitrumOne: process.env.ARBISCAN_API_KEY,
+      arbitrumTestnet: process.env.ARBISCAN_API_KEY,
       // avalanche
       avalanche: 'YOUR_SNOWTRACE_API_KEY',
       avalancheFujiTestnet: 'YOUR_SNOWTRACE_API_KEY',

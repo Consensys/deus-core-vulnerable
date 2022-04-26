@@ -23,6 +23,12 @@ let config = {
     adminAddress: '0xE5227F141575DcE74721f4A9bE2D7D636F923044',
     poolCeiling: '5000000000000000000000000',
   },
+  arbitrum: {
+    collateralAddress: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',
+    muonAddress: '0x08654C8f419b29840A2ec6522Ad2Ed99ab850ee1',
+    adminAddress: '0xE5227F141575DcE74721f4A9bE2D7D636F923044',
+    poolCeiling: '1000000000000',
+  },
 }
 
 module.exports = {

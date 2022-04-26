@@ -13,7 +13,8 @@ async function main() {
   const deusRedemptionDelay = 8 * 60 * 60
   const appId = '20'
 
-  const library = await deployLibrary({})
+  // const library = await deployLibrary({})
+  const libraryAddress = '0x70De3200eFF47A1Ee1FC9A6B588799533cC5f49c'
 
   await new Promise((resolve) => setTimeout(resolve, 10000))
   const conf = config[hre.network.name]
@@ -28,7 +29,8 @@ async function main() {
     collateralRedemptionDelay: collateralRedemptionDelay,
     deusRedemptionDelay: deusRedemptionDelay,
     poolCeiling: conf.poolCeiling,
-    libraryAddress: library.address,
+    // libraryAddress: library.address,
+    libraryAddress: libraryAddress,
     appId: appId,
   })
 
