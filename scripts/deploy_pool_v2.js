@@ -14,7 +14,7 @@ async function main() {
   const appId = '20'
 
   // const library = await deployLibrary({})
-  const libraryAddress = '0x70De3200eFF47A1Ee1FC9A6B588799533cC5f49c'
+  const libraryAddress = '0x219E8c4d2EA039d26647B80c424b1F91B427975F'
 
   await new Promise((resolve) => setTimeout(resolve, 10000))
   const conf = config[hre.network.name]

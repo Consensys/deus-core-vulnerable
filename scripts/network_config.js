@@ -1,4 +1,10 @@
 let config = {
+  fantom: {
+    collateralAddress: '0x04068DA6C83AFCFA0e13ba15A6696662335D5B75',
+    muonAddress: '0xe4f8d9a30936a6f8b17a73dc6feb51a3bbabd51a',
+    adminAddress: '0xE5227F141575DcE74721f4A9bE2D7D636F923044',
+    poolCeiling: '60000000000000',
+  },
   polygon: {
     collateralAddress: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
     muonAddress: '0xe4f8d9a30936a6f8b17a73dc6feb51a3bbabd51a',
