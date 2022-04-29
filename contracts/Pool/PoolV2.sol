@@ -270,7 +270,7 @@ contract DEIPool is IDEIPool, AccessControl {
     ) external notMintPaused returns (uint256 deiAmount) {
         uint256 globalCollateralRatio = IDEI(dei).global_collateral_ratio();
         require(
-            IDEI(dei).global_collateral_ratio() == 0,
+            globalCollateralRatio == 0,
             "DEIPool: INVALID_COLLATERAL_RATIO"
         );
         require(expireBlock >= block.number, "DEIPool: EXPIRED_SIGNATURE");
