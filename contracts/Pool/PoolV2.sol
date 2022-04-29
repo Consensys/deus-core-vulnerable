@@ -228,8 +228,9 @@ contract DEIPool is IDEIPool, AccessControl {
         notMintPaused
         returns (uint256 deiAmount)
     {
+        uint256 globalCollateralRatio = IDEI(dei).global_collateral_ratio();
         require(
-            IDEI(dei).global_collateral_ratio() >= COLLATERAL_RATIO_MAX,
+            globalCollateralRatio >= COLLATERAL_RATIO_MAX,
             "DEIPool: INVALID_COLLATERAL_RATIO"
         );
         require(
@@ -257,6 +258,7 @@ contract DEIPool is IDEIPool, AccessControl {
 
         daoShare += (deiAmount * mintingFee) / SCALE;
         IDEI(dei).pool_mint(msg.sender, deiAmount);
+        emit Mint(msg.sender, deiAmount, globalCollateralRatio);
     }
 
     // 0% collateral-backed
@@ -266,6 +268,7 @@ contract DEIPool is IDEIPool, AccessControl {
         uint256 expireBlock,
         bytes[] calldata sigs
     ) external notMintPaused returns (uint256 deiAmount) {
+        uint256 globalCollateralRatio = IDEI(dei).global_collateral_ratio();
         require(
             IDEI(dei).global_collateral_ratio() == 0,
             "DEIPool: INVALID_COLLATERAL_RATIO"
@@ -289,6 +292,7 @@ contract DEIPool is IDEIPool, AccessControl {
 
         IDEUS(deus).pool_burn_from(msg.sender, deusAmount);
         IDEI(dei).pool_mint(msg.sender, deiAmount);
+        emit Mint(msg.sender, deiAmount, globalCollateralRatio);
     }
 
     // Will fail if fully collateralized or fully algorithmic
@@ -355,12 +359,14 @@ contract DEIPool is IDEIPool, AccessControl {
 
         daoShare += (mintAmount * mintingFee) / SCALE;
         IDEI(dei).pool_mint(msg.sender, mintAmount);
+        emit Mint(msg.sender, mintAmount, globalCollateralRatio);
     }
 
     // Redeem collateral. 100% collateral-backed
     function redeem1t1DEI(uint256 deiAmount) external notRedeemPaused {
+        uint256 globalCollateralRatio = IDEI(dei).global_collateral_ratio();
         require(
-            IDEI(dei).global_collateral_ratio() == COLLATERAL_RATIO_MAX,
+            globalCollateralRatio == COLLATERAL_RATIO_MAX,
             "DEIPool: INVALID_COLLATERAL_RATIO"
         );
 
@@ -388,6 +394,7 @@ contract DEIPool is IDEIPool, AccessControl {
         daoShare += (deiAmount * redemptionFee) / SCALE;
         // Move all external functions to the end
         IDEI(dei).pool_burn_from(msg.sender, deiAmount);
+        emit Redeem(msg.sender, deiAmount, globalCollateralRatio);
     }
 
     // Will fail if fully collateralized or algorithmic
@@ -439,12 +446,14 @@ contract DEIPool is IDEIPool, AccessControl {
         daoShare += (deiAmount * redemptionFee) / SCALE;
 
         IDEI(dei).pool_burn_from(msg.sender, deiAmount);
+        emit Redeem(msg.sender, deiAmount, globalCollateralRatio);
     }
 
     // Redeem DEI for DEUS. 0% collateral-backed
     function redeemAlgorithmicDEI(uint256 deiAmount) external notRedeemPaused {
+        uint256 globalCollateralRatio = IDEI(dei).global_collateral_ratio();
         require(
-            IDEI(dei).global_collateral_ratio() == 0,
+            globalCollateralRatio == 0,
             "DEIPool: INVALID_COLLATERAL_RATIO"
         );
 
@@ -458,6 +467,7 @@ contract DEIPool is IDEIPool, AccessControl {
         );
         daoShare += (deiAmount * redemptionFee) / SCALE;
         IDEI(dei).pool_burn_from(msg.sender, deiAmount);
+        emit Redeem(msg.sender, deiAmount, globalCollateralRatio);
     }
 
     function collectCollateral() external {
@@ -478,6 +488,8 @@ contract DEIPool is IDEIPool, AccessControl {
             unclaimedPoolCollateral =
                 unclaimedPoolCollateral -
                 collateralAmount;
+
+            emit CollectCollateral(collateralAmount, msg.sender);
         }
     }
 
@@ -520,6 +532,7 @@ contract DEIPool is IDEIPool, AccessControl {
             1e18) / price;
 
         IDEUS(deus).pool_mint(msg.sender, deusAmount);
+        emit CollectDeus(deusAmount, msg.sender, redeemId);
     }
 
     // When the protocol is recollateralizing, we need to give a discount of DEUS to hit the new CR target
@@ -644,7 +657,7 @@ contract DEIPool is IDEIPool, AccessControl {
         IDEI(dei).pool_mint(to, amount);
         daoShare -= amount;
 
-        emit daoShareCollected(amount, to);
+        emit CollectDaoShare(amount, to);
     }
 
     function emergencyWithdrawERC20(
@@ -657,22 +670,22 @@ contract DEIPool is IDEIPool, AccessControl {
 
     function toggleMinting() external onlyRole(PAUSER_ROLE) {
         mintPaused = !mintPaused;
-        emit MintingToggled(mintPaused);
+        emit ToggleMinting(mintPaused);
     }
 
     function toggleRedeeming() external onlyRole(PAUSER_ROLE) {
         redeemPaused = !redeemPaused;
-        emit RedeemingToggled(redeemPaused);
+        emit ToggleRedeeming(redeemPaused);
     }
 
     function toggleRecollateralize() external onlyRole(PAUSER_ROLE) {
         recollateralizePaused = !recollateralizePaused;
-        emit RecollateralizeToggled(recollateralizePaused);
+        emit ToggleRecollateralize(recollateralizePaused);
     }
 
     function toggleBuyBack() external onlyRole(PAUSER_ROLE) {
         buyBackPaused = !buyBackPaused;
-        emit BuybackToggled(buyBackPaused);
+        emit ToggleBuyback(buyBackPaused);
     }
 
     // Combined into one function due to 24KiB contract memory limit

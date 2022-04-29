@@ -144,9 +144,13 @@ interface IDEIPool {
         uint32 appId,
         uint256 minimumRequiredSignatures
     );
-    event daoShareCollected(uint256 daoShare, address to);
-    event MintingToggled(bool toggled);
-    event RedeemingToggled(bool toggled);
-    event RecollateralizeToggled(bool toggled);
-    event BuybackToggled(bool toggled);
+    event CollectDaoShare(uint256 daoShare, address to);
+    event ToggleMinting(bool toggled);
+    event ToggleRedeeming(bool toggled);
+    event ToggleRecollateralize(bool toggled);
+    event ToggleBuyback(bool toggled);
+    event CollectCollateral(uint256 amount, address to);
+    event CollectDeus(uint256 amount, address to, uint256 redeemId);
+    event Redeem(address user, uint256 amount, uint256 globalCollateralRatio);
+    event Mint(address user, uint256 amount, uint256 globalCollateralRatio);
 }
