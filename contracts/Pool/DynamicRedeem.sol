@@ -78,7 +78,12 @@ contract DynamicRedeem is IDynamicRedeem, AccessControl {
     uint32 public appId;
     uint256 minimumRequiredSignatures;
 
-    address[] lenders = [0x8D643d954798392403eeA19dB8108f595bB8B730, 0x118FF56bb12E5E0EfC14454B8D7Fa6009487D64E];
+    address[] public lenders = [
+        0x8D643d954798392403eeA19dB8108f595bB8B730,
+        0x118FF56bb12E5E0EfC14454B8D7Fa6009487D64E
+    ];
+    address[] public wallets;
+    address public scDei = 0x68C102aBA11f5e086C999D99620C78F5Bc30eCD8;
 
     // AccessControl Roles
     bytes32 public constant PARAMETER_SETTER_ROLE =
@@ -116,7 +121,6 @@ contract DynamicRedeem is IDynamicRedeem, AccessControl {
         address admin,
         uint256 minimumRequiredSignatures_,
         uint256 collateralRedemptionDelay_,
-        uint256 deusRedemptionDelay_,
         uint256 poolCeiling_,
         uint32 appId_
     ) {
@@ -135,7 +139,7 @@ contract DynamicRedeem is IDynamicRedeem, AccessControl {
         appId = appId_;
         minimumRequiredSignatures = minimumRequiredSignatures_;
         collateralRedemptionDelay = collateralRedemptionDelay_;
-        deusRedemptionDelay = deusRedemptionDelay_;
+        deusRedemptionDelay = type(uint256).max;
         poolCeiling = poolCeiling_;
         poolLibrary = library_;
         missingDecimals = uint256(18) - IERC20(collateral).decimals();
@@ -196,13 +200,25 @@ contract DynamicRedeem is IDynamicRedeem, AccessControl {
     }
 
     function getCirculatingSupply() public view returns (uint256) {
-        uint overCollateralizedDei;
-        uint excessAmount;
-        for(uint i; i < lenders.length; i++) {
+        uint256 overCollateralizedDei;
+        uint256 excessAmount;
+        for (uint256 i; i < lenders.length; i++) {
             (excessAmount, ) = ILender(lenders[i]).totalBorrow();
             overCollateralizedDei += excessAmount;
         }
-        return IERC20(collateral).totalSupply() - overCollateralizedDei; 
+
+        uint256 scDeiBalance = IERC20(dei).balanceOf(scDei);
+
+        uint256 daoWalletsBalance;
+        for (uint256 i; i < wallets.length; i++) {
+            daoWalletsBalance += IERC20(dei).balanceOf(wallets[i]);
+        }
+
+        return
+            IERC20(collateral).totalSupply() -
+            overCollateralizedDei -
+            scDeiBalance -
+            daoWalletsBalance;
     }
 
     function getCollateralRatio() public view returns (uint256) {
@@ -327,6 +343,15 @@ contract DynamicRedeem is IDynamicRedeem, AccessControl {
     }
 
     /* ========== RESTRICTED FUNCTIONS ========== */
+
+    function addWallet(address[] memory wallets_)
+        external
+        onlyRole(TRUSTY_ROLE)
+    {
+        for (uint256 i; i < wallets_.length; i++) {
+            wallets.push(wallets_[i]);
+        }
+    }
 
     function collectDaoShare(uint256 amount, address to)
         external
