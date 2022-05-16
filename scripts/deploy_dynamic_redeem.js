@@ -1,5 +1,5 @@
 const deployLibrary = require('./deploy_contracts/deploy_dei_pool_library.js')
-const deployDynamicRedeem = require('./deploy_contracts/deploy_pool.js')
+const deployDynamicRedeem = require('./deploy_contracts/deploy_dynamic_redeem.js')
 const { verifyAll } = require('./helpers/deploy_contract.js')
 const { config } = require('./network_config.js')
 const hre = require('hardhat')
@@ -27,9 +27,7 @@ async function main() {
     adminAddress: conf.adminAddress,
     minimumRequiredSignatures: minimumRequiredSignatures,
     collateralRedemptionDelay: collateralRedemptionDelay,
-    deusRedemptionDelay: deusRedemptionDelay,
     poolCeiling: conf.poolCeiling,
-    // libraryAddress: library.address,
     libraryAddress: libraryAddress,
     appId: appId,
   })
