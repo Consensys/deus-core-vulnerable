@@ -36,9 +36,25 @@ async function transfer(tokenAddress, fromAddress, toAddress, amount) {
     await token.transfer(toAddress, amount)
 }
 
+async function swapETH(signer, uniswapAddress, amount, path) {
+    const Uniswap = await hre.ethers.getContractFactory('UniswapV2Router02', signer)
+    const uniswap = await Uniswap.attach(uniswapAddress);
+
+    return uniswap.swapExactETHForTokens(
+        BigInt(0),
+        path,
+        signer.address,
+        BigInt(1e18),
+        {
+            value: amount
+        }
+    )
+}
+
 module.exports = {
     impersonate,
     transfer,
     getBalanceOf,
     setBalance,
+    swapETH
 }

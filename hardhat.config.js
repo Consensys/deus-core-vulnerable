@@ -190,6 +190,12 @@ module.exports = {
       gasPrice: 'auto',
       gasMultiplier: 1.2,
     },
+    localhost: {
+      url: 'http://127.0.0.1:8547/',
+      accounts: [
+        process.env.MAIN_DEPLOYER_PRIVATE_KEY,
+      ]
+    },
     localhostOptimism: {
       url: 'http://127.0.0.1:8547/',
       accounts: [

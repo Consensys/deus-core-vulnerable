@@ -10,7 +10,7 @@ async function main() {
   const deusAddress = '0xde5ed76e7c05ec5e4572cfc88d1acea165109e44'
   const minimumRequiredSignatures = 1
   const collateralRedemptionDelay = 30
-  const deusRedemptionDelay = 8 * 60 * 60
+  // const deusRedemptionDelay = 8 * 60 * 60
   const appId = '20'
 
   // const library = await deployLibrary({})

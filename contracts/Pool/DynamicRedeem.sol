@@ -215,7 +215,7 @@ contract DynamicRedeem is IDynamicRedeem, AccessControl {
         }
 
         return
-            IERC20(collateral).totalSupply() -
+            IERC20(dei).totalSupply() -
             overCollateralizedDei -
             scDeiBalance -
             daoWalletsBalance;
