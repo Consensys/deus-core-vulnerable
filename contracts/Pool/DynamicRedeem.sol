@@ -85,6 +85,9 @@ contract DynamicRedeem is IDynamicRedeem, AccessControl {
     address[] public wallets;
     address public scDei = 0x68C102aBA11f5e086C999D99620C78F5Bc30eCD8;
 
+    uint256 public staticCollateralRatio;
+    bool public isDynamic;
+
     // AccessControl Roles
     bytes32 public constant PARAMETER_SETTER_ROLE =
         keccak256("PARAMETER_SETTER_ROLE");
@@ -144,6 +147,7 @@ contract DynamicRedeem is IDynamicRedeem, AccessControl {
         poolLibrary = library_;
         missingDecimals = uint256(18) - IERC20(collateral).decimals();
 
+        isDynamic = true;
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
@@ -232,7 +236,9 @@ contract DynamicRedeem is IDynamicRedeem, AccessControl {
     // Will fail if fully collateralized or algorithmic
     // Redeem DEI for collateral and DEUS. > 0% and < 100% collateral-backed
     function redeemFractionalDEI(uint256 deiAmount) external notRedeemPaused {
-        uint256 globalCollateralRatio = getCollateralRatio();
+        uint256 globalCollateralRatio = isDynamic
+            ? getCollateralRatio()
+            : staticCollateralRatio;
         require(
             globalCollateralRatio < COLLATERAL_RATIO_MAX &&
                 globalCollateralRatio > 0,
@@ -378,7 +384,22 @@ contract DynamicRedeem is IDynamicRedeem, AccessControl {
         emit ToggleRedeeming(redeemPaused);
     }
 
-    // Combined into one function due to 24KiB contract memory limit
+    function setStaticCollateralRatio(uint256 staticCollateralRatio_)
+        external
+        onlyRole(PARAMETER_SETTER_ROLE)
+    {
+        emit SetStaticCollateralRatio(
+            staticCollateralRatio,
+            staticCollateralRatio_
+        );
+        staticCollateralRatio = staticCollateralRatio_;
+    }
+
+    function toggleIsDynamic() external onlyRole(PARAMETER_SETTER_ROLE) {
+        isDynamic = !isDynamic;
+        emit ToggleIsDynamic(isDynamic);
+    }
+
     function setPoolParameters(
         uint256 poolCeiling_,
         uint256 collateralRedemptionDelay_,

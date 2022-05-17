@@ -18,7 +18,6 @@
 import "./IMuonV02.sol";
 
 interface IDynamicRedeem {
-
     struct RedeemPosition {
         uint256 amount;
         uint256 timestamp;
@@ -46,8 +45,6 @@ interface IDynamicRedeem {
         view
         returns (RedeemPosition[] memory positions);
 
-
-
     function redeemFractionalDEI(uint256 deiAmount) external;
 
     function collectCollateral() external;
@@ -69,6 +66,7 @@ interface IDynamicRedeem {
 
     function toggleRedeeming() external;
 
+    function toggleIsDynamic() external;
 
     function setPoolParameters(
         uint256 poolCeiling_,
@@ -82,6 +80,8 @@ interface IDynamicRedeem {
 
     /* ========== EVENTS ========== */
 
+    event ToggleIsDynamic(bool isDynamic);
+    event SetStaticCollateralRatio(uint256 oldRatio, uint256 newRatio);
     event PoolParametersSet(
         uint256 poolCeiling,
         uint256 collateralRedemptionDelay,
