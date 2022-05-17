@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 pragma solidity 0.8.13;
-pragma abicoder v2;
 
 // =================================================================================================================
 //  _|_|_|    _|_|_|_|  _|    _|    _|_|_|      _|_|_|_|  _|                                                       |
@@ -27,22 +26,15 @@ import "./interfaces/IDEUS.sol";
 import "./interfaces/IDEI.sol";
 import "./interfaces/ILender.sol";
 
-/// @title Minter Pool Contract V2
+/// @title Dynamic/Static Redeem contact
 /// @author DEUS Finance
-/// @notice Minter pool of DEI stablecoin
-/// @dev Uses twap and vwap for DEUS price in DEI redemption by using muon oracles
-///      Usable for stablecoins as collateral
+/// @notice Dynamic or Static Ratio Redeem of DEI
 contract DynamicRedeem is IDynamicRedeem, AccessControl {
     /* ========== STATE VARIABLES ========== */
     address public collateral;
     address private dei;
     address private deus;
-
-    uint256 public mintingFee;
     uint256 public redemptionFee = 10000;
-    uint256 public buybackFee = 5000;
-    uint256 public recollatFee = 5000;
-
     mapping(address => uint256) public redeemCollateralBalances;
     uint256 public unclaimedPoolCollateral;
     mapping(address => uint256) public lastCollateralRedeemed;
@@ -64,12 +56,6 @@ contract DynamicRedeem is IDynamicRedeem, AccessControl {
     // Number of decimals needed to get to 18
     uint256 private immutable missingDecimals;
 
-    // Pool_ceiling is the total units of collateral that a pool contract can hold
-    uint256 public poolCeiling;
-
-    // Bonus rate on DEUS minted during RecollateralizeDei(); 6 decimals of precision, set to 0.75% on genesis
-    uint256 public bonusRate = 7500;
-
     uint256 public daoShare = 0; // fees goes to daoWallet
 
     address public poolLibrary; // Pool library contract
@@ -82,9 +68,10 @@ contract DynamicRedeem is IDynamicRedeem, AccessControl {
         0x8D643d954798392403eeA19dB8108f595bB8B730,
         0x118FF56bb12E5E0EfC14454B8D7Fa6009487D64E
     ];
-    address[] public wallets;
-    address public scDei = 0x68C102aBA11f5e086C999D99620C78F5Bc30eCD8;
-    address public ohmBond = 0xC481571F724Bf3db59485b66702380E8eE342108;
+    address[] public wallets = [
+        0x68C102aBA11f5e086C999D99620C78F5Bc30eCD8, // scDEI
+        0xC481571F724Bf3db59485b66702380E8eE342108 // ohm Bond
+    ];
 
     uint256 public staticCollateralRatio;
     bool public isDynamic;
@@ -98,19 +85,11 @@ contract DynamicRedeem is IDynamicRedeem, AccessControl {
     bytes32 public constant TRUSTY_ROLE = keccak256("TRUSTY_ROLE");
 
     // AccessControl state variables
-    bool public mintPaused = false;
     bool public redeemPaused = false;
-    bool public recollateralizePaused = false;
-    bool public buyBackPaused = false;
 
     /* ========== MODIFIERS ========== */
     modifier notRedeemPaused() {
         require(redeemPaused == false, "DEIPool: REDEEM_PAUSED");
-        _;
-    }
-
-    modifier notMintPaused() {
-        require(mintPaused == false, "DEIPool: MINTING_PAUSED");
         _;
     }
 
@@ -125,7 +104,6 @@ contract DynamicRedeem is IDynamicRedeem, AccessControl {
         address admin,
         uint256 minimumRequiredSignatures_,
         uint256 collateralRedemptionDelay_,
-        uint256 poolCeiling_,
         uint32 appId_
     ) {
         require(
@@ -144,7 +122,6 @@ contract DynamicRedeem is IDynamicRedeem, AccessControl {
         minimumRequiredSignatures = minimumRequiredSignatures_;
         collateralRedemptionDelay = collateralRedemptionDelay_;
         deusRedemptionDelay = type(uint256).max;
-        poolCeiling = poolCeiling_;
         poolLibrary = library_;
         missingDecimals = uint256(18) - IERC20(collateral).decimals();
 
@@ -211,20 +188,15 @@ contract DynamicRedeem is IDynamicRedeem, AccessControl {
             overCollateralizedDei += excessAmount;
         }
 
-        uint256 scDeiBalance = IERC20(dei).balanceOf(scDei);
-        uint256 ohmBalance = IERC20(dei).balanceOf(ohmBond);
-
-        uint256 daoWalletsBalance;
+        uint256 whitelistWalletsBalance;
         for (uint256 i; i < wallets.length; i++) {
-            daoWalletsBalance += IERC20(dei).balanceOf(wallets[i]);
+            whitelistWalletsBalance += IERC20(dei).balanceOf(wallets[i]);
         }
 
         return
             IERC20(dei).totalSupply() -
             overCollateralizedDei -
-            scDeiBalance -
-            ohmBalance -
-            daoWalletsBalance;
+            whitelistWalletsBalance;
     }
 
     function getCollateralRatio() public view returns (uint256) {
@@ -408,7 +380,6 @@ contract DynamicRedeem is IDynamicRedeem, AccessControl {
     }
 
     function setPoolParameters(
-        uint256 poolCeiling_,
         uint256 collateralRedemptionDelay_,
         uint256 deusRedemptionDelay_,
         uint256 redemptionFee_,
@@ -416,7 +387,6 @@ contract DynamicRedeem is IDynamicRedeem, AccessControl {
         uint32 appId_,
         uint256 minimumRequiredSignatures_
     ) external onlyRole(PARAMETER_SETTER_ROLE) {
-        poolCeiling = poolCeiling_;
         collateralRedemptionDelay = collateralRedemptionDelay_;
         deusRedemptionDelay = deusRedemptionDelay_;
         redemptionFee = redemptionFee_;
@@ -424,8 +394,7 @@ contract DynamicRedeem is IDynamicRedeem, AccessControl {
         appId = appId_;
         minimumRequiredSignatures = minimumRequiredSignatures_;
 
-        emit PoolParametersSet(
-            poolCeiling_,
+        emit SetPoolParameters(
             collateralRedemptionDelay_,
             deusRedemptionDelay_,
             redemptionFee_,

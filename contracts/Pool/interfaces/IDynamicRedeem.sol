@@ -68,8 +68,9 @@ interface IDynamicRedeem {
 
     function toggleIsDynamic() external;
 
+    function setStaticCollateralRatio(uint256) external;
+
     function setPoolParameters(
-        uint256 poolCeiling_,
         uint256 collateralRedemptionDelay_,
         uint256 deusRedemptionDelay_,
         uint256 redemptionFee_,
@@ -82,8 +83,7 @@ interface IDynamicRedeem {
 
     event ToggleIsDynamic(bool isDynamic);
     event SetStaticCollateralRatio(uint256 oldRatio, uint256 newRatio);
-    event PoolParametersSet(
-        uint256 poolCeiling,
+    event SetPoolParameters(
         uint256 collateralRedemptionDelay,
         uint256 deusRedemptionDelay,
         uint256 redemptionFee,
@@ -92,12 +92,8 @@ interface IDynamicRedeem {
         uint256 minimumRequiredSignatures
     );
     event CollectDaoShare(uint256 daoShare, address to);
-    event ToggleMinting(bool toggled);
     event ToggleRedeeming(bool toggled);
-    event ToggleRecollateralize(bool toggled);
-    event ToggleBuyback(bool toggled);
     event CollectCollateral(uint256 amount, address to);
     event CollectDeus(uint256 amount, address to, uint256 redeemId);
     event Redeem(address user, uint256 amount, uint256 globalCollateralRatio);
-    event Mint(address user, uint256 amount, uint256 globalCollateralRatio);
 }
