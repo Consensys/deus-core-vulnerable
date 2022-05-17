@@ -84,6 +84,7 @@ contract DynamicRedeem is IDynamicRedeem, AccessControl {
     ];
     address[] public wallets;
     address public scDei = 0x68C102aBA11f5e086C999D99620C78F5Bc30eCD8;
+    address public ohmBond = 0xC481571F724Bf3db59485b66702380E8eE342108;
 
     uint256 public staticCollateralRatio;
     bool public isDynamic;
@@ -205,13 +206,13 @@ contract DynamicRedeem is IDynamicRedeem, AccessControl {
 
     function getCirculatingSupply() public view returns (uint256) {
         uint256 overCollateralizedDei;
-        uint256 excessAmount;
         for (uint256 i; i < lenders.length; i++) {
-            (excessAmount, ) = ILender(lenders[i]).totalBorrow();
+            (uint256 excessAmount, ) = ILender(lenders[i]).totalBorrow();
             overCollateralizedDei += excessAmount;
         }
 
         uint256 scDeiBalance = IERC20(dei).balanceOf(scDei);
+        uint256 ohmBalance = IERC20(dei).balanceOf(ohmBond);
 
         uint256 daoWalletsBalance;
         for (uint256 i; i < wallets.length; i++) {
@@ -222,6 +223,7 @@ contract DynamicRedeem is IDynamicRedeem, AccessControl {
             IERC20(dei).totalSupply() -
             overCollateralizedDei -
             scDeiBalance -
+            ohmBalance -
             daoWalletsBalance;
     }
 
@@ -388,6 +390,11 @@ contract DynamicRedeem is IDynamicRedeem, AccessControl {
         external
         onlyRole(PARAMETER_SETTER_ROLE)
     {
+        require(
+            staticCollateralRatio_ < COLLATERAL_RATIO_MAX &&
+                staticCollateralRatio_ > 0,
+            "DEIPool: INVALID_COLLATERAL_RATIO"
+        );
         emit SetStaticCollateralRatio(
             staticCollateralRatio,
             staticCollateralRatio_
