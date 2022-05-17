@@ -16,6 +16,8 @@ pragma solidity 0.8.13;
 
 // Primary Author(s)
 // Vahid: https://github.com/vahid-dev
+// MRM: https://github.com/smrm-dev
+// Sina: https://github.com/spsina
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "../Uniswap/TransferHelper.sol";
@@ -26,7 +28,7 @@ import "./interfaces/IDEUS.sol";
 import "./interfaces/IDEI.sol";
 import "./interfaces/ILender.sol";
 
-/// @title Dynamic/Static Redeem contact
+/// @title Dynamic/Static Redeem contract
 /// @author DEUS Finance
 /// @notice Dynamic or Static Ratio Redeem of DEI
 contract DynamicRedeem is IDynamicRedeem, AccessControl {
