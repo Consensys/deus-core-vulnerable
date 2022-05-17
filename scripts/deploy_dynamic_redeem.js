@@ -10,10 +10,8 @@ async function main() {
   const deusAddress = '0xde5ed76e7c05ec5e4572cfc88d1acea165109e44'
   const minimumRequiredSignatures = 1
   const collateralRedemptionDelay = 30
-  // const deusRedemptionDelay = 8 * 60 * 60
   const appId = '20'
 
-  // const library = await deployLibrary({})
   const libraryAddress = '0x219E8c4d2EA039d26647B80c424b1F91B427975F'
 
   await new Promise((resolve) => setTimeout(resolve, 10000))
@@ -27,7 +25,6 @@ async function main() {
     adminAddress: conf.adminAddress,
     minimumRequiredSignatures: minimumRequiredSignatures,
     collateralRedemptionDelay: collateralRedemptionDelay,
-    poolCeiling: conf.poolCeiling,
     libraryAddress: libraryAddress,
     appId: appId,
   })

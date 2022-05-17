@@ -8,7 +8,6 @@ module.exports = async ({
   adminAddress,
   minimumRequiredSignatures,
   collateralRedemptionDelay,
-  poolCeiling,
   libraryAddress,
   appId,
 }) => {
@@ -26,10 +25,11 @@ module.exports = async ({
       adminAddress,
       minimumRequiredSignatures,
       collateralRedemptionDelay,
-      poolCeiling,
       appId,
     ],
   })
-  const dynamicRedeemInstance = await hre.ethers.getContractFactory(contractName)
+  const dynamicRedeemInstance = await hre.ethers.getContractFactory(
+    contractName,
+  )
   return dynamicRedeemInstance.attach(deployedPool.address)
 }
