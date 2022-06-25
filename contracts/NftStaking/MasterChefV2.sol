@@ -48,6 +48,8 @@ contract MasterChefV2 is Ownable {
     uint256 public tokenPerBlock;
     uint256 private constant ACC_TOKEN_PRECISION = 1e12;
 
+    address public staking;
+
     event Deposit(
         address indexed user,
         uint256 indexed pid,
@@ -87,11 +89,22 @@ contract MasterChefV2 is Ownable {
     constructor(
         IERC20 _deus,
         IRewarder _rewarder,
-        uint256 _tokenPerBlock
+        uint256 _tokenPerBlock,
+        address _staking
     ) public {
         DEUS = _deus;
         rewarder = _rewarder;
         tokenPerBlock = _tokenPerBlock;
+        staking = _staking;
+    }
+
+    modifier onlyStaking() {
+        require(msg.sender == staking, "MasterChefV2: sender is not staking");
+        _;
+    }
+
+    function setStaking(address _staking) external onlyOwner {
+        staking = _staking;
     }
 
     /// @notice Returns the number of MCV2 pools.
@@ -212,7 +225,7 @@ contract MasterChefV2 is Ownable {
         uint256 pid,
         uint256 amount,
         address to
-    ) public {
+    ) public onlyStaking {
         PoolInfo memory pool = updatePool(pid);
         UserInfo storage user = userInfo[pid][to];
 
@@ -240,7 +253,7 @@ contract MasterChefV2 is Ownable {
         uint256 pid,
         uint256 amount,
         address to
-    ) public {
+    ) public onlyStaking {
         PoolInfo memory pool = updatePool(pid);
         UserInfo storage user = userInfo[pid][msg.sender];
 
@@ -296,7 +309,7 @@ contract MasterChefV2 is Ownable {
         uint256 pid,
         uint256 amount,
         address to
-    ) public {
+    ) public onlyStaking {
         PoolInfo memory pool = updatePool(pid);
         UserInfo storage user = userInfo[pid][msg.sender];
         int256 accumulatedTokens = int256(
@@ -328,7 +341,7 @@ contract MasterChefV2 is Ownable {
     /// @notice Withdraw without caring about rewards. EMERGENCY ONLY.
     /// @param pid The index of the pool. See `poolInfo`.
     /// @param to Receiver of the LP tokens.
-    function emergencyWithdraw(uint256 pid, address to) public {
+    function emergencyWithdraw(uint256 pid, address to) public onlyStaking {
         UserInfo storage user = userInfo[pid][msg.sender];
         uint256 amount = user.amount;
         user.amount = 0;
