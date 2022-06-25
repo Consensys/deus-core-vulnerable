@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.13;
-pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -35,8 +34,19 @@ contract Staking is AccessControl {
     bytes32 public constant SETTER_ROLE = keccak256("SETTER_ROLE");
     bytes32 public constant POOL_MANAGER_ROLE = keccak256("POOL_MANAGER_ROLE");
 
+    bool isEmergency;
+
+
+    event ToggleEmergency(bool isEmergency);
+    event SetPool(uint256 poolId, uint256 lockDuration, address token);
+    event SetNFT(address oldNft, address newNft);
+    event SetMasterChef(address oldMasterChef, address newMasterChef);
+    event Deposit(address sender, uint256 poolId, uint256 nftId, address to, uint256 amount);
+    event WithdrawFor(address sender, uint256 poolId, uint256 nftId, address user, uint256 amount);
+    event EmergencyWithdraw(address sender, uint256 poolId, address to, uint256 amount);
+
     modifier whenEmrgency {
-        require(isEmergency, "");
+        require(isEmergency, "Staking: NOT_EMEREGENCY");
         _;
     }
 
@@ -56,10 +66,12 @@ contract Staking is AccessControl {
     }
 
     function setNft(address nft_) external onlyRole(SETTER_ROLE) {
+        emit SetNFT(nft, nft_);
         nft = nft_;
     }
 
     function setMasterChef(address masterChef_) external onlyRole(SETTER_ROLE) {
+        emit SetMasterChef(masterChef, masterChef_);
         masterChef = masterChef_;
     }
 
@@ -73,6 +85,13 @@ contract Staking is AccessControl {
             token: token,
             lockDuration: lockDuration
         });
+
+        emit SetPool(poolId, lockDuration, token);
+    }
+
+    function toggleEmergency() onlyRole(SETTER_ROLE) {
+        isEmergency = !isEmergency;
+        emit ToggleEmergency(isEmergency);
     }
 
     // todo impelemnt this function
@@ -101,6 +120,7 @@ contract Staking is AccessControl {
         MintableToken(pools[poolId].token).mint(address(this), amount);
 
         MasterChefV2(masterChef).deposit(poolId, amount, to);
+        emit Deposit(msg.sender, poolId, nftId, to, amount);
     }
 
     function withdrawFor(
@@ -131,6 +151,7 @@ contract Staking is AccessControl {
         MintableToken(pools[poolId].token).burnFrom(address(this), amount);
 
         IERC721(nft).safeTransferFrom(address(this), user, nftId);
+        emit WithdrawFor(msg.sender, poolId, nftId, user, amount);
     }
 
     function emergencyWithdraw(uint256 poolId, address to)
@@ -139,22 +160,22 @@ contract Staking is AccessControl {
     {
         uint256 depositIndex = validUserDepositIndex[poolId][msg.sender];
         uint256 lastDepositIndex = userDeposits[poolId][msg.sender].length;
-
-        UserDeposit memory userDeposit = userDeposits[poolId][msg.sender][
-            depositIndex
-        ];
-
         validUserDepositIndex[poolId][msg.sender] = lastDepositIndex;
 
+
         MasterChefV2(masterChef).emergencyWithdraw(poolId, address(this));
-
+        uint256 amount;
         for (uint256 i = depositIndex; i < lastDepositIndex; i++) {
-            MintableToken(pools[poolId].token).burnFrom(
-                address(this),
-                getNftValue(userDeposits[poolId][msg.sender][i].nftId)
-            );
+            UserDeposit memory userDeposit = userDeposits[poolId][msg.sender][i];
+            uint256 value = getNftValue(userDeposit.nftId);
+            amount += value;
 
-            IERC721(nft).safeTransferFrom(address(this), to, nftId);
+            IERC721(nft).safeTransferFrom(address(this), to, userDeposit.nftId);
         }
+        MintableToken(pools[poolId].token).burnFrom(
+                address(this),
+                amount
+            );
+        emit EmergencyWithdraw(msg.sender, poolId, to, amount);
     }
 }
