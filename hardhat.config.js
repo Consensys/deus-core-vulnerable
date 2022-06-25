@@ -11,6 +11,16 @@ require('@nomiclabs/hardhat-etherscan')
 module.exports = {
   defaultNetwork: 'hardhat',
   networks: {
+    localhostFantom: {
+      url: 'http://127.0.0.1:8547/',
+      accounts: [
+        process.env.MAIN_DEPLOYER_PRIVATE_KEY,
+        process.env.SECOND_DEPLOYER_PRIVATE_KEY,
+        process.env.DEI_DEPLOYER_PRIVATE_KEY,
+        process.env.DEUS_DEPLOYER_PRIVATE_KEY,
+        process.env.veDEUS_DEPLOYER_PRIVATE_KEY
+      ],
+    },
     hardhat: {
       accounts: {
         mnemonic:
@@ -231,6 +241,15 @@ module.exports = {
       },
       {
         version: '0.6.11',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 100000,
+          },
+        },
+      },
+      {
+        version: '0.6.12',
         settings: {
           optimizer: {
             enabled: true,
