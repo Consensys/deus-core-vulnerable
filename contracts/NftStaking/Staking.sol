@@ -132,12 +132,32 @@ contract Staking is AccessControl {
         emit ToggleEmergency(isEmergency);
     }
 
-    function approve(uint256 poolId) external {
-        IERC20(pools[poolId].token).approve(masterChef, type(uint256).max);
+    function approve(uint256 poolId, uint256 amount) external {
+        IERC20(pools[poolId].token).approve(masterChef, amount);
     }
 
     function getNftValue(uint256 nftId) public view returns (uint256 value) {
         return INftValueCalculator(nftValueCalculator).getNftValue(nftId);
+    }
+
+    function userNfts(uint256 poolId, address user)
+        external
+        view
+        returns (uint256[] memory nfts)
+    {
+        nfts = new uint256[](
+            userDeposits[poolId][user].length -
+                validUserDepositIndex[poolId][user]
+        );
+        uint256 index = 0;
+        for (
+            uint256 i = validUserDepositIndex[poolId][user];
+            i < userDeposits[poolId][user].length;
+            i++
+        ) {
+            nfts[index] = userDeposits[poolId][user][i].nftId;
+            index++;
+        }
     }
 
     function deposit(
@@ -157,9 +177,9 @@ contract Staking is AccessControl {
             })
         );
 
-        MintableToken(pools[poolId].token).mint(address(this), amount);
+        IMintableToken(pools[poolId].token).mint(address(this), amount);
 
-        MasterChefV2(masterChef).deposit(poolId, amount, to);
+        IMasterChefV2(masterChef).deposit(poolId, amount, to);
         emit Deposit(msg.sender, poolId, nftId, to, amount);
     }
 
@@ -181,9 +201,9 @@ contract Staking is AccessControl {
 
         validUserDepositIndex[poolId][user] += 1;
 
-        MasterChefV2(masterChef).withdraw(poolId, amount, address(this));
+        IMasterChefV2(masterChef).withdraw(poolId, amount, address(this));
 
-        MintableToken(pools[poolId].token).burnFrom(address(this), amount);
+        IMintableToken(pools[poolId].token).burnFrom(address(this), amount);
 
         IERC721(nft).safeTransferFrom(address(this), user, nftId);
         emit WithdrawFor(msg.sender, poolId, nftId, user, amount);
@@ -197,7 +217,7 @@ contract Staking is AccessControl {
         uint256 lastDepositIndex = userDeposits[poolId][msg.sender].length;
         validUserDepositIndex[poolId][msg.sender] = lastDepositIndex;
 
-        MasterChefV2(masterChef).emergencyWithdraw(poolId, address(this));
+        IMasterChefV2(masterChef).emergencyWithdraw(poolId, address(this));
         uint256 amount;
         for (uint256 i = depositIndex; i < lastDepositIndex; i++) {
             UserDeposit memory userDeposit = userDeposits[poolId][msg.sender][
@@ -208,7 +228,7 @@ contract Staking is AccessControl {
 
             IERC721(nft).safeTransferFrom(address(this), to, userDeposit.nftId);
         }
-        MintableToken(pools[poolId].token).burnFrom(address(this), amount);
+        IMintableToken(pools[poolId].token).burnFrom(address(this), amount);
         emit EmergencyWithdraw(msg.sender, poolId, to, amount);
     }
 
@@ -223,7 +243,7 @@ contract Staking is AccessControl {
     function emergencyWithdrawERC721(
         address token,
         uint256 tokenId,
-        address to,
+        address to
     ) public onlyRole(DEFAULT_ADMIN_ROLE) {
         IERC721(token).safeTransferFrom(address(this), to, tokenId);
     }

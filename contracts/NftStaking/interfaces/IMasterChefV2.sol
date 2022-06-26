@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-interface MasterChefV2 {
+interface IMasterChefV2 {
     function deposit(
         uint256 pid,
         uint256 amount,
