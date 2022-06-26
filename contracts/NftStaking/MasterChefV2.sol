@@ -28,7 +28,7 @@ contract MasterChefV2 is Ownable {
     /// Also known as the amount of DEUS to ditro per block.
     struct PoolInfo {
         uint128 accTokensPerShare;
-        uint64 lastRewardBlock;
+        uint64 lastRewardTimestamp;
         uint64 allocPoint;
     }
 
@@ -45,7 +45,7 @@ contract MasterChefV2 is Ownable {
     mapping(uint256 => mapping(address => UserInfo)) public userInfo;
     /// @dev Total allocation points. Must be the sum of all allocation points in all pools.
     uint256 public totalAllocPoint;
-    uint256 public tokenPerBlock;
+    uint256 public tokenPerSecond;
     uint256 private constant ACC_TOKEN_PRECISION = 1e12;
 
     address public staking;
@@ -77,11 +77,11 @@ contract MasterChefV2 is Ownable {
     event LogSetPool(uint256 indexed pid, uint256 allocPoint);
     event LogUpdatePool(
         uint256 indexed pid,
-        uint64 lastRewardBlock,
+        uint64 lastRewardTimestamp,
         uint256 lpSupply,
         uint256 accTokensPerShare
     );
-    event LogSetTokenPerBlock(uint256 oldValue, uint256 newValue);
+    event LogSetTokenPerSecond(uint256 oldValue, uint256 newValue);
     event LogInit();
 
     /// @param _deus The DEUS token contract address.
@@ -89,12 +89,12 @@ contract MasterChefV2 is Ownable {
     constructor(
         IERC20 _deus,
         IRewarder _rewarder,
-        uint256 _tokenPerBlock,
+        uint256 _tokenPerSecond,
         address _staking
     ) public {
         DEUS = _deus;
         rewarder = _rewarder;
-        tokenPerBlock = _tokenPerBlock;
+        tokenPerSecond = _tokenPerSecond;
         staking = _staking;
     }
 
@@ -116,12 +116,12 @@ contract MasterChefV2 is Ownable {
         rewarder = _rewarder;
     }
 
-    function setTokenPerBlock(uint256 _tokenPerBlock) external onlyOwner {
+    function setTokenPerSecond(uint256 _tokenPerSecond) external onlyOwner {
         for (uint256 i = 0; i < poolInfo.length; i++) {
             updatePool(i);
         }
-        emit LogSetTokenPerBlock(tokenPerBlock, _tokenPerBlock);
-        tokenPerBlock = _tokenPerBlock;
+        emit LogSetTokenPerSecond(tokenPerSecond, _tokenPerSecond);
+        tokenPerSecond = _tokenPerSecond;
     }
 
     /// @notice Add a new LP to the pool. Can only be called by the owner.
@@ -129,14 +129,14 @@ contract MasterChefV2 is Ownable {
     /// @param allocPoint AP of the new pool.
     /// @param _lpToken Address of the LP ERC-20 token.
     function add(uint256 allocPoint, IERC20 _lpToken) public onlyOwner {
-        uint256 lastRewardBlock = block.number;
+        uint256 lastRewardTimestamp = block.timestamp;
         totalAllocPoint = totalAllocPoint.add(allocPoint);
         lpToken.push(_lpToken);
 
         poolInfo.push(
             PoolInfo({
                 allocPoint: allocPoint.to64(),
-                lastRewardBlock: lastRewardBlock.to64(),
+                lastRewardTimestamp: lastRewardTimestamp.to64(),
                 accTokensPerShare: 0
             })
         );
@@ -167,9 +167,9 @@ contract MasterChefV2 is Ownable {
         UserInfo storage user = userInfo[_pid][_user];
         uint256 accTokensPerShare = pool.accTokensPerShare;
         uint256 lpSupply = lpToken[_pid].balanceOf(address(this));
-        if (block.number > pool.lastRewardBlock && lpSupply != 0) {
-            uint256 blocks = block.number.sub(pool.lastRewardBlock);
-            uint256 tokenReward = blocks.mul(tokenPerBlock).mul(
+        if (block.timestamp > pool.lastRewardTimestamp && lpSupply != 0) {
+            uint256 duration = block.timestamp.sub(pool.lastRewardTimestamp);
+            uint256 tokenReward = duration.mul(tokenPerSecond).mul(
                 pool.allocPoint
             ) / totalAllocPoint;
             accTokensPerShare = accTokensPerShare.add(
@@ -195,22 +195,24 @@ contract MasterChefV2 is Ownable {
     /// @return pool Returns the pool that was updated.
     function updatePool(uint256 pid) public returns (PoolInfo memory pool) {
         pool = poolInfo[pid];
-        if (block.number > pool.lastRewardBlock) {
+        if (block.timestamp > pool.lastRewardTimestamp) {
             uint256 lpSupply = lpToken[pid].balanceOf(address(this));
             if (lpSupply > 0) {
-                uint256 blocks = block.number.sub(pool.lastRewardBlock);
-                uint256 tokenReward = blocks.mul(tokenPerBlock).mul(
+                uint256 duration = block.timestamp.sub(
+                    pool.lastRewardTimestamp
+                );
+                uint256 tokenReward = duration.mul(tokenPerSecond).mul(
                     pool.allocPoint
                 ) / totalAllocPoint;
                 pool.accTokensPerShare = pool.accTokensPerShare.add(
                     (tokenReward.mul(ACC_TOKEN_PRECISION) / lpSupply).to128()
                 );
             }
-            pool.lastRewardBlock = block.number.to64();
+            pool.lastRewardTimestamp = block.timestamp.to64();
             poolInfo[pid] = pool;
             emit LogUpdatePool(
                 pid,
-                pool.lastRewardBlock,
+                pool.lastRewardTimestamp,
                 lpSupply,
                 pool.accTokensPerShare
             );
