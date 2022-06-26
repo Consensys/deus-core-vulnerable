@@ -6,11 +6,12 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./interfaces/IMasterChefV2.sol";
 import "./interfaces/IMintableToken.sol";
 import "./interfaces/INftValueCalculator.sol";
 
-contract Staking is AccessControl {
+contract Staking is AccessControl, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     struct UserDeposit {
@@ -83,7 +84,7 @@ contract Staking is AccessControl {
         address setter,
         address poolManager,
         address admin
-    ) public {
+    ) public ReentrancyGuard() {
         nft = nft_;
         nftValueCalculator = nftValueCalculator_;
         masterChef = masterChef_;
@@ -164,7 +165,7 @@ contract Staking is AccessControl {
         uint256 poolId,
         uint256 nftId,
         address to
-    ) external {
+    ) external nonReentrant {
         IERC721(nft).safeTransferFrom(msg.sender, address(this), nftId);
 
         uint256 amount = getNftValue(nftId);
@@ -183,7 +184,7 @@ contract Staking is AccessControl {
         emit Deposit(msg.sender, poolId, nftId, to, amount);
     }
 
-    function withdrawFor(uint256 poolId, address user) external {
+    function withdrawFor(uint256 poolId, address user) external nonReentrant {
         uint256 depositIndex = validUserDepositIndex[poolId][user];
 
         UserDeposit memory userDeposit = userDeposits[poolId][user][
@@ -207,6 +208,48 @@ contract Staking is AccessControl {
 
         IERC721(nft).safeTransferFrom(address(this), user, nftId);
         emit WithdrawFor(msg.sender, poolId, nftId, user, amount);
+    }
+
+    function withdrawAllFor(
+        uint256 poolId,
+        address user,
+        uint256 maxWithdraw
+    ) external nonReentrant {
+        uint256 depositIndex = validUserDepositIndex[poolId][user];
+        uint256 activeDeposits = userDeposits[poolId][user].length;
+        maxWithdraw += depositIndex;
+        uint256 totalAmount;
+        for (
+            uint256 i = depositIndex;
+            i < activeDeposits && i < maxWithdraw;
+            i++
+        ) {
+            UserDeposit memory userDeposit = userDeposits[poolId][user][i];
+
+            uint256 amount = userDeposit.amount;
+            uint256 nftId = userDeposit.nftId;
+
+            if (
+                userDeposit.depositTimestamp + pools[poolId].lockDuration >
+                block.timestamp
+            ) {
+                break;
+            }
+
+            validUserDepositIndex[poolId][user] += 1;
+
+            totalAmount += amount;
+
+            IERC721(nft).safeTransferFrom(address(this), user, nftId);
+            emit WithdrawFor(msg.sender, poolId, nftId, user, amount);
+        }
+        require(totalAmount > 0, "Staking: ZERO_WITHDRAW_AMOUNT");
+        IMasterChefV2(masterChef).withdraw(poolId, totalAmount, address(this));
+
+        IMintableToken(pools[poolId].token).burnFrom(
+            address(this),
+            totalAmount
+        );
     }
 
     function emergencyWithdraw(uint256 poolId, address to)
