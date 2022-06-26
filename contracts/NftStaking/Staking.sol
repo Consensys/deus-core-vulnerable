@@ -4,10 +4,15 @@ pragma solidity 0.8.13;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IMasterChefV2.sol";
 import "./interfaces/IMintableToken.sol";
+import "./interfaces/INftValueCalculator.sol";
 
 contract Staking is AccessControl {
+    using SafeERC20 for IERC20;
+
     struct UserDeposit {
         uint256 nftId;
         uint256 amount;
@@ -21,6 +26,7 @@ contract Staking is AccessControl {
     }
 
     address public nft;
+    address public nftValueCalculator;
     address public masterChef;
 
     // pool id => user address => user deposits
@@ -38,7 +44,11 @@ contract Staking is AccessControl {
 
     event ToggleEmergency(bool isEmergency);
     event SetPool(uint256 poolId, uint256 lockDuration, address token);
-    event SetNFT(address oldNft, address newNft);
+    event SetNft(address oldNft, address newNft);
+    event SetNftValueCalculator(
+        address oldNftValueCalculator,
+        address newNftValueCalculator
+    );
     event SetMasterChef(address oldMasterChef, address newMasterChef);
     event Deposit(
         address sender,
@@ -68,12 +78,14 @@ contract Staking is AccessControl {
 
     constructor(
         address nft_,
+        address nftValueCalculator_,
         address masterChef_,
         address setter,
         address poolManager,
         address admin
     ) public {
         nft = nft_;
+        nftValueCalculator = nftValueCalculator_;
         masterChef = masterChef_;
 
         _setupRole(SETTER_ROLE, setter);
@@ -82,8 +94,16 @@ contract Staking is AccessControl {
     }
 
     function setNft(address nft_) external onlyRole(SETTER_ROLE) {
-        emit SetNFT(nft, nft_);
+        emit SetNft(nft, nft_);
         nft = nft_;
+    }
+
+    function setNftValueCalculator(address nftValueCalculator_)
+        external
+        onlyRole(SETTER_ROLE)
+    {
+        emit SetNftValueCalculator(nftValueCalculator, nftValueCalculator_);
+        nftValueCalculator = nftValueCalculator_;
     }
 
     function setMasterChef(address masterChef_) external onlyRole(SETTER_ROLE) {
@@ -102,6 +122,8 @@ contract Staking is AccessControl {
             lockDuration: lockDuration
         });
 
+        IERC20(token).approve(masterChef, type(uint256).max);
+
         emit SetPool(poolId, lockDuration, token);
     }
 
@@ -110,10 +132,12 @@ contract Staking is AccessControl {
         emit ToggleEmergency(isEmergency);
     }
 
-    // todo impelemnt this function
+    function approve(uint256 poolId) external {
+        IERC20(pools[poolId].token).approve(masterChef, type(uint256).max);
+    }
+
     function getNftValue(uint256 nftId) public view returns (uint256 value) {
-        value = 100e18;
-        return value;
+        return INftValueCalculator(nftValueCalculator).getNftValue(nftId);
     }
 
     function deposit(
@@ -166,7 +190,7 @@ contract Staking is AccessControl {
     }
 
     function emergencyWithdraw(uint256 poolId, address to)
-        public
+        external
         whenEmergency
     {
         uint256 depositIndex = validUserDepositIndex[poolId][msg.sender];
@@ -186,5 +210,21 @@ contract Staking is AccessControl {
         }
         MintableToken(pools[poolId].token).burnFrom(address(this), amount);
         emit EmergencyWithdraw(msg.sender, poolId, to, amount);
+    }
+
+    function emergencyWithdrawERC20(
+        address token,
+        address to,
+        uint256 amount
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        IERC20(token).safeTransfer(to, amount);
+    }
+
+    function emergencyWithdrawERC721(
+        address token,
+        uint256 tokenId,
+        address to,
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        IERC721(token).safeTransferFrom(address(this), to, tokenId);
     }
 }
