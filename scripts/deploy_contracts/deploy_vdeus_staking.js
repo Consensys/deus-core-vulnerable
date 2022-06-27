@@ -1,11 +1,11 @@
-const { deploy } = require("../helpers/deploy_contract.js");
+const { deployProxy } = require("../helpers/deploy_contract.js");
 
-module.exports = async (deployer, { nft, nftValueCalculator, masterChef, setter, poolManager, admin }) => {
+module.exports = async (deployer, { dei, usdc, nft, nftValueCalculator, masterChef, mintHelper, setter, poolManager, admin }) => {
 
-    const staking = await deploy({
+    const staking = await deployProxy({
         deployer: deployer,
         contractName: 'contracts/NftStaking/Staking.sol:Staking',
-        constructorArguments: [nft, nftValueCalculator, masterChef, setter, poolManager, admin]
+        constructorArguments: [dei, usdc, nft, nftValueCalculator, masterChef, mintHelper, setter, poolManager, admin]
     })
 
     return staking;

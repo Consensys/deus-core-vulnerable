@@ -1,18 +1,44 @@
+// Be name Khoda
+// Bime Abolfazl
+
+// =================================================================================================================
+//  _|_|_|    _|_|_|_|  _|    _|    _|_|_|      _|_|_|_|  _|                                                       |
+//  _|    _|  _|        _|    _|  _|            _|            _|_|_|      _|_|_|  _|_|_|      _|_|_|    _|_|       |
+//  _|    _|  _|_|_|    _|    _|    _|_|        _|_|_|    _|  _|    _|  _|    _|  _|    _|  _|        _|_|_|_|     |
+//  _|    _|  _|        _|    _|        _|      _|        _|  _|    _|  _|    _|  _|    _|  _|        _|           |
+//  _|_|_|    _|_|_|_|    _|_|    _|_|_|        _|        _|  _|    _|    _|_|_|  _|    _|    _|_|_|    _|_|_|     |
+// =================================================================================================================
+// ======================= STAKING ======================
+// ======================================================
+// DEUS Finance: https://github.com/DeusFinance
+
+// Primary Author(s)
+// Mmd: https://github.com/mmd-mostafaee
+// Kazem: https://github.com/kazemghareghani
+
+// Reviewer(s) / Contributor(s)
+// MRM: https://github.com/smrm-dev
+
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.13;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./interfaces/IMasterChefV2.sol";
 import "./interfaces/IMintableToken.sol";
 import "./interfaces/INftValueCalculator.sol";
 import "./interfaces/IMintHelper.sol";
 
-contract Staking is AccessControl, ReentrancyGuard {
+contract Staking is
+    Initializable,
+    AccessControlUpgradeable,
+    ReentrancyGuardUpgradeable
+{
     using SafeERC20 for IERC20;
 
     struct UserDeposit {
@@ -81,7 +107,7 @@ contract Staking is AccessControl, ReentrancyGuard {
         uint256 usdcAmount
     );
 
-    constructor(
+    function initialize(
         address dei_,
         address usdc_,
         address nft_,
@@ -91,7 +117,10 @@ contract Staking is AccessControl, ReentrancyGuard {
         address setter,
         address poolManager,
         address admin
-    ) public ReentrancyGuard() {
+    ) public initializer {
+        __AccessControl_init();
+        __ReentrancyGuard_init();
+
         dei = dei_;
         usdc = usdc_;
         nft = nft_;
