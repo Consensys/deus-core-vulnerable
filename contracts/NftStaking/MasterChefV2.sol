@@ -15,7 +15,6 @@ contract MasterChefV2 is AccessControl {
     using SafeERC20 for IERC20;
     using SignedSafeMath for int256;
 
-
     /// @notice Info of each MCV2 user.
     /// `amount` LP token amount the user has provided.
     /// `rewardDebt` The amount of DEUS entitled to the user.
@@ -98,17 +97,15 @@ contract MasterChefV2 is AccessControl {
         address aprSetter,
         address setter,
         address admin
-
     ) public {
         DEUS = _deus;
         rewarder = _rewarder;
         tokenPerSecond = _tokenPerSecond;
         staking = _staking;
 
-       _setupRole(APR_SETTER_ROLE, aprSetter);
-       _setupRole(SETTER_ROLE, setter);
-       _setupRole(DEFAULT_ADMIN_ROLE, admin);
-
+        _setupRole(APR_SETTER_ROLE, aprSetter);
+        _setupRole(SETTER_ROLE, setter);
+        _setupRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
     modifier onlyStaking() {
@@ -137,7 +134,10 @@ contract MasterChefV2 is AccessControl {
         rewarder = _rewarder;
     }
 
-    function setTokenPerSecond(uint256 _tokenPerSecond) external onlyRole(APR_SETTER_ROLE) {
+    function setTokenPerSecond(uint256 _tokenPerSecond)
+        external
+        onlyRole(APR_SETTER_ROLE)
+    {
         for (uint256 i = 0; i < poolInfo.length; i++) {
             updatePool(i);
         }
@@ -149,7 +149,10 @@ contract MasterChefV2 is AccessControl {
     /// DO NOT add the same LP token more than once. Rewards will be messed up if you do.
     /// @param allocPoint AP of the new pool.
     /// @param _lpToken Address of the LP ERC-20 token.
-    function add(uint256 allocPoint, IERC20 _lpToken) public onlyRole(SETTER_ROLE) {
+    function add(uint256 allocPoint, IERC20 _lpToken)
+        public
+        onlyRole(SETTER_ROLE)
+    {
         uint256 lastRewardTimestamp = block.timestamp;
         totalAllocPoint = totalAllocPoint.add(allocPoint);
         lpToken.push(_lpToken);
@@ -167,7 +170,10 @@ contract MasterChefV2 is AccessControl {
     /// @notice Update the given pool's DEUS allocation point and `IRewarder` contract. Can only be called by the owner.
     /// @param _pid The index of the pool. See `poolInfo`.
     /// @param _allocPoint New AP of the pool.
-    function set(uint256 _pid, uint256 _allocPoint) public onlyRole(SETTER_ROLE) {
+    function set(uint256 _pid, uint256 _allocPoint)
+        public
+        onlyRole(SETTER_ROLE)
+    {
         totalAllocPoint = totalAllocPoint.sub(poolInfo[_pid].allocPoint).add(
             _allocPoint
         );
@@ -260,7 +266,7 @@ contract MasterChefV2 is AccessControl {
 
         // Interactions
         if (address(rewarder) != address(0)) {
-            rewarder.onReward(pid, msg.sender, user.amount);
+            rewarder.onReward(pid, to, user.amount);
         }
 
         lpToken[pid].safeTransferFrom(msg.sender, address(this), amount);
@@ -332,10 +338,11 @@ contract MasterChefV2 is AccessControl {
     function withdrawAndHarvest(
         uint256 pid,
         uint256 amount,
+        address userAddress,
         address to
     ) public onlyStaking {
         PoolInfo memory pool = updatePool(pid);
-        UserInfo storage user = userInfo[pid][msg.sender];
+        UserInfo storage user = userInfo[pid][userAddress];
         int256 accumulatedTokens = int256(
             user.amount.mul(pool.accTokensPerShare) / ACC_TOKEN_PRECISION
         );
@@ -350,16 +357,16 @@ contract MasterChefV2 is AccessControl {
         user.amount = user.amount.sub(amount);
 
         // Interactions
-        DEUS.safeTransfer(to, _pendingTokens);
+        DEUS.safeTransfer(userAddress, _pendingTokens);
 
         if (address(rewarder) != address(0)) {
-            rewarder.onReward(pid, msg.sender, user.amount);
+            rewarder.onReward(pid, userAddress, user.amount);
         }
 
         lpToken[pid].safeTransfer(to, amount);
 
-        emit Withdraw(msg.sender, pid, amount, to);
-        emit Harvest(msg.sender, pid, _pendingTokens);
+        emit Withdraw(userAddress, pid, amount, to);
+        emit Harvest(userAddress, pid, _pendingTokens);
     }
 
     /// @notice Withdraw without caring about rewards. EMERGENCY ONLY.

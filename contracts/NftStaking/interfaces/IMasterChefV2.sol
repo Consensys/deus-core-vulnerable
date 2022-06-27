@@ -14,5 +14,12 @@ interface IMasterChefV2 {
         address to
     ) external;
 
+    function withdrawAndHarvest(
+        uint256 pid,
+        uint256 amount,
+        address userAddress,
+        address to
+    ) external;
+
     function emergencyWithdraw(uint256 pid, address to) external;
 }

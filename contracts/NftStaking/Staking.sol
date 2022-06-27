@@ -220,7 +220,7 @@ contract Staking is AccessControl, ReentrancyGuard {
             "Staking: DEPOSIT_IS_LOCKED"
         );
 
-        IMasterChefV2(masterChef).withdraw(
+        IMasterChefV2(masterChef).withdrawAndHarvest(
             poolId,
             amount,
             nftUser[nftId],
