@@ -21,5 +21,5 @@ interface IMasterChefV2 {
         address to
     ) external;
 
-    function emergencyWithdraw(uint256 pid, address to) external;
+    function emergencyWithdraw(uint256 pid, address userAddress, address to) external;
 }

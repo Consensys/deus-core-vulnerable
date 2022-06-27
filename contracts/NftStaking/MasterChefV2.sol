@@ -372,18 +372,22 @@ contract MasterChefV2 is AccessControl {
     /// @notice Withdraw without caring about rewards. EMERGENCY ONLY.
     /// @param pid The index of the pool. See `poolInfo`.
     /// @param to Receiver of the LP tokens.
-    function emergencyWithdraw(uint256 pid, address to) public onlyStaking {
-        UserInfo storage user = userInfo[pid][msg.sender];
+    function emergencyWithdraw(
+        uint256 pid,
+        address userAddress,
+        address to
+    ) public onlyStaking {
+        UserInfo storage user = userInfo[pid][userAddress];
         uint256 amount = user.amount;
         user.amount = 0;
         user.rewardDebt = 0;
 
         if (address(rewarder) != address(0)) {
-            rewarder.onReward(pid, msg.sender, 0);
+            rewarder.onReward(pid, userAddress, 0);
         }
 
         // Note: transfer can fail or succeed if `amount` is zero.
         lpToken[pid].safeTransfer(to, amount);
-        emit EmergencyWithdraw(msg.sender, pid, amount, to);
+        emit EmergencyWithdraw(userAddress, pid, amount, to);
     }
 }
