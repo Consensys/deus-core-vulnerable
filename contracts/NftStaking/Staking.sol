@@ -153,7 +153,9 @@ contract Staking is AccessControl, ReentrancyGuard {
     }
 
     function getNftValue(uint256 nftId) public view returns (uint256 value) {
-        return INftValueCalculator(nftValueCalculator).getNftValue(nftId);
+        (value, ) = INftValueCalculator(nftValueCalculator).getNftRedeemValues(
+            nftId
+        );
     }
 
     function userNftDeposits(address user)
@@ -233,7 +235,7 @@ contract Staking is AccessControl, ReentrancyGuard {
     }
 
     function withdrawTo(uint256 nftIndex, address to) external nonReentrant {
-        uint nftId = userNfts[msg.sender][nftIndex];
+        uint256 nftId = userNfts[msg.sender][nftIndex];
         require(
             nftUser[nftId] == msg.sender,
             "Staking: SENDER_IS_NOT_NFT_ONWER"

@@ -21,26 +21,6 @@ contract NftValueCalculator is INftValueCalculator {
         v1Edge = v1Edge_;
     }
 
-    function getNftValue(uint256 tokenId)
-        external
-        view
-        override
-        returns (uint256 value)
-    {
-        if (tokenId <= v1Edge) {
-            (uint256 deiAmount, uint8 trancheId) = ITrancheRedeemV1(
-                trancheRedeemer1
-            ).redemptions(tokenId);
-            (, , uint256 deusRatio, ) = ITrancheRedeemV1(trancheRedeemer1)
-                .tranches(trancheId);
-            value = (deiAmount * deusRatio) / 1e6;
-        } else {
-            uint256 usdcAmount = ITrancheRedeemV2(trancheRedeemer2)
-                .redeemAmounts(tokenId);
-            value = usdcAmount * 6 * 1e12;
-        }
-    }
-
     function getNftRedeemValues(uint256 tokenId)
         external
         view
