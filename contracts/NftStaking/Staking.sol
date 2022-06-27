@@ -232,7 +232,8 @@ contract Staking is AccessControl, ReentrancyGuard {
         emit ExitFor(msg.sender, nftUser[nftId], nftId, amount);
     }
 
-    function withdrawTo(uint256 nftId, address to) external nonReentrant {
+    function withdrawTo(uint256 nftIndex, address to) external nonReentrant {
+        uint nftId = userNfts[msg.sender][nftIndex];
         require(
             nftUser[nftId] == msg.sender,
             "Staking: SENDER_IS_NOT_NFT_ONWER"
@@ -249,9 +250,10 @@ contract Staking is AccessControl, ReentrancyGuard {
         nftUser[nftId] = address(0);
 
         userNftIndex[msg.sender] -= 1;
-        userNfts[msg.sender][nftId] = userNfts[msg.sender][
+        userNfts[msg.sender][nftIndex] = userNfts[msg.sender][
             userNftIndex[msg.sender]
         ];
+        userNfts[msg.sender][userNftIndex[msg.sender]] = 0;
 
         if (freeExit) {
             IERC721(nft).safeTransferFrom(address(this), to, nftId);
