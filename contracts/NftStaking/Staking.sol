@@ -47,6 +47,8 @@ contract Staking is AccessControl, ReentrancyGuard {
     mapping(uint256 => uint256) public nftPool;
     // nft => depsoit
     mapping(uint256 => UserDeposit) public nftDeposit;
+    // poolId => Pool
+    mapping(uint256 => Pool) public pools;
 
     bool public freeExit;
 
@@ -62,6 +64,7 @@ contract Staking is AccessControl, ReentrancyGuard {
         address newNftValueCalculator
     );
     event SetMasterChef(address oldMasterChef, address newMasterChef);
+    event SetMintHelper(address oldMintHelper, address newMintHelper);
     event Deposit(
         address sender,
         uint256 poolId,
@@ -72,10 +75,10 @@ contract Staking is AccessControl, ReentrancyGuard {
     event ExitFor(address sender, address user, uint256 nftId, uint256 amount);
     event WithdrawTo(
         address sender,
-        uint256 user,
+        address user,
         uint256 nftId,
-        address deiAmount,
-        uint256 usdcAmount 
+        uint256 deiAmount,
+        uint256 usdcAmount
     );
 
     constructor(
@@ -119,6 +122,11 @@ contract Staking is AccessControl, ReentrancyGuard {
         masterChef = masterChef_;
     }
 
+    function setMintHelper(address mintHelper_) external onlyRole(SETTER_ROLE) {
+        emit SetMintHelper(mintHelper, mintHelper_);
+        mintHelper = mintHelper_;
+    }
+
     function setPool(
         uint256 poolId,
         address token,
@@ -148,24 +156,15 @@ contract Staking is AccessControl, ReentrancyGuard {
         return INftValueCalculator(nftValueCalculator).getNftValue(nftId);
     }
 
-    // todo update this view
-    function userNfts(uint256 poolId, address user)
+    function userNftDeposits(address user)
         external
         view
-        returns (uint256[] memory nfts)
+        returns (UserDeposit[] memory nfts)
     {
-        nfts = new uint256[](
-            userDeposits[poolId][user].length -
-                validUserDepositIndex[poolId][user]
-        );
-        uint256 index = 0;
-        for (
-            uint256 i = validUserDepositIndex[poolId][user];
-            i < userDeposits[poolId][user].length;
-            i++
-        ) {
-            nfts[index] = userDeposits[poolId][user][i].nftId;
-            index++;
+        uint256 userBalance = userNftIndex[user];
+        nfts = new UserDeposit[](userBalance);
+        for (uint256 i = 0; i < userBalance; i++) {
+            nfts[i] = nftDeposit[userNfts[user][i]];
         }
     }
 
@@ -197,7 +196,7 @@ contract Staking is AccessControl, ReentrancyGuard {
         emit Deposit(msg.sender, poolId, nftId, to, amount);
     }
 
-    function exitFor(uint256 nftId) external nonReentrant {
+    function exitFor(uint256 nftId) public nonReentrant {
         require(
             nftUser[nftId] == msg.sender || hasRole(EXTRACTOR_ROLE, msg.sender),
             "Staking: EXIT_FORBIDDEN"
@@ -221,11 +220,15 @@ contract Staking is AccessControl, ReentrancyGuard {
             "Staking: DEPOSIT_IS_LOCKED"
         );
 
-        IMasterChefV2(masterChef).withdraw(poolId, amount, address(this));
+        IMasterChefV2(masterChef).withdraw(
+            poolId,
+            amount,
+            nftUser[nftId],
+            address(this)
+        );
 
         IMintableToken(pools[poolId].token).burnFrom(address(this), amount);
 
-        // IERC721(nft).safeTransferFrom(address(this), user, nftId);
         emit ExitFor(msg.sender, nftUser[nftId], nftId, amount);
     }
 
@@ -250,10 +253,9 @@ contract Staking is AccessControl, ReentrancyGuard {
             userNftIndex[msg.sender]
         ];
 
-        uint256 amount = nftDeposit[nftId].amount;
-
         if (freeExit) {
             IERC721(nft).safeTransferFrom(address(this), to, nftId);
+            emit WithdrawTo(msg.sender, to, nftId, 0, 0);
         } else {
             (uint256 deiAmount, uint256 usdcAmount) = INftValueCalculator(
                 nftValueCalculator
@@ -266,9 +268,8 @@ contract Staking is AccessControl, ReentrancyGuard {
             );
 
             IMintHelper(mintHelper).mint(to, deiAmount);
+            emit WithdrawTo(msg.sender, to, nftId, deiAmount, usdcAmount);
         }
-
-        emit WithdrawTo(msg.sender, to, nftId, deiAmount, usdcAmount);
     }
 
     function emergencyWithdrawERC20(

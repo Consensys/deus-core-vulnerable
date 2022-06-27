@@ -10,6 +10,7 @@ interface IMasterChefV2 {
     function withdraw(
         uint256 pid,
         uint256 amount,
+        address userAddress,
         address to
     ) external;
 

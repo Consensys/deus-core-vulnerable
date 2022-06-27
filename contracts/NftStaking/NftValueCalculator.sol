@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.12;
-pragma experimental ABIEncoderV2;
+pragma solidity 0.8.13;
 
 import "./interfaces/INftValueCalculator.sol";
 import "./interfaces/ITrancheRedeemV1.sol";
@@ -46,17 +45,22 @@ contract NftValueCalculator is INftValueCalculator {
         external
         view
         override
-        returns (uint256 deiAmount, uint usdcAmount)
+        returns (uint256 deiAmount, uint256 usdcAmount)
     {
         if (tokenId <= v1Edge) {
-            (deiAmount, uint8 trancheId) = ITrancheRedeemV1(
-                trancheRedeemer1
-            ).redemptions(tokenId);
-            (uint256 usdcRatio, , , ) = ITrancheRedeemV1(trancheRedeemer1).tranches(trancheId);
+            uint8 trancheId;
+            (deiAmount, trancheId) = ITrancheRedeemV1(trancheRedeemer1)
+                .redemptions(tokenId);
+            (uint256 usdcRatio, , , ) = ITrancheRedeemV1(trancheRedeemer1)
+                .tranches(trancheId);
             usdcAmount = (deiAmount * usdcRatio) / 1e6;
         } else {
-            usdcAmount = ITrancheRedeemV2(trancheRedeemer2).redeemAmounts(tokenId);
-            (deiAmount, ) = ITrancheRedeemV2(trancheRedeemer2).redemptions(tokenId);
+            usdcAmount = ITrancheRedeemV2(trancheRedeemer2).redeemAmounts(
+                tokenId
+            );
+            (deiAmount, ) = ITrancheRedeemV2(trancheRedeemer2).redemptions(
+                tokenId
+            );
         }
     }
 }

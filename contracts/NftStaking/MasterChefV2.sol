@@ -275,10 +275,11 @@ contract MasterChefV2 is AccessControl {
     function withdraw(
         uint256 pid,
         uint256 amount,
+        address userAddress,
         address to
     ) public onlyStaking {
         PoolInfo memory pool = updatePool(pid);
-        UserInfo storage user = userInfo[pid][msg.sender];
+        UserInfo storage user = userInfo[pid][userAddress];
 
         // Effects
         user.rewardDebt = user.rewardDebt.sub(
@@ -288,12 +289,12 @@ contract MasterChefV2 is AccessControl {
 
         // Interactions
         if (address(rewarder) != address(0)) {
-            rewarder.onReward(pid, msg.sender, user.amount);
+            rewarder.onReward(pid, userAddress, user.amount);
         }
 
         lpToken[pid].safeTransfer(to, amount);
 
-        emit Withdraw(msg.sender, pid, amount, to);
+        emit Withdraw(userAddress, pid, amount, to);
     }
 
     /// @notice Harvest proceeds for transaction sender to `to`.
