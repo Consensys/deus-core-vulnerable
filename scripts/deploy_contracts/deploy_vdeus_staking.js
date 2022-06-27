@@ -4,7 +4,7 @@ module.exports = async (deployer, { dei, usdc, nft, nftValueCalculator, masterCh
 
     const staking = await deployProxy({
         deployer: deployer,
-        contractName: 'contracts/NftStaking/Staking.sol:Staking',
+        contractName: 'NFTStaking',
         constructorArguments: [dei, usdc, nft, nftValueCalculator, masterChef, mintHelper, setter, poolManager, admin]
     })
 

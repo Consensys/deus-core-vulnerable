@@ -7,8 +7,8 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IMasterChefV2.sol";
 import "./interfaces/IMintableToken.sol";
 import "./interfaces/INftValueCalculator.sol";
@@ -16,13 +16,13 @@ import "./interfaces/IMintHelper.sol";
 
 /// @title vDeus staking
 /// @author Deus Finance
-contract Staking is
+contract NFTStaking is
     Initializable,
     ERC721HolderUpgradeable,
     AccessControlUpgradeable,
     ReentrancyGuardUpgradeable
 {
-    using SafeERC20 for IERC20;
+    using SafeERC20Upgradeable for IERC20Upgradeable;
 
     struct UserDeposit {
         uint256 nftId;
@@ -151,7 +151,7 @@ contract Staking is
             lockDuration: lockDuration
         });
 
-        IERC20(token).approve(masterChef, type(uint256).max);
+        IERC20Upgradeable(token).approve(masterChef, type(uint256).max);
 
         emit SetPool(poolId, lockDuration, token);
     }
@@ -162,7 +162,7 @@ contract Staking is
     }
 
     function approve(uint256 poolId, uint256 amount) external {
-        IERC20(pools[poolId].token).approve(masterChef, amount);
+        IERC20Upgradeable(pools[poolId].token).approve(masterChef, amount);
     }
 
     function getNftValue(uint256 nftId) public view returns (uint256 value) {
@@ -278,7 +278,7 @@ contract Staking is
                 nftValueCalculator
             ).getNftRedeemValues(nftId);
 
-            IERC20(usdc).safeTransferFrom(
+            IERC20Upgradeable(usdc).safeTransferFrom(
                 msg.sender,
                 address(this),
                 usdcAmount
@@ -294,7 +294,7 @@ contract Staking is
         address to,
         uint256 amount
     ) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        IERC20(token).safeTransfer(to, amount);
+        IERC20Upgradeable(token).safeTransfer(to, amount);
     }
 
     function emergencyWithdrawERC721(
