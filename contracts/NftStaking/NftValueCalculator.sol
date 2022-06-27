@@ -33,7 +33,7 @@ contract NftValueCalculator is INftValueCalculator {
                 .redemptions(tokenId);
             (uint256 usdcRatio, , , ) = ITrancheRedeemV1(trancheRedeemer1)
                 .tranches(trancheId);
-            usdcAmount = (deiAmount * usdcRatio) / 1e6;
+            usdcAmount = (deiAmount * usdcRatio) / (1e6 * 1e12);
         } else {
             usdcAmount = ITrancheRedeemV2(trancheRedeemer2).redeemAmounts(
                 tokenId
