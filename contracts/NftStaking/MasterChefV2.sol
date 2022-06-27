@@ -3,17 +3,18 @@
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
+import "@openzeppelin/contracts-3.3/access/AccessControl.sol";
 import "./BoringMath.sol";
-import "./Ownable.sol";
-import "./SafeERC20.sol";
+import "@openzeppelin/contracts-3.3/token/ERC20/SafeERC20.sol";
 import "./SignedSafeMath.sol";
 import "./IRewarder.sol";
 
-contract MasterChefV2 is Ownable {
+contract MasterChefV2 is AccessControl {
     using BoringMath for uint256;
     using BoringMath128 for uint128;
     using SafeERC20 for IERC20;
     using SignedSafeMath for int256;
+
 
     /// @notice Info of each MCV2 user.
     /// `amount` LP token amount the user has provided.
@@ -49,6 +50,9 @@ contract MasterChefV2 is Ownable {
     uint256 private constant ACC_TOKEN_PRECISION = 1e12;
 
     address public staking;
+
+    bytes32 public constant APR_SETTER_ROLE = keccak256("APR_SETTER_ROLE");
+    bytes32 public constant SETTER_ROLE = keccak256("SETTER_ROLE");
 
     event Deposit(
         address indexed user,
@@ -90,20 +94,37 @@ contract MasterChefV2 is Ownable {
         IERC20 _deus,
         IRewarder _rewarder,
         uint256 _tokenPerSecond,
-        address _staking
+        address _staking,
+        address aprSetter,
+        address setter,
+        address admin
+
     ) public {
         DEUS = _deus;
         rewarder = _rewarder;
         tokenPerSecond = _tokenPerSecond;
         staking = _staking;
+
+       _setupRole(APR_SETTER_ROLE, aprSetter);
+       _setupRole(SETTER_ROLE, setter);
+       _setupRole(DEFAULT_ADMIN_ROLE, admin);
+
     }
 
     modifier onlyStaking() {
-        require(msg.sender == staking, "MasterChefV2: sender is not staking");
+        require(msg.sender == staking, "MasterChefV2: SENDER_IS_NOT_STAKING");
         _;
     }
 
-    function setStaking(address _staking) external onlyOwner {
+    modifier onlyRole(bytes32 role) {
+        address account = msg.sender;
+        if (!hasRole(role, account)) {
+            revert("MasterChefV2: MISSING_ROLE");
+        }
+        _;
+    }
+
+    function setStaking(address _staking) external onlyRole(SETTER_ROLE) {
         staking = _staking;
     }
 
@@ -112,11 +133,11 @@ contract MasterChefV2 is Ownable {
         pools = poolInfo.length;
     }
 
-    function setRewarder(IRewarder _rewarder) external onlyOwner {
+    function setRewarder(IRewarder _rewarder) external onlyRole(SETTER_ROLE) {
         rewarder = _rewarder;
     }
 
-    function setTokenPerSecond(uint256 _tokenPerSecond) external onlyOwner {
+    function setTokenPerSecond(uint256 _tokenPerSecond) external onlyRole(APR_SETTER_ROLE) {
         for (uint256 i = 0; i < poolInfo.length; i++) {
             updatePool(i);
         }
@@ -128,7 +149,7 @@ contract MasterChefV2 is Ownable {
     /// DO NOT add the same LP token more than once. Rewards will be messed up if you do.
     /// @param allocPoint AP of the new pool.
     /// @param _lpToken Address of the LP ERC-20 token.
-    function add(uint256 allocPoint, IERC20 _lpToken) public onlyOwner {
+    function add(uint256 allocPoint, IERC20 _lpToken) public onlyRole(SETTER_ROLE) {
         uint256 lastRewardTimestamp = block.timestamp;
         totalAllocPoint = totalAllocPoint.add(allocPoint);
         lpToken.push(_lpToken);
@@ -146,7 +167,7 @@ contract MasterChefV2 is Ownable {
     /// @notice Update the given pool's DEUS allocation point and `IRewarder` contract. Can only be called by the owner.
     /// @param _pid The index of the pool. See `poolInfo`.
     /// @param _allocPoint New AP of the pool.
-    function set(uint256 _pid, uint256 _allocPoint) public onlyOwner {
+    function set(uint256 _pid, uint256 _allocPoint) public onlyRole(SETTER_ROLE) {
         totalAllocPoint = totalAllocPoint.sub(poolInfo[_pid].allocPoint).add(
             _allocPoint
         );
