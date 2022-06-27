@@ -1,41 +1,24 @@
-// Be name Khoda
-// Bime Abolfazl
-
-// =================================================================================================================
-//  _|_|_|    _|_|_|_|  _|    _|    _|_|_|      _|_|_|_|  _|                                                       |
-//  _|    _|  _|        _|    _|  _|            _|            _|_|_|      _|_|_|  _|_|_|      _|_|_|    _|_|       |
-//  _|    _|  _|_|_|    _|    _|    _|_|        _|_|_|    _|  _|    _|  _|    _|  _|    _|  _|        _|_|_|_|     |
-//  _|    _|  _|        _|    _|        _|      _|        _|  _|    _|  _|    _|  _|    _|  _|        _|           |
-//  _|_|_|    _|_|_|_|    _|_|    _|_|_|        _|        _|  _|    _|    _|_|_|  _|    _|    _|_|_|    _|_|_|     |
-// =================================================================================================================
-// ======================= STAKING ======================
-// ======================================================
-// DEUS Finance: https://github.com/DeusFinance
-
-// Primary Author(s)
-// Mmd: https://github.com/mmd-mostafaee
-// Kazem: https://github.com/kazemghareghani
-
-// Reviewer(s) / Contributor(s)
-// MRM: https://github.com/smrm-dev
-
 // SPDX-License-Identifier: MIT
+// Be name Khoda
 
 pragma solidity 0.8.13;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IMasterChefV2.sol";
 import "./interfaces/IMintableToken.sol";
 import "./interfaces/INftValueCalculator.sol";
 import "./interfaces/IMintHelper.sol";
 
+/// @title vDeus staking
+/// @author Deus Finance
 contract Staking is
     Initializable,
+    ERC721HolderUpgradeable,
     AccessControlUpgradeable,
     ReentrancyGuardUpgradeable
 {
@@ -118,6 +101,7 @@ contract Staking is
         address poolManager,
         address admin
     ) public initializer {
+        __ERC721Holder_init();
         __AccessControl_init();
         __ReentrancyGuard_init();
 
