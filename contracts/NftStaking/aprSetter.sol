@@ -28,6 +28,7 @@ contract AprSetter is AccessControl {
     }
 
     function setApr(PoolAllocPoint[] memory poolAllocPoints, uint256 tokenPerSecond) external onlyRole(SETTER_ROLE) {
+        require(IMasterChefV2(masterChef).poolLength() == poolAllocPoints.length, "AprSetter: INVALID_LENGTH");
         for (uint8 i = 0 ; i < poolAllocPoints.length; i++) {
             IMasterChefV2(masterChef).set(poolAllocPoints[i].poolId, poolAllocPoints[i].allocationPoint);
         }
