@@ -17,7 +17,7 @@ contract AprSetter is AccessControl {
     }
 
     constructor(address admin, address setter, address masterChef_) {
-        require(setter != address(0) && masterChef != address(0));
+        require(admin != address(0) && setter != address(0) && masterChef_ != address(0), "AprSetter: ZERO_ADDRESS");
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         _setupRole(SETTER_ROLE, setter);
         masterChef = masterChef_;
