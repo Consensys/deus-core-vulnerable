@@ -26,8 +26,8 @@ contract NFTStaking is
 
     struct UserDeposit {
         uint256 nftId;
-        uint256 amount;
-        uint256 depositTimestamp;
+        uint256 amount;  // amount of nft measured in dei(we assume dei is 1)
+        uint256 depositTimestamp; 
         bool isWithdrawn;
         bool isExited;
     }
@@ -46,9 +46,9 @@ contract NFTStaking is
     address public mintHelper;
 
     // user => nft index
-    mapping(address => uint256) public userNftIndex;
+    mapping(address => uint256) public userNftIndex; // count of nft a user has
     // user => nft index => nft id
-    mapping(address => mapping(uint256 => uint256)) public userNfts;
+    mapping(address => mapping(uint256 => uint256)) public userNfts; 
 
     // nft => user
     mapping(uint256 => address) public nftUser;
@@ -199,10 +199,10 @@ contract NFTStaking is
             isWithdrawn: false,
             isExited: false
         });
-        nftUser[nftId] = to;
-        nftPool[nftId] = poolId;
-        userNfts[to][userNftIndex[to]] = nftId;
-        userNftIndex[to] += 1;
+        nftUser[nftId] = to; // owner of nft
+        nftPool[nftId] = poolId; // staked in this pool
+        userNfts[to][userNftIndex[to]] = nftId; // users nfts 
+        userNftIndex[to] += 1; // next deposit index 
 
         IMintableToken(pools[poolId].token).mint(address(this), amount);
 

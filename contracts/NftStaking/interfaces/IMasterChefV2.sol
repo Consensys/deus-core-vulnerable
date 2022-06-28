@@ -22,4 +22,7 @@ interface IMasterChefV2 {
     ) external;
 
     function emergencyWithdraw(uint256 pid, address userAddress, address to) external;
+
+    function set(uint256 pid, uint256 allocPoint) external;
+    function setTokenPerSecond(uint256 tokenPerSecond) external;
 }
