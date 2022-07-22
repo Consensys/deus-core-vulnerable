@@ -13,10 +13,12 @@ import "./interfaces/IMasterChefV2.sol";
 import "./interfaces/IMintableToken.sol";
 import "./interfaces/INftValueCalculator.sol";
 import "./interfaces/IMintHelper.sol";
+import "./interfaces/INFTStaking.sol";
 
 /// @title vDeus staking
 /// @author Deus Finance
 contract NFTStaking is
+    INFTStaking,
     Initializable,
     ERC721HolderUpgradeable,
     AccessControlUpgradeable,
@@ -26,8 +28,8 @@ contract NFTStaking is
 
     struct UserDeposit {
         uint256 nftId;
-        uint256 amount;  // amount of nft measured in dei(we assume dei is 1)
-        uint256 depositTimestamp; 
+        uint256 amount; // amount of nft measured in dei(we assume dei is 1)
+        uint256 depositTimestamp;
         bool isWithdrawn;
         bool isExited;
     }
@@ -48,7 +50,7 @@ contract NFTStaking is
     // user => nft index
     mapping(address => uint256) public userNftIndex; // count of nft a user has
     // user => nft index => nft id
-    mapping(address => mapping(uint256 => uint256)) public userNfts; 
+    mapping(address => mapping(uint256 => uint256)) public userNfts;
 
     // nft => user
     mapping(uint256 => address) public nftUser;
@@ -124,7 +126,10 @@ contract NFTStaking is
         nft = nft_;
     }
 
-    function setBlackList(address user, bool isBlocked) external onlyRole(SETTER_ROLE){
+    function setBlackList(address user, bool isBlocked)
+        external
+        onlyRole(SETTER_ROLE)
+    {
         blackList[user] = isBlocked;
     }
 
@@ -167,7 +172,10 @@ contract NFTStaking is
         emit ToggleFreeExit(freeExit);
     }
 
-    function approve(uint256 poolId, uint256 amount) external onlyRole(POOL_MANAGER_ROLE){
+    function approve(uint256 poolId, uint256 amount)
+        external
+        onlyRole(POOL_MANAGER_ROLE)
+    {
         IERC20Upgradeable(pools[poolId].token).approve(masterChef, amount);
     }
 
@@ -207,8 +215,8 @@ contract NFTStaking is
         });
         nftUser[nftId] = to; // owner of nft
         nftPool[nftId] = poolId; // staked in this pool
-        userNfts[to][userNftIndex[to]] = nftId; // users nfts 
-        userNftIndex[to] += 1; // next deposit index 
+        userNfts[to][userNftIndex[to]] = nftId; // users nfts
+        userNftIndex[to] += 1; // next deposit index
 
         IMintableToken(pools[poolId].token).mint(address(this), amount);
 
@@ -263,7 +271,10 @@ contract NFTStaking is
             nftDeposit[nftId].isWithdrawn == false,
             "Staking: NFT_IS_WITHDRAWN"
         );
-        require(blackList[nftUser[nftId]] == false,"Staking: BLACK_LISTED_ADDRESS");
+        require(
+            blackList[nftUser[nftId]] == false,
+            "Staking: BLACK_LISTED_ADDRESS"
+        );
 
         if (nftDeposit[nftId].isExited == false) {
             exitFor(nftId);

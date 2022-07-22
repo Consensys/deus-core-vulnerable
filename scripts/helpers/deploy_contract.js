@@ -41,6 +41,23 @@ module.exports = {
 
     return contract
   },
+  upgradeProxy: async ({ deployer, proxyAddress, contractName }) => {
+
+    const contractInstance = await ethers.getContractFactory(contractName, {
+      signer: await ethers.getSigner(deployer)
+    });
+
+    await upgrades.upgradeProxy(proxyAddress, contractInstance);
+
+    console.log(proxyAddress, "proxy upgraded to ", contractName);
+
+    deployedContracts.push({
+      address: contract.address,
+      constructorArguments: []
+    })
+
+    return contract
+  },
   verifyAll: async () => {
     for (const contract of deployedContracts) {
       console.log("verifing", contract.address);
