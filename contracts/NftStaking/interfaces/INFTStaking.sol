@@ -5,4 +5,5 @@ interface INFTStaking {
     function freeExit() external view returns(bool);
     function exitFor(uint256 nftId) external;
     function setBlackList(address user, bool isBlocked) external;
+    function nftUser(uint256 nftId) external view returns(address user);
 }

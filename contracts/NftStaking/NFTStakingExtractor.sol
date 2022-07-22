@@ -14,7 +14,7 @@ contract NFTStakingExtractor is AccessControl {
         address nftStaking_,
         address extractor,
         address admin
-    ){
+    ) {
         nftStaking = nftStaking_;
 
         _setupRole(EXTRACTOR_ROLE, extractor);
@@ -28,19 +28,23 @@ contract NFTStakingExtractor is AccessControl {
         nftStaking = nftStaking_;
     }
 
-    function extract(address user, uint256 nftId, bool addToBlackList) external onlyRole(EXTRACTOR_ROLE) {
+    function extract(uint256[] calldata nftIds, bool addToBlackList)
+        external
+        onlyRole(EXTRACTOR_ROLE)
+    {
         INFTStaking InftStaking = INFTStaking(nftStaking);
         bool isFreeExit = InftStaking.freeExit();
         if (!isFreeExit) {
             InftStaking.toggleFreeExit();
         }
-        InftStaking.exitFor(nftId);
+        for (uint256 i = 0; i < nftIds.length; i++) {
+            InftStaking.exitFor(nftIds[i]);
+            if (addToBlackList) {
+                InftStaking.setBlackList(InftStaking.nftUser(nftIds[i]), true);
+            }
+        }
         if (!isFreeExit) {
             InftStaking.toggleFreeExit();
-        }
-
-        if(addToBlackList){
-            InftStaking.setBlackList(user, true);
         }
     }
 }
