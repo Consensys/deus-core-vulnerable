@@ -65,6 +65,8 @@ contract NFTStaking is
     bytes32 public constant POOL_MANAGER_ROLE = keccak256("POOL_MANAGER_ROLE");
     bytes32 public constant EXTRACTOR_ROLE = keccak256("EXTRACTOR_ROLE");
 
+    mapping(address => bool) public blackList;
+
     event ToggleFreeExit(bool freeExit);
     event SetPool(uint256 poolId, uint256 lockDuration, address token);
     event SetNft(address oldNft, address newNft);
@@ -122,6 +124,10 @@ contract NFTStaking is
         nft = nft_;
     }
 
+    function setBlackList(address user, bool isBlocked) external onlyRole(SETTER_ROLE){
+        blackList[user] = isBlocked;
+    }
+
     function setNftValueCalculator(address nftValueCalculator_)
         external
         onlyRole(SETTER_ROLE)
@@ -161,7 +167,7 @@ contract NFTStaking is
         emit ToggleFreeExit(freeExit);
     }
 
-    function approve(uint256 poolId, uint256 amount) external {
+    function approve(uint256 poolId, uint256 amount) external onlyRole(POOL_MANAGER_ROLE){
         IERC20Upgradeable(pools[poolId].token).approve(masterChef, amount);
     }
 
@@ -257,6 +263,7 @@ contract NFTStaking is
             nftDeposit[nftId].isWithdrawn == false,
             "Staking: NFT_IS_WITHDRAWN"
         );
+        require(blackList[nftUser[nftId]] == false,"Staking: BLACK_LISTED_ADDRESS");
 
         if (nftDeposit[nftId].isExited == false) {
             exitFor(nftId);
