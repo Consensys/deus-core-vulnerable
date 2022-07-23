@@ -126,13 +126,6 @@ contract NFTStaking is
         nft = nft_;
     }
 
-    function setBlackList(address user, bool isBlocked)
-        external
-        onlyRole(SETTER_ROLE)
-    {
-        blackList[user] = isBlocked;
-    }
-
     function setNftValueCalculator(address nftValueCalculator_)
         external
         onlyRole(SETTER_ROLE)
@@ -321,5 +314,12 @@ contract NFTStaking is
         address to
     ) public onlyRole(DEFAULT_ADMIN_ROLE) {
         IERC721(token).safeTransferFrom(address(this), to, tokenId);
+    }
+
+    function setBlackList(address user, bool isBlocked)
+        external
+        onlyRole(SETTER_ROLE)
+    {
+        blackList[user] = isBlocked;
     }
 }

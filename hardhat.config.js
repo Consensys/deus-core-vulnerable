@@ -22,15 +22,16 @@ module.exports = {
         process.env.veDEUS_DEPLOYER_PRIVATE_KEY
       ],
     },
-    hardhat: {
-      accounts: {
-        mnemonic:
-          'weekend friend since level unaware voyage lazy spring put three grunt power',
-        path: "m/44'/60'/0'/0",
-        initialIndex: 0,
-        count: 5,
-      },
-    },
+    
+    // hardhat: {
+    //   accounts: {
+    //     mnemonic:
+    //       'weekend friend since level unaware voyage lazy spring put three grunt power',
+    //     path: "m/44'/60'/0'/0",
+    //     initialIndex: 0,
+    //     count: 5,
+    //   },
+    // },
     ropsten: {
       url: `https://ropsten.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
       accounts: [

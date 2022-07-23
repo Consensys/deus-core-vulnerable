@@ -1,4 +1,4 @@
-const { upgrades, ethers, run } = require("hardhat");
+const { upgrades, ethers, run, network } = require("hardhat");
 
 var deployedContracts = [];
 
@@ -46,11 +46,10 @@ module.exports = {
     const contractInstance = await ethers.getContractFactory(contractName, {
       signer: await ethers.getSigner(deployer)
     });
-
-    await upgrades.upgradeProxy(proxyAddress, contractInstance);
+    let contract = await upgrades.upgradeProxy(proxyAddress, contractInstance);
 
     console.log(proxyAddress, "proxy upgraded to ", contractName);
-
+    
     deployedContracts.push({
       address: contract.address,
       constructorArguments: []
