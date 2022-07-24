@@ -1,0 +1,354 @@
+{
+  "manifestVersion": "3.2",
+  "admin": {
+    "address": "0x27517A6b8910C9739c184215ED213A898eeF9E83",
+    "txHash": "0xb726ed3f81b4983895006a94e3afc2ed7c539783e4ed3480bf4c55ba77600e27"
+  },
+  "proxies": [
+    {
+      "address": "0x8e5E19C09F9e8F19aC8c1290728FabbAEf4b4b22",
+      "txHash": "0x746f821be7c04eed55b416ee358f279540a358c2226ef629c5b1fea7e551fe98",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x72D049879BE3257F0Ca7bB02B7F8B557b4ecF638",
+      "txHash": "0x25fbbc6e9d4f9dae628189e34bed1d28942e600a511f953ad84e01dce831798c",
+      "kind": "transparent"
+    }
+  ],
+  "impls": {
+    "007b2e6268be31e40ad29e9abdccd5c5b3b4d44662ddcd1207f359d04b27d41c": {
+      "address": "0x6827E77996cBEDcF7328dF08184a90e9099972E9",
+      "txHash": "0xac3a690f07e1b497451517eac7e8a1e668ef50b6e9fa65b9f9eca30be37b02bc",
+      "layout": {
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC721HolderUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\token\\ERC721\\utils\\ERC721HolderUpgradeable.sol:40"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC165Upgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\utils\\introspection\\ERC165Upgradeable.sol:41"
+          },
+          {
+            "label": "_roles",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)34_storage)",
+            "contract": "AccessControlUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "152",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "AccessControlUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:247"
+          },
+          {
+            "label": "_status",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_uint256",
+            "contract": "ReentrancyGuardUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\security\\ReentrancyGuardUpgradeable.sol:38"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "202",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "ReentrancyGuardUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\security\\ReentrancyGuardUpgradeable.sol:74"
+          },
+          {
+            "label": "nft",
+            "offset": 0,
+            "slot": "251",
+            "type": "t_address",
+            "contract": "NFTStaking",
+            "src": "contracts\\NftStaking\\Staking.sol:43"
+          },
+          {
+            "label": "dei",
+            "offset": 0,
+            "slot": "252",
+            "type": "t_address",
+            "contract": "NFTStaking",
+            "src": "contracts\\NftStaking\\Staking.sol:44"
+          },
+          {
+            "label": "usdc",
+            "offset": 0,
+            "slot": "253",
+            "type": "t_address",
+            "contract": "NFTStaking",
+            "src": "contracts\\NftStaking\\Staking.sol:45"
+          },
+          {
+            "label": "nftValueCalculator",
+            "offset": 0,
+            "slot": "254",
+            "type": "t_address",
+            "contract": "NFTStaking",
+            "src": "contracts\\NftStaking\\Staking.sol:46"
+          },
+          {
+            "label": "masterChef",
+            "offset": 0,
+            "slot": "255",
+            "type": "t_address",
+            "contract": "NFTStaking",
+            "src": "contracts\\NftStaking\\Staking.sol:47"
+          },
+          {
+            "label": "mintHelper",
+            "offset": 0,
+            "slot": "256",
+            "type": "t_address",
+            "contract": "NFTStaking",
+            "src": "contracts\\NftStaking\\Staking.sol:48"
+          },
+          {
+            "label": "userNftIndex",
+            "offset": 0,
+            "slot": "257",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "NFTStaking",
+            "src": "contracts\\NftStaking\\Staking.sol:51"
+          },
+          {
+            "label": "userNfts",
+            "offset": 0,
+            "slot": "258",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_uint256))",
+            "contract": "NFTStaking",
+            "src": "contracts\\NftStaking\\Staking.sol:53"
+          },
+          {
+            "label": "nftUser",
+            "offset": 0,
+            "slot": "259",
+            "type": "t_mapping(t_uint256,t_address)",
+            "contract": "NFTStaking",
+            "src": "contracts\\NftStaking\\Staking.sol:56"
+          },
+          {
+            "label": "nftPool",
+            "offset": 0,
+            "slot": "260",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "contract": "NFTStaking",
+            "src": "contracts\\NftStaking\\Staking.sol:58"
+          },
+          {
+            "label": "nftDeposit",
+            "offset": 0,
+            "slot": "261",
+            "type": "t_mapping(t_uint256,t_struct(UserDeposit)1691_storage)",
+            "contract": "NFTStaking",
+            "src": "contracts\\NftStaking\\Staking.sol:60"
+          },
+          {
+            "label": "pools",
+            "offset": 0,
+            "slot": "262",
+            "type": "t_mapping(t_uint256,t_struct(Pool)1698_storage)",
+            "contract": "NFTStaking",
+            "src": "contracts\\NftStaking\\Staking.sol:62"
+          },
+          {
+            "label": "freeExit",
+            "offset": 0,
+            "slot": "263",
+            "type": "t_bool",
+            "contract": "NFTStaking",
+            "src": "contracts\\NftStaking\\Staking.sol:64"
+          },
+          {
+            "label": "blackList",
+            "offset": 0,
+            "slot": "264",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "NFTStaking",
+            "src": "contracts\\NftStaking\\Staking.sol:70"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_uint256))": {
+            "label": "mapping(address => mapping(uint256 => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)34_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_address)": {
+            "label": "mapping(uint256 => address)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(Pool)1698_storage)": {
+            "label": "mapping(uint256 => struct NFTStaking.Pool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(UserDeposit)1691_storage)": {
+            "label": "mapping(uint256 => struct NFTStaking.UserDeposit)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Pool)1698_storage": {
+            "label": "struct NFTStaking.Pool",
+            "members": [
+              {
+                "label": "poolId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "token",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "lockDuration",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(RoleData)34_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(UserDeposit)1691_storage": {
+            "label": "struct NFTStaking.UserDeposit",
+            "members": [
+              {
+                "label": "nftId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "depositTimestamp",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "isWithdrawn",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "isExited",
+                "type": "t_bool",
+                "offset": 1,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    }
+  }
+}
