@@ -254,6 +254,7 @@ contract NFTStaking is
         emit ExitFor(msg.sender, nftUser[nftId], nftId, amount);
     }
 
+    // Reverse of Redeem | Withdraw vDEUS
     function withdrawTo(uint256 nftIndex, address to) external nonReentrant {
         uint256 nftId = userNfts[msg.sender][nftIndex];
         require(
