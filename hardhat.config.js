@@ -6,20 +6,32 @@ require('hardhat-deploy')
 require('@nomiclabs/hardhat-waffle')
 require('@nomiclabs/hardhat-web3')
 require('@nomiclabs/hardhat-etherscan')
+require('@openzeppelin/hardhat-upgrades');
 // require("@nomiclabs/hardhat-vyper");
 
 module.exports = {
   defaultNetwork: 'hardhat',
   networks: {
-    hardhat: {
-      accounts: {
-        mnemonic:
-          'weekend friend since level unaware voyage lazy spring put three grunt power',
-        path: "m/44'/60'/0'/0",
-        initialIndex: 0,
-        count: 5,
-      },
+    localhostFantom: {
+      url: 'http://127.0.0.1:8547/',
+      accounts: [
+        process.env.MAIN_DEPLOYER_PRIVATE_KEY,
+        process.env.SECOND_DEPLOYER_PRIVATE_KEY,
+        process.env.DEI_DEPLOYER_PRIVATE_KEY,
+        process.env.DEUS_DEPLOYER_PRIVATE_KEY,
+        process.env.veDEUS_DEPLOYER_PRIVATE_KEY
+      ],
     },
+    
+    // hardhat: {
+    //   accounts: {
+    //     mnemonic:
+    //       'weekend friend since level unaware voyage lazy spring put three grunt power',
+    //     path: "m/44'/60'/0'/0",
+    //     initialIndex: 0,
+    //     count: 5,
+    //   },
+    // },
     ropsten: {
       url: `https://ropsten.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
       accounts: [
@@ -121,7 +133,7 @@ module.exports = {
       gasMultiplier: 1.2,
     },
     fantom: {
-      url: `https://rpc.ankr.com/fantom/${process.env.ANKR_API_KEY}`,
+      url: `https://rpc.ankr.com/fantom/` + process.env.ANKR_STRING,
       accounts: [
         process.env.MAIN_DEPLOYER_PRIVATE_KEY,
         process.env.SECOND_DEPLOYER_PRIVATE_KEY,
@@ -131,7 +143,7 @@ module.exports = {
       ],
       chainId: 250,
       gas: 'auto',
-      gasPrice: 1000100000000, //500.1 Gwei
+      // gasPrice: 1000100000000, //500.1 Gwei
       gasMultiplier: 1.2,
     },
     bsctest: {
@@ -231,6 +243,15 @@ module.exports = {
       },
       {
         version: '0.6.11',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 100000,
+          },
+        },
+      },
+      {
+        version: '0.6.12',
         settings: {
           optimizer: {
             enabled: true,
