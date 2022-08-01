@@ -6,7 +6,7 @@ require('hardhat-deploy')
 require('@nomiclabs/hardhat-waffle')
 require('@nomiclabs/hardhat-web3')
 require('@nomiclabs/hardhat-etherscan')
-require('@openzeppelin/hardhat-upgrades');
+// require('@openzeppelin/hardhat-upgrades');
 // require("@nomiclabs/hardhat-vyper");
 
 module.exports = {
@@ -133,7 +133,7 @@ module.exports = {
       gasMultiplier: 1.2,
     },
     fantom: {
-      url: `https://rpc.ankr.com/fantom/` + process.env.ANKR_STRING,
+      url: `https://rpc.ankr.com/fantom/` + process.env.ANKR_API_KEY,
       accounts: [
         process.env.MAIN_DEPLOYER_PRIVATE_KEY,
         process.env.SECOND_DEPLOYER_PRIVATE_KEY,
