@@ -3,7 +3,7 @@ const { verifyAll } = require("./helpers/deploy_contract.js");
 
 async function main() {
   // * configuration
-  const masterChef = "0x120FF9821817eA2bbB700e1131e5c856ccC20d1b";
+  const masterChef = "0xa04d179e0C0b32C52D74e1CaC67B192E9f337bB5";
   let admin = "0xE5227F141575DcE74721f4A9bE2D7D636F923044";
   let setter = "0x69f0033d29DAc8f338FF4520B84Ad4Dd6E44A161";
 

@@ -5,7 +5,7 @@ const { ethers } = require("hardhat");
 
 async function main() {
     
-    const second_deployer = process.env.SECOND_DEPLOYER
+    const second_deployer = process.env.MAIN_DEPLOYER
     const proxyAddress = "0x978b5d59DeE843C99B205A81ca82F66F35B1Ba35";
 
     await upgradeProxy({
