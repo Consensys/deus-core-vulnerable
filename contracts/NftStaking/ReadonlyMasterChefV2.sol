@@ -54,6 +54,7 @@ contract ReadonlyMasterChefV2 is AccessControl {
 
     bytes32 public constant APR_SETTER_ROLE = keccak256("APR_SETTER_ROLE");
     bytes32 public constant SETTER_ROLE = keccak256("SETTER_ROLE");
+    bytes32 public constant USER_ROLE = keccak256("USER_ROLE");
 
     event Deposit(
         address indexed user,
@@ -98,6 +99,7 @@ contract ReadonlyMasterChefV2 is AccessControl {
         uint256 _tokenPerSecond,
         address _staking,
         address aprSetter,
+        address user,
         address setter,
         address admin
     ) public {
@@ -107,6 +109,7 @@ contract ReadonlyMasterChefV2 is AccessControl {
         staking = _staking;
 
         _setupRole(APR_SETTER_ROLE, aprSetter);
+        _setupRole(USER_ROLE, user);
         _setupRole(SETTER_ROLE, setter);
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
     }
@@ -263,7 +266,7 @@ contract ReadonlyMasterChefV2 is AccessControl {
         uint256 pid,
         uint256 amount,
         address to
-    ) public onlyStaking {
+    ) public onlyRole(USER_ROLE) {
         PoolInfo memory pool = updatePool(pid);
         UserInfo storage user = userInfo[pid][to];
 
@@ -292,7 +295,7 @@ contract ReadonlyMasterChefV2 is AccessControl {
         uint256 amount,
         address userAddress,
         address to
-    ) public onlyStaking {
+    ) public onlyRole(USER_ROLE) {
         PoolInfo memory pool = updatePool(pid);
         UserInfo storage user = userInfo[pid][userAddress];
 
@@ -315,7 +318,7 @@ contract ReadonlyMasterChefV2 is AccessControl {
     /// @notice Harvest proceeds for transaction sender to `to`.
     /// @param pid The index of the pool. See `poolInfo`.
     /// @param to Receiver of DEUS rewards.
-    function harvest(uint256 pid, address to) public {
+    function harvest(uint256 pid, address to) public  onlyRole(USER_ROLE) {
         require(canHarvest, "ReadonlyMasterChefV2: HARVEST_PAUSED");
         PoolInfo memory pool = updatePool(pid);
         UserInfo storage user = userInfo[pid][msg.sender];
@@ -350,7 +353,7 @@ contract ReadonlyMasterChefV2 is AccessControl {
         uint256 amount,
         address userAddress,
         address to
-    ) public onlyStaking {
+    ) public onlyRole(USER_ROLE) {
         require(canHarvest, "ReadonlyMasterChefV2: HARVEST_PAUSED");
         PoolInfo memory pool = updatePool(pid);
         UserInfo storage user = userInfo[pid][userAddress];

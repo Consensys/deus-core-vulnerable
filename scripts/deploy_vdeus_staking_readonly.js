@@ -9,23 +9,27 @@ async function main() {
   const deployer = process.env.MAIN_DEPLOYER;
   const nftValueCalculatorAddress =
     "0x311bD0BB0ec64b43B8d7a7Ad600510624a4A9095";
-  const deus = "0xDE5ed76E7c05eC5e4572CfC88d1ACEA165109E44";
+  const vdeus = "0x62ad8dE6740314677F06723a7A07797aE5082Dbb";
   const rewarder = "0x0000000000000000000000000000000000000000";
-  const tokenPerSecond = BigInt(0);
+  const tokenPerSecond = BigInt("142694063926940");
   const staking = "0x0000000000000000000000000000000000000000";
   const aprSetter = deployer;
+  const user = deployer;
   const masterChefSetter = deployer;
   const masterChefAdmin = deployer;
   const masterChefV2 = await deployMasterChefV2(deployer, {
-    deus,
+    vdeus,
     rewarder,
     tokenPerSecond,
     staking,
     aprSetter,
+    user: user,
     setter: masterChefSetter,
     admin: masterChefAdmin,
   });
   await sleep(5000);
+
+  return
 
   const dei = "0xDE12c7959E1a72bbe8a5f7A1dc8f8EeF9Ab011B3";
   const usdc = "0x04068DA6C83AFCFA0e13ba15A6696662335D5B75";
