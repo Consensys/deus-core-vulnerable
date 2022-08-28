@@ -323,9 +323,41 @@ contract NFTStaking is
       userNftsLength = step;
     }
     for (uint256 i = 0; i < userNftsLength; i++) {
-      uint256 nftId = userNfts[msg.sender][i];
-      exitFor(nftId);
-      withdrawTo(i, to);
+      uint256 nftId = userNfts[msg.sender][0];
+      exitForWithoutHarvest(nftId);
+      withdrawTo(0, to);
     }
+  }
+
+  function exitForWithoutHarvest(uint256 nftId) public nonReentrant {
+    require(
+      nftUser[nftId] == msg.sender || hasRole(EXTRACTOR_ROLE, msg.sender),
+      "Staking: EXIT_FORBIDDEN"
+    );
+    require(nftDeposit[nftId].isExited == false, "Staking: NFT_ALREADY_EXITED");
+
+    nftDeposit[nftId].isExited = true;
+
+    uint256 poolId = nftPool[nftId];
+
+    uint256 amount = nftDeposit[nftId].amount;
+
+    require(
+      freeExit ||
+        nftDeposit[nftId].depositTimestamp + pools[poolId].lockDuration <=
+        block.timestamp,
+      "Staking: DEPOSIT_IS_LOCKED"
+    );
+
+    IMasterChefV2(masterChef).withdraw(
+      poolId,
+      amount,
+      nftUser[nftId],
+      address(this)
+    );
+
+    IMintableToken(pools[poolId].token).burnFrom(address(this), amount);
+
+    emit ExitFor(msg.sender, nftUser[nftId], nftId, amount);
   }
 }

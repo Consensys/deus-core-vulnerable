@@ -6,7 +6,7 @@ require("hardhat-deploy");
 require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-web3");
 require("@nomiclabs/hardhat-etherscan");
-// require('@openzeppelin/hardhat-upgrades');
+require('@openzeppelin/hardhat-upgrades');
 // require("@nomiclabs/hardhat-vyper");
 
 module.exports = {
