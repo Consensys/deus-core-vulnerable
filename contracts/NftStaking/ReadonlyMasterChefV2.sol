@@ -48,9 +48,7 @@ contract ReadonlyMasterChefV2 is AccessControl {
     uint256 public tokenPerSecond;
     uint256 private constant ACC_TOKEN_PRECISION = 1e12;
 
-    address public staking;
-
-    bool canHarvest = false;
+    bool public canHarvest = false;
 
     bytes32 public constant APR_SETTER_ROLE = keccak256("APR_SETTER_ROLE");
     bytes32 public constant SETTER_ROLE = keccak256("SETTER_ROLE");
@@ -97,7 +95,6 @@ contract ReadonlyMasterChefV2 is AccessControl {
         IERC20 _deus,
         IRewarder _rewarder,
         uint256 _tokenPerSecond,
-        address _staking,
         address aprSetter,
         address user,
         address setter,
@@ -106,17 +103,11 @@ contract ReadonlyMasterChefV2 is AccessControl {
         DEUS = _deus;
         rewarder = _rewarder;
         tokenPerSecond = _tokenPerSecond;
-        staking = _staking;
 
         _setupRole(APR_SETTER_ROLE, aprSetter);
         _setupRole(USER_ROLE, user);
         _setupRole(SETTER_ROLE, setter);
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
-    }
-
-    modifier onlyStaking() {
-        require(msg.sender == staking, "MasterChefV2: SENDER_IS_NOT_STAKING");
-        _;
     }
 
     modifier onlyRole(bytes32 role) {
@@ -125,10 +116,6 @@ contract ReadonlyMasterChefV2 is AccessControl {
             revert("MasterChefV2: MISSING_ROLE");
         }
         _;
-    }
-
-    function setStaking(address _staking) external onlyRole(SETTER_ROLE) {
-        staking = _staking;
     }
 
     /// @notice Returns the number of MCV2 pools.
@@ -318,7 +305,7 @@ contract ReadonlyMasterChefV2 is AccessControl {
     /// @notice Harvest proceeds for transaction sender to `to`.
     /// @param pid The index of the pool. See `poolInfo`.
     /// @param to Receiver of DEUS rewards.
-    function harvest(uint256 pid, address to) public  onlyRole(USER_ROLE) {
+    function harvest(uint256 pid, address to) public onlyRole(USER_ROLE) {
         require(canHarvest, "ReadonlyMasterChefV2: HARVEST_PAUSED");
         PoolInfo memory pool = updatePool(pid);
         UserInfo storage user = userInfo[pid][msg.sender];
@@ -371,8 +358,9 @@ contract ReadonlyMasterChefV2 is AccessControl {
         user.amount = user.amount.sub(amount);
 
         // Interactions
-        DEUS.safeTransfer(userAddress, _pendingTokens);
-
+        if (_pendingTokens > 0) {
+            DEUS.safeTransfer(userAddress, _pendingTokens);
+        }
         if (address(rewarder) != address(0)) {
             rewarder.onReward(pid, userAddress, user.amount);
         }
@@ -390,7 +378,7 @@ contract ReadonlyMasterChefV2 is AccessControl {
         uint256 pid,
         address userAddress,
         address to
-    ) public onlyStaking {
+    ) public onlyRole(USER_ROLE) {
         UserInfo storage user = userInfo[pid][userAddress];
         uint256 amount = user.amount;
         user.amount = 0;
